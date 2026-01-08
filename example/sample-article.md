@@ -65,7 +65,7 @@ exports:
 
 # Introduction
 
-This document demonstrates the integration of MyST Markdown {cite:p}`myst2023` with Elsevier's CAS (Content Acquisition System) templates. MyST provides a powerful authoring experience while maintaining compatibility with traditional LaTeX journal requirements {cite:p}`latex2004`.
+This document demonstrates the integration of {abbr}`MyST (Markedly Structured Text)` Markdown {cite:p}`myst2023` with Elsevier's {abbr}`CAS (Content Acquisition System)` templates. MyST provides a powerful authoring experience while maintaining compatibility with traditional LaTeX journal requirements {cite:p}`latex2004`.
 
 ## Background
 
@@ -77,6 +77,53 @@ Scientific publishing has traditionally relied on LaTeX for high-quality typeset
 
 Reproducible research workflows have become increasingly important, with tools like Jupyter Notebooks {cite:p}`jupyter2018` enabling literate programming approaches.
 
+# Typography Features
+
+This section demonstrates MyST Markdown typography features and how they render in the PDF output.
+
+## Inline Formatting
+
+Standard inline formatting includes **bold text**, *italic text*, and `inline code`. You can also use {del}`strikethrough text` and {u}`underlined text` for special emphasis.
+
+For chemical formulas, use subscripts: H{sub}`2`O, CO{sub}`2`. For ordinals, use superscripts: the 4{sup}`th` of July, 1{sup}`st` place.
+
+## Quotations
+
+Block quotes are useful for highlighting important passages:
+
+> We know what we are, but know not what we may be.
+>
+> -- William Shakespeare, Hamlet
+
+## Definition Lists
+
+MyST supports definition lists for glossaries or term explanations:
+
+MyST
+: Markedly Structured Text, a markdown flavor for scientific writing
+
+LaTeX
+: A document preparation system for high-quality typesetting
+
+jtex
+: A Jinja-based templating system for LaTeX documents
+
+## Footnotes
+
+MyST supports footnotes[^fn1] which are automatically numbered and placed at the end of the document. You can have multiple footnotes[^fn2] throughout your text.
+
+[^fn1]: This is a footnote demonstrating the feature. Footnotes can contain **formatted text** and even `code`.
+
+[^fn2]: Another footnote with additional information.
+
+## Task Lists
+
+Task lists can track progress (rendered as bullet points in LaTeX):
+
+- [x] Create template structure
+- [x] Add typography examples
+- [ ] Submit to journal
+
 # Methods
 
 We use the standard CAS template structure provided by Elsevier, adapted for use with the `jtex` templating system.
@@ -87,16 +134,28 @@ The templates support full LaTeX math. For example, the quadratic formula:
 
 $$
 x = \frac{-b \pm \sqrt{b^2 - 4ac}}{2a}
-$$
+$$ (eq:quadratic)
 
-And inline math like $E = mc^2$.
+And inline math like $E = mc^2$. Equations can be cross-referenced: see {eq}`eq:quadratic`.
+
+## Tables
+
+MyST tables convert cleanly to LaTeX:
+
+| Method | Accuracy | Speed |
+|--------|----------|-------|
+| Baseline | 85.2% | Fast |
+| Proposed | **92.1%** | Medium |
+| Oracle | 98.5% | Slow |
+
+: Comparison of different methods {#tbl:comparison}
 
 # Results
 
 The template successfully renders:
 
 - Author information with ORCID
-- Multiple affiliations
+- Multiple affiliations  
 - CRediT author contributions
 - Keywords
 - Abstract and highlights
