@@ -40,6 +40,8 @@ keypoints:
   - MyST Markdown enables reproducible scientific writing
   - Seamless export to multiple journal formats
   - Support for both single and double column layouts
+parts:
+  appendix: appendix.md
 bibliography:
   - references.bib
 exports:
@@ -116,23 +118,3 @@ This approach enables researchers to write in MyST Markdown while producing publ
 # Conclusion
 
 The Elsevier CAS MyST template provides a modern workflow for scientific writing while maintaining compatibility with traditional journal submission systems.
-
-+++ {"part": "appendix"}
-
-# Supplementary Methods
-
-This appendix provides additional methodological details that support the main text.
-
-## Data Processing
-
-The data was processed using standard procedures as described in the literature.
-
-# Additional Tables
-
-| Parameter | Value | Unit |
-|-----------|-------|------|
-| Alpha | 0.05 | - |
-| Beta | 1.23 | m/s |
-| Gamma | 456 | kg |
-
-+++
