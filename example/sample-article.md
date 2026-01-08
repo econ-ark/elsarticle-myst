@@ -12,22 +12,17 @@ authors:
       - Conceptualization
       - Methodology
       - Software
-  - name: Jane Doe
+  - name: Christopher Carroll
     affiliations:
-      - MIT
+      - Johns Hopkins University
     roles:
-      - Validation
+      - Supervision
       - Writing – review & editing
 affiliations:
   - id: jhu
     name: Johns Hopkins University
     city: Baltimore
     state: MD
-    country: USA
-  - id: mit  
-    name: Massachusetts Institute of Technology
-    city: Cambridge
-    state: MA
     country: USA
 keywords:
   - MyST Markdown
