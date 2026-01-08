@@ -269,29 +269,34 @@ List tables provide an alternative syntax useful for longer content:
 
 ## Raw LaTeX Tables
 
-For complex tables requiring features like `\multicolumn`, `\cmidrule`, or custom formatting, use raw LaTeX blocks:
+For complex tables requiring advanced features, use raw LaTeX blocks. The CAS templates include `booktabs`, `multirow`, `makecell`, `array`, `colortbl`, and `dcolumn` packages:
 
 ```{raw} latex
 \begin{table}[h]
 \centering
-\caption{Complex table with booktabs features}
+\caption{Comprehensive table showcasing CAS template features}
 \label{tbl:complex}
-\begin{tabular}{@{}llr@{}}
+\begin{tabular}{@{}l l c D{.}{.}{2.2} >{\columncolor{gray!10}}r @{}}
 \toprule
-\multicolumn{2}{c}{Item} \\
-\cmidrule(r){1-2}
-Animal & Description & Price (\$) \\
+\multicolumn{2}{c}{\textbf{Category}} & \multicolumn{3}{c}{\textbf{Measurements}} \\
+\cmidrule(lr){1-2} \cmidrule(lr){3-5}
+Type & \makecell{Description\\(details)} & Status & \multicolumn{1}{c}{Value} & Count \\
 \midrule
-Gnat  & per gram & 13.65 \\
-      & each     & 0.01 \\
-Gnu   & stuffed  & 92.50 \\
-Emu   & stuffed  & 33.33 \\
+\multirow{3}{*}{Group A} 
+  & Item 1 & \checkmark & 12.34 & 100 \\
+  & Item 2 & \checkmark & 5.67 & 250 \\
+  & Item 3 & -- & 89.01 & 50 \\
+\midrule
+\multirow{2}{*}{Group B}
+  & \cellcolor{yellow!20}Item 4 & \checkmark & 23.45 & 175 \\
+  & Item 5 & -- & 6.78 & 320 \\
 \bottomrule
 \end{tabular}
+
+\vspace{1ex}
+\small\textit{Features: \texttt{booktabs} rules, \texttt{multirow} row spanning, \texttt{makecell} line breaks, \texttt{dcolumn} decimal alignment, \texttt{colortbl} colors, \texttt{array} column formatting.}
 \end{table}
 ```
-
-The CAS templates include `booktabs`, `multirow`, `makecell`, `array`, `colortbl`, and `dcolumn` packages for advanced table formatting.
 
 # Results
 
