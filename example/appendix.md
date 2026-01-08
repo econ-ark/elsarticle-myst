@@ -1,7 +1,3 @@
-```{raw} latex
-\appendix
-```
-
 # Supplementary Methods
 
 This appendix provides additional methodological details that support the main text.
