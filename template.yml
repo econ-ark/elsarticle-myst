@@ -1,76 +1,95 @@
 jtex: v1
 title: Elsevier CAS Template
-description: Elsevier CAS template for journal articles with single or double column layout
+description: >
+  Elsevier CAS (Content Acquisition System) template for journal articles.
+  Supports both single column (cas-sc) and double column (cas-dc) layouts,
+  author-year or numeric citation styles, ORCID identifiers, CRediT roles,
+  research highlights, graphical abstracts, and keywords.
 version: 1.0.0
 license: LPPL-1.3c
 source: https://www.elsevier.com/authors/policies-and-guidelines/latex-instructions
 thumbnail: ./thumbnail.png
 authors:
   - name: Alan Lujan
-    website: https://github.com/alanlujan91
+    website: https://alanlujan91.github.io
+    github: alanlujan91
+    affiliations:
+      - Johns Hopkins University
+  - name: Christopher Carroll
+    website: https://econ.jhu.edu/people/ccarroll
+    github: llorracc
     affiliations:
       - Johns Hopkins University
 tags:
   - paper
   - journal
   - elsevier
-  - single-column
+  - one-column
   - two-column
   - cas
 parts:
   - id: abstract
     required: true
-    description: |
+    description: >
       A concise summary of the article's main findings and conclusions.
+      Most Elsevier journals require an abstract of 100-300 words.
   - id: highlights
-    description: |
-      Research highlights as bullet points (3-5 items). Use +++ block.
+    description: >
+      Research highlights as raw LaTeX \\item entries (3-5 items).
+      Use the +++ block syntax with part: highlights.
   - id: keypoints
     description: >
-      Research highlights as bullet points (3-5 items). Can be defined in
-      frontmatter as a list.
+      Research highlights as bullet points (3-5 items).
+      Can be defined in frontmatter as a YAML list under keypoints.
   - id: graphical_abstract
-    description: |
-      A graphical abstract image path.
+    description: >
+      A graphical abstract as raw LaTeX content.
+      Alternatively, use the graphical_abstract option with a file path.
   - id: appendix
-    description: |
+    description: >
       Appendix content. Sections within will be labeled A, B, C, etc.
+      Can reference an external markdown file via parts.appendix in frontmatter.
 doc:
   - id: title
     required: true
   - id: short_title
-    description: Short title for running header
+    description: >
+      Short title for running header (recommended max 50 characters).
   - id: authors
     required: true
   - id: affiliations
   - id: keywords
-  - id: keypoints
-    description: Research highlights/keypoints as a list in frontmatter
+    description: >
+      Article keywords (typically 3-6). Will be joined with \\sep in LaTeX.
   - id: bibliography
-  - id: abstract
-    description: Article abstract (can also use part block)
+    description: >
+      Path(s) to BibTeX bibliography files.
 options:
-  - type: choice
-    id: columns
-    description: Number of columns for the layout
+  - id: columns
+    type: choice
+    title: Column Layout
+    description: Number of columns for the document layout.
     default: single
     choices:
       - single
       - double
-  - type: boolean
-    id: longmktitle
-    description: Use if frontmatter runs over more than one page
+  - id: longmktitle
+    type: boolean
+    title: Long Title
+    description: Enable if frontmatter (title, authors, abstract) spans multiple pages.
     default: false
-  - type: choice
-    id: citation_style
-    description: Citation style to use
+  - id: citation_style
+    type: choice
+    title: Citation Style
+    description: Bibliography citation style.
     default: authoryear
     choices:
       - authoryear
       - numbers
-  - type: file
-    id: graphical_abstract
-    description: Path to graphical abstract image
+  - id: graphical_abstract
+    type: file
+    title: Graphical Abstract
+    description: Path to graphical abstract image file (PNG, JPG, or PDF).
 files:
   - template.tex
   - cas-sc.cls
