@@ -59,7 +59,7 @@ project:
       title: PDF (Double Column)
     - file: example/exports/sample-sc-numbers.pdf
       title: PDF (Numbered References)
-  thumbnail: example/images/sample-figure.png
+  thumbnail: example/images/thumbnail.png
   exclude:
     - original
     - template.tex

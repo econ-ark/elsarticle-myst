@@ -70,7 +70,7 @@ abbreviations:
   ORCID: Open Researcher and Contributor ID
   DOI: Digital Object Identifier
   PDF: Portable Document Format
-thumbnail: images/sample-figure.png
+thumbnail: images/thumbnail.png
 parts:
   appendix: appendix.md
 bibliography:
