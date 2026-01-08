@@ -1,0 +1,76 @@
+version: 1
+project:
+  id: elsevier-myst-template
+  title: A Comprehensive Guide to MyST Markdown with Elsevier CAS Templates
+  short_title: MyST & Elsevier Guide
+  description: A comprehensive template demonstrating MyST Markdown integration with Elsevier CAS journal templates, featuring typography, mathematics, proofs, tables, figures, and citations.
+  date: 2026-01-08
+  authors:
+    - id: alujan
+      name: Alan Lujan
+      email: alujan@jhu.edu
+      url: https://alanlujan91.github.io
+      corresponding: true
+      orcid: 0000-0002-5289-7054
+      github: alanlujan91
+      affiliations:
+        - jhu
+      roles:
+        - Conceptualization
+        - Methodology
+        - Software
+        - Writing – original draft
+    - id: ccarroll
+      name: Christopher Carroll
+      email: ccarroll@jhu.edu
+      url: https://econ.jhu.edu/people/ccarroll
+      orcid: 0000-0003-3732-9312
+      github: llorracc
+      affiliations:
+        - jhu
+      roles:
+        - Supervision
+        - Writing – review & editing
+  affiliations:
+    - id: jhu
+      name: Johns Hopkins University
+      department: Department of Economics
+      city: Baltimore
+      state: MD
+      country: USA
+      ror: https://ror.org/00za53h95
+      url: https://econ.jhu.edu
+  keywords:
+    - MyST Markdown
+    - Elsevier
+    - LaTeX
+    - CAS Template
+    - Scientific Publishing
+    - Reproducible Research
+  license:
+    content: CC-BY-4.0
+    code: MIT
+  open_access: true
+  github: https://github.com/alanlujan91/elsevier_myst_template
+  downloads:
+    - file: example/exports/sample-sc.pdf
+      title: PDF (Single Column)
+    - file: example/exports/sample-dc.pdf
+      title: PDF (Double Column)
+    - file: example/exports/sample-sc-numbers.pdf
+      title: PDF (Numbered References)
+  thumbnail: example/images/sample-figure.png
+  exclude:
+    - original
+    - template.tex
+    - "*.cls"
+    - "*.bst"
+    - thumbnail.png
+  toc:
+    - file: example/sample-article.md
+    - file: README.md
+
+site:
+  title: Elsevier CAS MyST Template
+  template: article-theme
+  nav: []
