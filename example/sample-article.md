@@ -45,6 +45,11 @@ exports:
     template: ..
     output: exports/sample-dc.pdf
     columns: double
+  - format: pdf
+    template: ..
+    output: exports/sample-sc-numbers.pdf
+    columns: single
+    citation_style: numbers
 ---
 
 +++ {"part": "abstract"}
@@ -56,6 +61,12 @@ This is a sample article demonstrating the use of MyST Markdown with Elsevier's 
 \item MyST Markdown enables reproducible scientific writing
 \item Seamless export to multiple journal formats
 \item Support for both single and double column layouts
+```
++++
+
++++ {"part": "graphical_abstract"}
+```{image} images/sample-figure.png
+:width: 100%
 ```
 +++
 
@@ -97,6 +108,15 @@ The template successfully renders:
 - Keywords
 - Abstract and highlights
 - Full document content
+
+```{figure} images/sample-figure.png
+:name: fig-sample
+:width: 80%
+
+A sample figure demonstrating image support in the template. This figure shows a placeholder image that would typically contain research results or visualizations.
+```
+
+As shown in {ref}`fig-sample`, the template properly handles figure placement and captions.
 
 # Discussion
 
