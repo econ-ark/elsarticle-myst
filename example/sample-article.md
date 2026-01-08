@@ -6,32 +6,49 @@ description: A comprehensive template demonstrating MyST Markdown integration wi
 date: 2026-01-08
 authors:
   - id: alujan
-    name: Alan Lujan
+    name: Alan E. Lujan
     email: alujan@jhu.edu
     url: https://alanlujan91.github.io
     corresponding: true
     orcid: 0000-0002-5289-7054
     github: alanlujan91
     affiliations:
-      - jhu
+      - jhu-ksas
+      - econ-ark
     roles:
       - Conceptualization
       - Methodology
       - Software
       - Writing – original draft
   - id: ccarroll
-    name: Christopher Carroll
+    name: Christopher D. Carroll
     email: ccarroll@jhu.edu
     url: https://econ.jhu.edu/people/ccarroll
     orcid: 0000-0003-3732-9312
     github: llorracc
     affiliations:
-      - jhu
+      - jhu-econ
+      - econ-ark
     roles:
       - Supervision
       - Writing – review & editing
+  - id: mnwhite
+    name: Matthew N. White
+    affiliations:
+      - econ-ark
+    roles:
+      - Methodology
+      - Software
 affiliations:
-  - id: jhu
+  - id: jhu-ksas
+    name: Johns Hopkins University
+    department: Krieger School of Arts and Sciences
+    city: Washington
+    state: DC
+    country: USA
+    ror: https://ror.org/00za53h95
+    url: https://krieger.jhu.edu
+  - id: jhu-econ
     name: Johns Hopkins University
     department: Department of Economics
     city: Baltimore
@@ -39,6 +56,9 @@ affiliations:
     country: USA
     ror: https://ror.org/00za53h95
     url: https://econ.jhu.edu
+  - id: econ-ark
+    name: Econ-ARK
+    url: https://econ-ark.org
 keywords:
   - MyST Markdown
   - Elsevier

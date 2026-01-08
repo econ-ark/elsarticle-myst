@@ -8,7 +8,7 @@ A comprehensive MyST Markdown template for Elsevier journal articles using the C
 
 | | |
 |---|---|
-| **Authors** | [Alan Lujan](https://alanlujan91.github.io) & [Christopher Carroll](https://econ.jhu.edu/people/ccarroll) |
+| **Authors** | [Alan Lujan](https://alanlujan91.github.io) |
 | **Affiliation** | Johns Hopkins University |
 | **Repository** | [github.com/alanlujan91/elsevier_myst_template](https://github.com/alanlujan91/elsevier_myst_template) |
 | **Source** | [Elsevier LaTeX Instructions](https://www.elsevier.com/authors/policies-and-guidelines/latex-instructions) |
