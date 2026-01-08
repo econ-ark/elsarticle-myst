@@ -124,6 +124,68 @@ Task lists can track progress (rendered as bullet points in LaTeX):
 - [x] Add typography examples
 - [ ] Submit to journal
 
+# Proofs and Theorems
+
+MyST supports formal mathematical environments using proof directives. These are essential for mathematical and theoretical papers.
+
+## Definitions and Theorems
+
+:::{prf:definition} Convergent Sequence
+:label: def-convergent
+
+A sequence $(a_n)$ in $\mathbb{R}$ is said to be *convergent* if there exists a number $L \in \mathbb{R}$ such that for every $\varepsilon > 0$, there exists $N \in \mathbb{N}$ such that for all $n > N$:
+$$
+|a_n - L| < \varepsilon
+$$
+We write $\lim_{n \to \infty} a_n = L$.
+:::
+
+:::{prf:theorem} Squeeze Theorem
+:label: thm-squeeze
+
+Let $(a_n)$, $(b_n)$, and $(c_n)$ be sequences such that $a_n \leq b_n \leq c_n$ for all $n \geq N_0$. If
+$$
+\lim_{n \to \infty} a_n = \lim_{n \to \infty} c_n = L
+$$
+then $\lim_{n \to \infty} b_n = L$.
+:::
+
+## Proofs and Corollaries
+
+:::{prf:proof}
+:label: prf-squeeze
+
+Let $\varepsilon > 0$ be given. Since $a_n \to L$ and $c_n \to L$, there exist $N_1, N_2 \in \mathbb{N}$ such that:
+- $|a_n - L| < \varepsilon$ for all $n > N_1$
+- $|c_n - L| < \varepsilon$ for all $n > N_2$
+
+Let $N = \max\{N_0, N_1, N_2\}$. For $n > N$, we have:
+$$
+L - \varepsilon < a_n \leq b_n \leq c_n < L + \varepsilon
+$$
+Thus $|b_n - L| < \varepsilon$, completing the proof.
+:::
+
+:::{prf:corollary}
+:label: cor-bounded
+
+If $(b_n)$ is squeezed between two sequences converging to zero, then $b_n \to 0$.
+:::
+
+## Lemmas and Remarks
+
+:::{prf:lemma} Triangle Inequality
+:label: lem-triangle
+
+For all $x, y \in \mathbb{R}$, we have $|x + y| \leq |x| + |y|$.
+:::
+
+:::{prf:remark}
+:label: rem-notation
+
+The proof directives ({prf:ref}`def-convergent`, {prf:ref}`thm-squeeze`) are automatically numbered and can be cross-referenced throughout the document.
+:::
+
 # Methods
 
 We use the standard CAS template structure provided by Elsevier, adapted for use with the `jtex` templating system.
