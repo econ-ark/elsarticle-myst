@@ -111,8 +111,9 @@
 
 [# if parts.appendix #]
 \appendix
-\section{Appendix}
+\section*{Appendix}
 \renewcommand{\thesubsection}{\Alph{subsection}}
+\setcounter{subsection}{0}
 [-parts.appendix-]
 [# endif #]
 
