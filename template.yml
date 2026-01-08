@@ -1,0 +1,106 @@
+jtex: v1
+title: Elsevier CAS Template
+description: Elsevier CAS template for journal articles with single or double column layout
+version: 1.0.0
+license: LPPL-1.3c
+source: https://www.elsevier.com/authors/policies-and-guidelines/latex-instructions
+thumbnail: ./thumbnail.png
+authors:
+  - name: Alan Lujan
+    website: https://github.com/alanlujan91
+    affiliations:
+      - Johns Hopkins University
+tags:
+  - paper
+  - journal
+  - elsevier
+  - single-column
+  - two-column
+  - cas
+parts:
+  - id: abstract
+    required: true
+    description: |
+      A concise summary of the article's main findings and conclusions.
+  - id: highlights
+    description: |
+      Research highlights as bullet points (3-5 items).
+  - id: graphical_abstract
+    description: |
+      A graphical abstract image path.
+  - id: appendix
+    description: |
+      Appendix content. Sections within will be labeled A, B, C, etc.
+doc:
+  - id: title
+    required: true
+  - id: short_title
+    description: Short title for running header
+  - id: authors
+    required: true
+  - id: affiliations
+  - id: keywords
+  - id: bibliography
+options:
+  - type: choice
+    id: columns
+    description: Number of columns for the layout
+    default: single
+    choices:
+      - single
+      - double
+  - type: boolean
+    id: longmktitle
+    description: Use if frontmatter runs over more than one page
+    default: false
+  - type: choice
+    id: citation_style
+    description: Citation style to use
+    default: authoryear
+    choices:
+      - authoryear
+      - numbers
+files:
+  - template.tex
+  - cas-sc.cls
+  - cas-dc.cls
+  - cas-common.sty
+  - cas-model2-names.bst
+  - thumbnails/cas-email.jpeg
+  - thumbnails/cas-facebook.jpeg
+  - thumbnails/cas-gplus.jpeg
+  - thumbnails/cas-linkedin.jpeg
+  - thumbnails/cas-twitter.jpeg
+  - thumbnails/cas-url.jpeg
+packages:
+  - amsfonts
+  - amsmath
+  - amssymb
+  - array
+  - balance
+  - booktabs
+  - cas-common
+  - charis
+  - colortbl
+  - dcolumn
+  - etoolbox
+  - expl3
+  - fontenc
+  - footmisc
+  - graphicx
+  - hyperref
+  - inconsolata
+  - l3regex
+  - makecell
+  - moreverb
+  - multirow
+  - natbib
+  - setspace
+  - stfloats
+  - stix
+  - wrapfig
+  - xcolor
+  - xparse
+  - xspace
+  - xstring
+myst: v1

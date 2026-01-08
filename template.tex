@@ -1,0 +1,112 @@
+%% Elsevier CAS Template for MyST
+%% Supports both single column (cas-sc) and double column (cas-dc) layouts
+
+[# if options.columns == 'double' #]
+[# if options.longmktitle #]
+\documentclass[a4paper,fleqn,longmktitle]{cas-dc}
+[# else #]
+\documentclass[a4paper,fleqn]{cas-dc}
+[# endif #]
+[# else #]
+[# if options.longmktitle #]
+\documentclass[a4paper,fleqn,longmktitle]{cas-sc}
+[# else #]
+\documentclass[a4paper,fleqn]{cas-sc}
+[# endif #]
+[# endif #]
+
+[# if options.citation_style == 'numbers' #]
+\usepackage[numbers]{natbib}
+[# else #]
+\usepackage[authoryear,longnamesfirst]{natbib}
+[# endif #]
+
+[- IMPORTS -]
+
+\begin{document}
+\let\WriteBookmarks\relax
+\def\floatpagepagefraction{1}
+\def\textpagefraction{.001}
+
+[# if doc.short_title #]
+\shorttitle{[-doc.short_title-]}
+[# endif #]
+
+[# if doc.authors #]
+\shortauthors{[# for author in doc.authors #][-author.surname-][# if not loop.last #], [# endif #][# endfor #]}
+[# endif #]
+
+\title[mode=title]{[-doc.title-]}
+
+[# for author in doc.authors #]
+\author[[-loop.index-]]{[-author.name-]}[#- if author.orcid -#][orcid=[-author.orcid-]][#- endif -#]
+[# if author.corresponding #]
+\cormark[[-loop.index-]]
+[# endif #]
+[# if author.email #]
+\ead{[-author.email-]}
+[# endif #]
+[# if author.url #]
+\ead[url]{[-author.url-]}
+[# endif #]
+[# if author.roles #]
+\credit{[-author.roles | join(", ")-]}
+[# endif #]
+[# endfor #]
+
+[# for affiliation in doc.affiliations #]
+\affiliation[[-affiliation.index-]]{organization={[-affiliation.name-]}[# if affiliation.address #],
+            addressline={[-affiliation.address-]}[# endif #][# if affiliation.city #],
+            city={[-affiliation.city-]}[# endif #][# if affiliation.postal_code #],
+            postcode={[-affiliation.postal_code-]}[# endif #][# if affiliation.state #],
+            state={[-affiliation.state-]}[# endif #][# if affiliation.country #],
+            country={[-affiliation.country-]}[# endif #]}
+[# endfor #]
+
+[# for author in doc.authors #]
+[# if author.corresponding #]
+\cortext[[-loop.index-]]{Corresponding author}
+[# endif #]
+[# endfor #]
+
+[# if parts.abstract #]
+\begin{abstract}
+[-parts.abstract-]
+\end{abstract}
+[# endif #]
+
+[# if parts.graphical_abstract #]
+\begin{graphicalabstract}
+\includegraphics{[-parts.graphical_abstract-]}
+\end{graphicalabstract}
+[# endif #]
+
+[# if parts.highlights #]
+\begin{highlights}
+[-parts.highlights-]
+\end{highlights}
+[# endif #]
+
+[# if doc.keywords #]
+\begin{keywords}
+[-doc.keywords | join(" \\sep ")-]
+\end{keywords}
+[# endif #]
+
+\maketitle
+
+[-CONTENT-]
+
+[# if parts.appendix #]
+\appendix
+[-parts.appendix-]
+[# endif #]
+
+\printcredits
+
+\bibliographystyle{cas-model2-names}
+[# if doc.bibliography #]
+\bibliography{[-doc.bibliography | join(", ")-]}
+[# endif #]
+
+\end{document}
