@@ -73,17 +73,41 @@
 \begin{abstract}
 [-parts.abstract-]
 \end{abstract}
+[# elif doc.abstract #]
+\begin{abstract}
+[-doc.abstract-]
+\end{abstract}
 [# endif #]
 
 [# if parts.graphical_abstract #]
 \begin{graphicalabstract}
 [-parts.graphical_abstract-]
 \end{graphicalabstract}
+[# elif options.graphical_abstract #]
+\begin{graphicalabstract}
+\includegraphics{[-options.graphical_abstract-]}
+\end{graphicalabstract}
 [# endif #]
 
 [# if parts.highlights #]
 \begin{highlights}
 [-parts.highlights-]
+\end{highlights}
+[# elif options.highlight_1 #]
+\begin{highlights}
+\item [-options.highlight_1-]
+[# if options.highlight_2 #]
+\item [-options.highlight_2-]
+[# endif #]
+[# if options.highlight_3 #]
+\item [-options.highlight_3-]
+[# endif #]
+[# if options.highlight_4 #]
+\item [-options.highlight_4-]
+[# endif #]
+[# if options.highlight_5 #]
+\item [-options.highlight_5-]
+[# endif #]
 \end{highlights}
 [# endif #]
 

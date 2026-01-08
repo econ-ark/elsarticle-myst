@@ -41,6 +41,8 @@ doc:
   - id: affiliations
   - id: keywords
   - id: bibliography
+  - id: abstract
+    description: Article abstract (can also use part block)
 options:
   - type: choice
     id: columns
@@ -60,6 +62,24 @@ options:
     choices:
       - authoryear
       - numbers
+  - type: string
+    id: highlight_1
+    description: First research highlight
+  - type: string
+    id: highlight_2
+    description: Second research highlight
+  - type: string
+    id: highlight_3
+    description: Third research highlight
+  - type: string
+    id: highlight_4
+    description: Fourth research highlight (optional)
+  - type: string
+    id: highlight_5
+    description: Fifth research highlight (optional)
+  - type: file
+    id: graphical_abstract
+    description: Path to graphical abstract image
 files:
   - template.tex
   - cas-sc.cls
