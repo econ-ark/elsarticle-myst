@@ -57,11 +57,9 @@ This is a sample article demonstrating the use of MyST Markdown with Elsevier's 
 +++
 
 +++ {"part": "highlights"}
-```{raw} latex
-\item MyST Markdown enables reproducible scientific writing
-\item Seamless export to multiple journal formats
-\item Support for both single and double column layouts
-```
+- MyST Markdown enables reproducible scientific writing
+- Seamless export to multiple journal formats
+- Support for both single and double column layouts
 +++
 
 +++ {"part": "graphical_abstract"}
