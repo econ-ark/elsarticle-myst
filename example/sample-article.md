@@ -34,6 +34,8 @@ keywords:
   - Elsevier
   - LaTeX
   - CAS Template
+bibliography:
+  - references.bib
 exports:
   - format: pdf
     template: ..
@@ -59,15 +61,17 @@ This is a sample article demonstrating the use of MyST Markdown with Elsevier's 
 
 # Introduction
 
-This document demonstrates the integration of MyST Markdown with Elsevier's CAS (Content Acquisition System) templates. MyST provides a powerful authoring experience while maintaining compatibility with traditional LaTeX journal requirements.
+This document demonstrates the integration of MyST Markdown {cite:p}`myst2023` with Elsevier's CAS (Content Acquisition System) templates. MyST provides a powerful authoring experience while maintaining compatibility with traditional LaTeX journal requirements {cite:p}`latex2004`.
 
 ## Background
 
-Scientific publishing has traditionally relied on LaTeX for high-quality typesetting. However, the learning curve and complexity of LaTeX can be a barrier for many researchers. MyST Markdown bridges this gap by providing:
+Scientific publishing has traditionally relied on LaTeX for high-quality typesetting {cite:p}`elsevier2020`. However, the learning curve and complexity of LaTeX can be a barrier for many researchers. MyST Markdown bridges this gap by providing:
 
-1. A familiar Markdown syntax
+1. A familiar Markdown syntax based on CommonMark {cite:p}`markdown2004`
 2. Rich scientific features (equations, citations, cross-references)
 3. Export to multiple formats including PDF via LaTeX
+
+Reproducible research workflows have become increasingly important, with tools like Jupyter Notebooks {cite:p}`jupyter2018` enabling literate programming approaches.
 
 # Methods
 
