@@ -200,17 +200,77 @@ $$ (eq:quadratic)
 
 And inline math like $E = mc^2$. Equations can be cross-referenced: see {eq}`eq:quadratic`.
 
+## Admonitions
+
+Admonitions (callouts) are useful for highlighting important information:
+
+:::{note}
+This is a note admonition. Use it to highlight supplementary information that readers should be aware of.
+:::
+
+:::{warning}
+This is a warning. Use it to alert readers about potential pitfalls or important caveats in your methodology.
+:::
+
+:::{tip}
+Tips can provide helpful suggestions for readers applying your methods.
+:::
+
+## Code Blocks
+
+Code blocks with syntax highlighting are supported:
+
+```{code} python
+:caption: Example Python implementation
+:label: code-example
+
+import numpy as np
+
+def quadratic_formula(a, b, c):
+    """Solve ax^2 + bx + c = 0"""
+    discriminant = b**2 - 4*a*c
+    x1 = (-b + np.sqrt(discriminant)) / (2*a)
+    x2 = (-b - np.sqrt(discriminant)) / (2*a)
+    return x1, x2
+```
+
+As shown in {ref}`code-example`, code can be captioned and cross-referenced.
+
 ## Tables
 
 MyST tables convert cleanly to LaTeX:
+
+:::{table} Comparison of different methods
+:label: tbl:comparison
 
 | Method | Accuracy | Speed |
 |--------|----------|-------|
 | Baseline | 85.2% | Fast |
 | Proposed | **92.1%** | Medium |
 | Oracle | 98.5% | Slow |
+:::
 
-: Comparison of different methods {#tbl:comparison}
+Results are summarized in {ref}`tbl:comparison`.
+
+List tables provide an alternative syntax useful for longer content:
+
+```{list-table} Dataset statistics
+:header-rows: 1
+:label: tbl:dataset
+
+* - Dataset
+  - Samples
+  - Features
+* - Training
+  - 10,000
+  - 256
+* - Validation
+  - 2,000
+  - 256
+* - Test
+  - 3,000
+  - 256
+```
 
 # Results
 
@@ -235,6 +295,10 @@ As shown in {ref}`fig-sample`, the template properly handles figure placement an
 # Discussion
 
 This approach enables researchers to write in MyST Markdown while producing publication-ready documents that meet Elsevier's submission requirements.
+
+:::{seealso}
+For more information on MyST Markdown features, visit the [MyST documentation](https://mystmd.org/guide).
+:::
 
 # Conclusion
 
