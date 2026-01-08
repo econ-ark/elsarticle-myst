@@ -2,17 +2,9 @@
 %% Supports both single column (cas-sc) and double column (cas-dc) layouts
 
 [# if options.columns == 'double' #]
-[# if options.longmktitle #]
-\documentclass[a4paper,fleqn,longmktitle]{cas-dc}
-[# else #]
 \documentclass[a4paper,fleqn]{cas-dc}
-[# endif #]
-[# else #]
-[# if options.longmktitle #]
-\documentclass[a4paper,fleqn,longmktitle]{cas-sc}
 [# else #]
 \documentclass[a4paper,fleqn]{cas-sc}
-[# endif #]
 [# endif #]
 
 [# if options.citation_style == 'numbers' #]
@@ -37,17 +29,31 @@
 [# endif #]
 
 \title[mode=title]{[-doc.title-]}
+[# if doc.subtitle #]
+\title[mode=sub]{[-doc.subtitle-]}
+[# endif #]
+
+[# if parts.title_note #]
+\tnotemark[1]
+\tnotetext[1]{[-parts.title_note-]}
+[# endif #]
 
 [# for author in doc.authors #]
-\author[[-loop.index-]]{[-author.name-]}[#- if author.orcid -#][orcid=[-author.orcid-]][#- endif -#]
+\author[[- author.affiliations | join(",", "index") -]]{[-author.name-]}[#- if author.orcid or author.deceased -#][[#- endif -#][#- if author.orcid -#]orcid=[-author.orcid-][#- endif -#][#- if author.orcid and author.deceased -#],[#- endif -#][#- if author.deceased -#]deceased[#- endif -#][#- if author.orcid or author.deceased -#]][#- endif -#]
 [# if author.corresponding #]
 \cormark[[-loop.index-]]
+[# endif #]
+[# if author.note #]
+\fnmark[[-loop.index + 100-]]
 [# endif #]
 [# if author.email #]
 \ead{[-author.email-]}
 [# endif #]
 [# if author.url #]
 \ead[url]{[-author.url-]}
+[# endif #]
+[# if author.twitter #]
+\ead[twitter]{[-author.twitter-]}
 [# endif #]
 [# if author.roles #]
 \credit{[-author.roles | join(", ") | replace("–", "--")-]}
@@ -67,7 +73,18 @@
 [# if author.corresponding #]
 \cortext[[-loop.index-]]{Corresponding author}
 [# endif #]
+[# if author.note #]
+\fntext[[-loop.index + 100-]]{[-author.note-]}
+[# endif #]
 [# endfor #]
+
+[# if doc.authors | selectattr("equal_contributor") | list | length > 1 #]
+\nonumnote{These authors contributed equally to this work.}
+[# endif #]
+
+[# if parts.note #]
+\nonumnote{[-parts.note-]}
+[# endif #]
 
 [# if parts.abstract #]
 \begin{abstract}
@@ -122,6 +139,10 @@
 \bibliographystyle{cas-model2-names}
 [# if doc.bibliography #]
 \bibliography{[-doc.bibliography | join(", ")-]}
+[# endif #]
+
+[# if parts.biography #]
+[-parts.biography-]
 [# endif #]
 
 \end{document}

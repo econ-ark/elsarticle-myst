@@ -20,6 +20,8 @@ A comprehensive MyST Markdown template for Elsevier journal articles using the C
 - **Citation styles**: Author-year or numeric references
 - **Rich metadata**: ORCID, email, CRediT contributor roles, affiliations
 - **Elsevier features**: Research highlights, graphical abstracts, keywords
+- **Extended author metadata**: Equal contributors, author notes, deceased markers, social links (Twitter)
+- **Title features**: Main title, subtitle, title footnotes, general notes
 - **Full MyST support**: Math, proofs, theorems, admonitions, cross-references, tables, figures
 - **Multiple exports**: Generate PDFs in different formats from a single source
 
@@ -89,12 +91,17 @@ myst build your-article.md --pdf
 
 ```yaml
 title: Article Title
+subtitle: Optional Subtitle  # Displayed below main title
 short_title: Short Title  # For running headers
 authors:
   - name: Author Name
     email: author@example.com
     orcid: 0000-0000-0000-0000
     corresponding: true
+    equal_contributor: true  # Mark as equal contribution
+    deceased: false  # Mark if deceased
+    note: Additional author info  # Author-specific footnote
+    twitter: username  # Twitter/X handle
     affiliations:
       - institution-id
     roles:
@@ -114,6 +121,14 @@ abstract: |
 keypoints:  # Research highlights
   - First key finding
   - Second key finding
+parts:
+  title_note: Acknowledgment or note attached to title
+  note: General note without numbering (e.g., disclaimers)
+  appendix: appendix.md  # External appendix file
+  biography: |  # Author biographies (raw LaTeX)
+    \bio{}
+    Author biography text...
+    \endbio
 bibliography:
   - references.bib
 ```
@@ -143,7 +158,13 @@ Use MyST `parts` for special content:
 
 ```yaml
 parts:
-  appendix: appendix.md  # External appendix file
+  appendix: appendix.md      # External appendix file
+  title_note: Funding note   # Footnote on title
+  note: General disclaimer   # Non-numbered note
+  biography: |               # Author bios (raw LaTeX)
+    \bio{}
+    Biography text...
+    \endbio
 ```
 
 Or inline with block syntax:

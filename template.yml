@@ -49,15 +49,42 @@ parts:
     description: >
       Appendix content. Sections within will be labeled A, B, C, etc.
       Can reference an external markdown file via parts.appendix in frontmatter.
+  - id: title_note
+    description: >
+      A footnote attached to the title, e.g., funding acknowledgment or
+      conference presentation note.
+  - id: note
+    description: >
+      A general note without a number that appears in the frontmatter.
+      Useful for disclaimers or additional context.
+  - id: biography
+    description: >
+      Author biographies as raw LaTeX. Use \\bio{} and \\endbio commands.
+      For photo, use \\bio{path/to/photo}.
 doc:
   - id: title
     required: true
+  - id: subtitle
+    description: >
+      Article subtitle displayed below the main title.
   - id: short_title
     description: >
       Short title for running header (recommended max 50 characters).
   - id: authors
     required: true
+    description: >
+      List of authors. Each author supports: name, orcid, email, url,
+      corresponding (boolean), roles (CRediT), equal_contributor (boolean),
+      deceased (boolean), note (string for author-specific footnote),
+      and twitter (username).
   - id: affiliations
+    description: >
+      List of affiliations with: name/institution, department, address,
+      city, state, postal_code, country, ror, isni, ringgold.
+  - id: abstract
+    description: >
+      Article abstract as a simple string. Can also be provided as parts.abstract
+      for more complex abstracts with formatting.
   - id: keywords
     description: >
       Article keywords (typically 3-6). Will be joined with \\sep in LaTeX.
@@ -73,11 +100,6 @@ options:
     choices:
       - single
       - double
-  - id: longmktitle
-    type: boolean
-    title: Long Title
-    description: Enable if frontmatter (title, authors, abstract) spans multiple pages.
-    default: false
   - id: citation_style
     type: choice
     title: Citation Style

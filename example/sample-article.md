@@ -1,5 +1,6 @@
 ---
 title: A Comprehensive Guide to MyST Markdown with Elsevier CAS Templates
+subtitle: Showcasing All Available Features
 short_title: MyST & Elsevier Guide
 description: A comprehensive template demonstrating MyST Markdown integration with Elsevier CAS journal templates.
 date: 2026-01-08
@@ -51,11 +52,10 @@ license:
 open_access: true
 github: https://github.com/alanlujan91/elsevier_myst_template
 abstract: |
-  This comprehensive article demonstrates all features available in MyST Markdown combined with Elsevier's CAS templates. We showcase typography, mathematical notation, cross-references, admonitions, proofs and theorems, tables, figures, code blocks, and more. This serves as both documentation and a test of template capabilities.
+  This article demonstrates MyST Markdown integration with Elsevier's CAS templates, showcasing typography, math, cross-references, admonitions, proofs, tables, figures, and code blocks.
 keypoints:
   - MyST Markdown enables reproducible scientific writing
   - Seamless export to multiple journal formats
-  - Support for both single and double column layouts
   - Rich mathematical and scientific notation support
 math:
   '\R': '\mathbb{R}'
