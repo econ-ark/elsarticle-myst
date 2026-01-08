@@ -36,6 +36,10 @@ keywords:
   - CAS Template
 abstract: |
   This is a sample article demonstrating the use of MyST Markdown with Elsevier's CAS templates. The template supports both single-column and double-column layouts, making it suitable for various Elsevier journals. We demonstrate the key features including author metadata, affiliations, keywords, and structured content.
+keypoints:
+  - MyST Markdown enables reproducible scientific writing
+  - Seamless export to multiple journal formats
+  - Support for both single and double column layouts
 bibliography:
   - references.bib
 exports:
@@ -43,26 +47,17 @@ exports:
     template: ..
     output: exports/sample-sc.pdf
     columns: single
-    highlight_1: MyST Markdown enables reproducible scientific writing
-    highlight_2: Seamless export to multiple journal formats
-    highlight_3: Support for both single and double column layouts
     graphical_abstract: images/sample-figure.png
   - format: pdf
     template: ..
     output: exports/sample-dc.pdf
     columns: double
-    highlight_1: MyST Markdown enables reproducible scientific writing
-    highlight_2: Seamless export to multiple journal formats
-    highlight_3: Support for both single and double column layouts
     graphical_abstract: images/sample-figure.png
   - format: pdf
     template: ..
     output: exports/sample-sc-numbers.pdf
     columns: single
     citation_style: numbers
-    highlight_1: MyST Markdown enables reproducible scientific writing
-    highlight_2: Seamless export to multiple journal formats
-    highlight_3: Support for both single and double column layouts
     graphical_abstract: images/sample-figure.png
 ---
 

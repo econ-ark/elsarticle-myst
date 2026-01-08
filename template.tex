@@ -93,21 +93,9 @@
 \begin{highlights}
 [-parts.highlights-]
 \end{highlights}
-[# elif options.highlight_1 #]
+[# elif parts.keypoints #]
 \begin{highlights}
-\item [-options.highlight_1-]
-[# if options.highlight_2 #]
-\item [-options.highlight_2-]
-[# endif #]
-[# if options.highlight_3 #]
-\item [-options.highlight_3-]
-[# endif #]
-[# if options.highlight_4 #]
-\item [-options.highlight_4-]
-[# endif #]
-[# if options.highlight_5 #]
-\item [-options.highlight_5-]
-[# endif #]
+\item [-parts.keypoints | trim | replace("\n\n", "\n\\item ")-]
 \end{highlights}
 [# endif #]
 

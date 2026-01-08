@@ -24,7 +24,11 @@ parts:
       A concise summary of the article's main findings and conclusions.
   - id: highlights
     description: |
-      Research highlights as bullet points (3-5 items).
+      Research highlights as bullet points (3-5 items). Use +++ block.
+  - id: keypoints
+    description: >
+      Research highlights as bullet points (3-5 items). Can be defined in
+      frontmatter as a list.
   - id: graphical_abstract
     description: |
       A graphical abstract image path.
@@ -40,6 +44,8 @@ doc:
     required: true
   - id: affiliations
   - id: keywords
+  - id: keypoints
+    description: Research highlights/keypoints as a list in frontmatter
   - id: bibliography
   - id: abstract
     description: Article abstract (can also use part block)
@@ -62,21 +68,6 @@ options:
     choices:
       - authoryear
       - numbers
-  - type: string
-    id: highlight_1
-    description: First research highlight
-  - type: string
-    id: highlight_2
-    description: Second research highlight
-  - type: string
-    id: highlight_3
-    description: Third research highlight
-  - type: string
-    id: highlight_4
-    description: Fourth research highlight (optional)
-  - type: string
-    id: highlight_5
-    description: Fifth research highlight (optional)
   - type: file
     id: graphical_abstract
     description: Path to graphical abstract image
