@@ -149,8 +149,8 @@ Supported roles (per [CRediT taxonomy](https://credit.niso.org/)):
 - Supervision
 - Validation
 - Visualization
-- Writing – original draft
-- Writing – review & editing
+- Writing - original draft
+- Writing - review & editing
 
 ### Document Parts
 

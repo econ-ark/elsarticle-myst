@@ -15,11 +15,6 @@ authors:
     github: alanlujan91
     affiliations:
       - Johns Hopkins University
-  - name: Christopher Carroll
-    website: https://econ.jhu.edu/people/ccarroll
-    github: llorracc
-    affiliations:
-      - Johns Hopkins University
 tags:
   - paper
   - journal
@@ -29,18 +24,20 @@ tags:
   - cas
 parts:
   - id: abstract
-    required: true
     description: >
-      A concise summary of the article's main findings and conclusions.
-      Most Elsevier journals require an abstract of 100-300 words.
+      A concise summary of the article's main findings and conclusions
+      (100-300 words). Takes precedence over doc.abstract if both are provided.
+      Use this for abstracts with formatting; use doc.abstract for plain text.
   - id: highlights
     description: >
       Research highlights as raw LaTeX \\item entries (3-5 items).
-      Use the +++ block syntax with part: highlights.
+      Use when you need raw LaTeX control. Define with +++ block syntax.
+      For simpler YAML-based highlights, use keypoints in frontmatter instead.
   - id: keypoints
     description: >
-      Research highlights as bullet points (3-5 items).
-      Can be defined in frontmatter as a YAML list under keypoints.
+      Research highlights as bullet points (3-5 items). Simpler alternative
+      to highlights part. Define as a YAML list in frontmatter. Each item
+      becomes a LaTeX \\item automatically.
   - id: graphical_abstract
     description: >
       A graphical abstract as raw LaTeX content.
@@ -83,8 +80,9 @@ doc:
       city, state, postal_code, country, ror, isni, ringgold.
   - id: abstract
     description: >
-      Article abstract as a simple string. Can also be provided as parts.abstract
-      for more complex abstracts with formatting.
+      Article abstract as a simple string (100-300 words). Either this or
+      parts.abstract is required. If parts.abstract is also provided, it
+      takes precedence.
   - id: keywords
     description: >
       Article keywords (typically 3-6). Will be joined with \\sep in LaTeX.
@@ -108,6 +106,11 @@ options:
     choices:
       - authoryear
       - numbers
+  - id: longmktitle
+    type: boolean
+    title: Long Title
+    description: Enable if frontmatter (title, authors, abstract) spans multiple pages.
+    default: false
   - id: graphical_abstract
     type: file
     title: Graphical Abstract

@@ -1502,7 +1502,9 @@
 \tex_gdef:D \abstractname { A\,B\,S\,T\,R\,A\,C\,T }
 \tl_new:N \l_stm_abs_title_tl
 \box_new:N \g_stm_abs_box
-\dim_new:N \g_stm_keybox_ht_dim  % MyST fix: track keyword box height
+%% MyST fix: Track keyword box height to prevent content overlap when
+%% keywords are taller than the abstract (common with long keyword lists)
+\dim_new:N \g_stm_keybox_ht_dim
 
 \NewDocumentEnvironment { Abstract } { o }
 {
@@ -1517,7 +1519,7 @@
   {
     \dim_gset:Nn \l_tmpa_dim { \box_ht:N \g_stm_key_box }
     \dim_gadd:Nn \l_tmpa_dim { \box_dp:N \g_stm_key_box }
-    \dim_gset_eq:NN \g_stm_keybox_ht_dim \l_tmpa_dim  % MyST fix: save height
+    \dim_gset_eq:NN \g_stm_keybox_ht_dim \l_tmpa_dim  % Save for end-of-abstract check
     \leftskip .35\textwidth
     \hspace*{-.35 \textwidth }
     \noindent\hbox_to_wd:nn {  \z@ } { \box \g_stm_key_box } 
@@ -1530,7 +1532,9 @@
 }
 {
   \par
-  % MyST fix: ensure minimum height when keywords are taller than abstract
+  %% MyST fix: When keywords extend below the abstract, add vertical space
+  %% to prevent the following content from overlapping the keyword box.
+  %% The 5\baselineskip accounts for the abstract title and rule spacing.
   \dim_compare:nNnT { \g_stm_keybox_ht_dim } > { \z@ }
   {
     \dim_set:Nn \l_tmpa_dim { \g_stm_keybox_ht_dim - 5\baselineskip }
@@ -1887,9 +1891,10 @@
   % \iow_term:x { ...~[tmpa-noteht:~ \dim_use:N \g_tmpa_dim ] }
   % \dim_gsub:Nn \g_tmpa_dim { \box_dp:N \g_stm_notes_box }
   % \iow_term:x { ...~[tmpa-notedp:~ \dim_use:N \g_tmpa_dim ] }
-  \dim_gsub:Nn \g_tmpa_dim { \g_tmpb_dim }  
+  \dim_gsub:Nn \g_tmpa_dim { \g_tmpb_dim }
   \vbox_set_split_to_ht:NNn \g_tmpb_box \g_stm_front_box { \g_tmpa_dim }
-  \noindent \vbox_unpack_clear:N \g_tmpb_box 
+  %% Note: vbox_unpack_drop:N replaces deprecated vbox_unpack_clear:N (LaTeX3 2022+)
+  \noindent \vbox_unpack_drop:N \g_tmpb_box 
   \printFirstPageNotes
   \dim_gzero:N \g_tmpa_dim
   \dim_gset:Nn \g_tmpa_dim { \box_ht:N \g_stm_front_box }
@@ -1899,15 +1904,15 @@
   \dim_compare:nNnTF { \dim_use:N \g_tmpa_dim } > { \the\textheight }
   {
     \vbox_set_split_to_ht:NNn \g_tmpb_box \g_stm_front_box { \textheight }
-    \vbox_unpack_clear:N \g_tmpb_box
+    \vbox_unpack_drop:N \g_tmpb_box
     \ifbool{dc}
-    { \twocolumn[{\vbox_unpack_clear:N \g_stm_front_box}] }
-    { \vbox_unpack_clear:N \g_stm_front_box }
+    { \twocolumn[{\vbox_unpack_drop:N \g_stm_front_box}] }
+    { \vbox_unpack_drop:N \g_stm_front_box }
   }
   {
     \ifbool{dc}
-    { \twocolumn[{\vbox_unpack_clear:N \g_stm_front_box}] }
-    { \vbox_unpack_clear:N \g_stm_front_box }
+    { \twocolumn[{\vbox_unpack_drop:N \g_stm_front_box}] }
+    { \vbox_unpack_drop:N \g_stm_front_box }
   } 
  \normalcolor \normalfont 
 }

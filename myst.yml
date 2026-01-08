@@ -79,6 +79,8 @@ project:
       title: PDF (Double Column)
     - file: example/exports/sample-sc-numbers.pdf
       title: PDF (Numbered References)
+    - file: example/exports/sample-long.pdf
+      title: PDF (Long Title)
   thumbnail: example/images/thumbnail.png
   exclude:
     - original

@@ -19,7 +19,7 @@ authors:
       - Conceptualization
       - Methodology
       - Software
-      - Writing – original draft
+      - Writing - original draft
   - id: ccarroll
     name: Christopher D. Carroll
     email: ccarroll@jhu.edu
@@ -31,7 +31,7 @@ authors:
       - econ-ark
     roles:
       - Supervision
-      - Writing – review & editing
+      - Writing - review & editing
   - id: mnwhite
     name: Matthew N. White
     affiliations:
@@ -102,6 +102,8 @@ downloads:
     title: PDF (Double Column)
   - id: pdf-num
     title: PDF (Numbered References)
+  - id: pdf-long
+    title: PDF (Long Title)
 exports:
   - id: pdf-sc
     format: pdf
@@ -122,16 +124,23 @@ exports:
     columns: single
     citation_style: numbers
     graphical_abstract: images/sample-figure.png
+  - id: pdf-long
+    format: pdf
+    template: ..
+    output: exports/sample-long.pdf
+    columns: single
+    longmktitle: true
+    graphical_abstract: images/sample-figure.png
 ---
 
 (sec-introduction)=
 # Introduction
 
-This document demonstrates the full integration of MyST Markdown {cite:p}`myst2023` with Elsevier's CAS templates. MyST provides a powerful authoring experience while maintaining compatibility with traditional LaTeX journal requirements {cite:p}`latex2004`.
+This document demonstrates the full integration of MyST Markdown {cite:p}`myst2024` with Elsevier's CAS templates. MyST provides a powerful authoring experience while maintaining compatibility with traditional LaTeX journal requirements {cite:p}`latex1994`.
 
 ## Background
 
-Scientific publishing has traditionally relied on LaTeX for high-quality typesetting {cite:p}`elsevier2020`. However, the learning curve and complexity of LaTeX can be a barrier for many researchers. MyST Markdown bridges this gap by providing:
+Scientific publishing has traditionally relied on LaTeX for high-quality typesetting {cite:p}`pandocscholar2017`. However, the learning curve and complexity of LaTeX can be a barrier for many researchers. MyST Markdown bridges this gap by providing:
 
 1. A familiar Markdown syntax based on CommonMark {cite:p}`markdown2004`
 2. Rich scientific features (equations, citations, cross-references)
@@ -521,11 +530,11 @@ Type & \makecell{Description\\(details)} & Status & \multicolumn{1}{c}{Value} & 
 \multirow{3}{*}{Group A} 
   & Item 1 & Yes & 12.34 & 100 \\
   & Item 2 & Yes & 5.67 & 250 \\
-  & Item 3 & -- & 89.01 & 50 \\
+  & Item 3 & - & 89.01 & 50 \\
 \midrule
 \multirow{2}{*}{Group B}
   & Item 4 & Yes & 23.45 & 175 \\
-  & Item 5 & -- & 6.78 & 320 \\
+  & Item 5 & - & 6.78 & 320 \\
 \bottomrule
 \end{tabular}
 

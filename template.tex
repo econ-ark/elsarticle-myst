@@ -2,9 +2,9 @@
 %% Supports both single column (cas-sc) and double column (cas-dc) layouts
 
 [# if options.columns == 'double' #]
-\documentclass[a4paper,fleqn]{cas-dc}
+\documentclass[a4paper,fleqn[# if options.longmktitle #],longmktitle[# endif #]]{cas-dc}
 [# else #]
-\documentclass[a4paper,fleqn]{cas-sc}
+\documentclass[a4paper,fleqn[# if options.longmktitle #],longmktitle[# endif #]]{cas-sc}
 [# endif #]
 
 [# if options.citation_style == 'numbers' #]
@@ -24,8 +24,9 @@
 \shorttitle{[-doc.short_title-]}
 [# endif #]
 
+%% Extract surname as last word from full name (handles middle initials correctly)
 [# if doc.authors #]
-\shortauthors{[# for author in doc.authors #][-author.surname-][# if not loop.last #], [# endif #][# endfor #]}
+\shortauthors{[# for author in doc.authors #][-author.name.split(" ") | last-][# if not loop.last #], [# endif #][# endfor #]}
 [# endif #]
 
 \title[mode=title]{[-doc.title-]}
@@ -39,7 +40,7 @@
 [# endif #]
 
 [# for author in doc.authors #]
-\author[[- author.affiliations | join(",", "index") -]]{[-author.name-]}[#- if author.orcid or author.deceased -#][[#- endif -#][#- if author.orcid -#]orcid=[-author.orcid-][#- endif -#][#- if author.orcid and author.deceased -#],[#- endif -#][#- if author.deceased -#]deceased[#- endif -#][#- if author.orcid or author.deceased -#]][#- endif -#]
+\author[[- author.affiliations | join(",", "index") -]]{[-author.name-]}[# if author.orcid or author.deceased #][[# endif #][# if author.orcid #]orcid=[-author.orcid-][# endif #][# if author.orcid and author.deceased #],[# endif #][# if author.deceased #]deceased[# endif #][# if author.orcid or author.deceased #]][# endif #]
 [# if author.corresponding #]
 \cormark[[-loop.index-]]
 [# endif #]
@@ -56,7 +57,7 @@
 \ead[twitter]{[-author.twitter-]}
 [# endif #]
 [# if author.roles #]
-\credit{[-author.roles | join(", ") | replace("–", "--")-]}
+\credit{[-author.roles | join(", ")-]}
 [# endif #]
 [# endfor #]
 
@@ -112,7 +113,7 @@
 \end{highlights}
 [# elif parts.keypoints #]
 \begin{highlights}
-\item [-parts.keypoints | trim | replace("\n\n", "\n\\item ")-]
+\item [-parts.keypoints | trim | replace("\n\n", "\n") | replace("\n", "\n\\item ")-]
 \end{highlights}
 [# endif #]
 
