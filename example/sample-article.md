@@ -267,6 +267,32 @@ List tables provide an alternative syntax useful for longer content:
   - 256
 ```
 
+## Raw LaTeX Tables
+
+For complex tables requiring features like `\multicolumn`, `\cmidrule`, or custom formatting, use raw LaTeX blocks:
+
+```{raw} latex
+\begin{table}[h]
+\centering
+\caption{Complex table with booktabs features}
+\label{tbl:complex}
+\begin{tabular}{@{}llr@{}}
+\toprule
+\multicolumn{2}{c}{Item} \\
+\cmidrule(r){1-2}
+Animal & Description & Price (\$) \\
+\midrule
+Gnat  & per gram & 13.65 \\
+      & each     & 0.01 \\
+Gnu   & stuffed  & 92.50 \\
+Emu   & stuffed  & 33.33 \\
+\bottomrule
+\end{tabular}
+\end{table}
+```
+
+The CAS templates include `booktabs`, `multirow`, `makecell`, `array`, `colortbl`, and `dcolumn` packages for advanced table formatting.
+
 # Results
 
 The template successfully renders:
