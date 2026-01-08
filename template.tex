@@ -50,7 +50,7 @@
 \ead[url]{[-author.url-]}
 [# endif #]
 [# if author.roles #]
-\credit{[-author.roles | join(", ")-]}
+\credit{[-author.roles | join(", ") | replace("–", "--")-]}
 [# endif #]
 [# endfor #]
 

@@ -17,7 +17,7 @@ authors:
       - MIT
     roles:
       - Validation
-      - Writing - Review & Editing
+      - Writing – review & editing
 affiliations:
   - id: jhu
     name: Johns Hopkins University
@@ -93,7 +93,7 @@ Block quotes are useful for highlighting important passages:
 
 > We know what we are, but know not what we may be.
 >
-> -- William Shakespeare, Hamlet
+> --- William Shakespeare, Hamlet
 
 ## Definition Lists
 
