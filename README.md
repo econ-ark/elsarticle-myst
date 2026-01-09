@@ -25,6 +25,15 @@ A comprehensive MyST Markdown template for Elsevier journal articles using the C
 - **Full MyST support**: Math, proofs, theorems, admonitions, cross-references, tables, figures
 - **Multiple exports**: Generate PDFs in different formats from a single source
 
+## Requirements
+
+- **MyST Markdown**: Latest version (install via `pip install mystmd` or `npm install -g mystmd`)
+- **LaTeX Distribution**: TeX Live 2022+ or MiKTeX 22.1+ (required for PDF export)
+  - **Important**: This template requires LaTeX3 (2022 or later) due to use of modern LaTeX3 commands
+  - Earlier versions may fail with `vbox_unpack_drop:N` errors
+- **Python**: 3.8+ (if using pip installation)
+- **Node.js**: 16+ (if using npm installation)
+
 ## Quick Start
 
 ### 1. Install MyST

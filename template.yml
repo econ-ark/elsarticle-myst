@@ -73,7 +73,15 @@ doc:
       List of authors. Each author supports: name, orcid, email, url,
       corresponding (boolean), roles (CRediT), equal_contributor (boolean),
       deceased (boolean), note (string for author-specific footnote),
-      and twitter (username).
+      and social media links.
+
+      Social media fields:
+      - twitter: Username only (e.g., "username", not full URL)
+      - facebook: Full profile URL (e.g., "https://facebook.com/username")
+      - linkedin: Full profile URL (e.g., "https://linkedin.com/in/username")
+
+      Note: URLs should be properly formatted and validated before use.
+      Improperly formatted URLs may cause LaTeX compilation errors.
   - id: affiliations
     description: >
       List of affiliations with: name/institution, department, address,

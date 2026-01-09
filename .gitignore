@@ -35,3 +35,6 @@ node_modules/
 
 # Keep exports folder but ignore contents (optional - remove if you want to track PDFs)
 # example/exports/
+
+# Generated TeX exports (pdf+tex format creates these directories)
+example/exports/*_pdf_tex/

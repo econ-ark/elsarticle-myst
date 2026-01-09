@@ -106,26 +106,26 @@ downloads:
     title: PDF (Long Title)
 exports:
   - id: pdf-sc
-    format: pdf
+    format: pdf+tex
     template: ..
     output: exports/sample-sc.pdf
     columns: single
     graphical_abstract: images/sample-figure.png
   - id: pdf-dc
-    format: pdf
+    format: pdf+tex
     template: ..
     output: exports/sample-dc.pdf
     columns: double
     graphical_abstract: images/sample-figure.png
   - id: pdf-num
-    format: pdf
+    format: pdf+tex
     template: ..
     output: exports/sample-sc-numbers.pdf
     columns: single
     citation_style: numbers
     graphical_abstract: images/sample-figure.png
   - id: pdf-long
-    format: pdf
+    format: pdf+tex
     template: ..
     output: exports/sample-long.pdf
     columns: single
