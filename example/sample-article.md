@@ -8,7 +8,7 @@ authors:
   - id: alujan
     name: Alan E. Lujan
     email: alujan@jhu.edu
-    url: https://alanlujan91.github.io
+    url: https://econ-ark.org
     corresponding: true
     orcid: 0000-0002-5289-7054
     github: alanlujan91
@@ -70,7 +70,7 @@ license:
   content: CC-BY-4.0
   code: MIT
 open_access: true
-github: https://github.com/alanlujan91/elsevier_myst_template
+github: https://github.com/econ-ark/elsarticle-myst
 abstract: |
   This article demonstrates MyST Markdown integration with Elsevier's CAS templates, showcasing typography, math, cross-references, admonitions, proofs, tables, figures, and code blocks.
 keypoints:

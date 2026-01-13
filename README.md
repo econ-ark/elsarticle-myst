@@ -8,9 +8,9 @@ A comprehensive MyST Markdown template for Elsevier journal articles using the C
 
 | | |
 |---|---|
-| **Authors** | [Alan Lujan](https://alanlujan91.github.io) |
-| **Affiliation** | Johns Hopkins University |
-| **Repository** | [github.com/alanlujan91/elsevier_myst_template](https://github.com/alanlujan91/elsevier_myst_template) |
+| **Authors** | [Alan Lujan](https://econ-ark.org) |
+| **Affiliation** | Johns Hopkins University, Econ-ARK |
+| **Repository** | [github.com/econ-ark/elsarticle-myst](https://github.com/econ-ark/elsarticle-myst) |
 | **Source** | [Elsevier LaTeX Instructions](https://www.elsevier.com/authors/policies-and-guidelines/latex-instructions) |
 | **License** | Content: CC-BY-4.0 / Code: MIT / LaTeX: LPPL-1.3c |
 
@@ -70,7 +70,7 @@ abstract: |
   Your abstract text here.
 exports:
   - format: pdf
-    template: path/to/elsevier_myst_template
+    template: path/to/elsarticle-myst
     output: article.pdf
     columns: single
 ---

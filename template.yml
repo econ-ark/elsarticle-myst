@@ -11,10 +11,11 @@ source: https://www.elsevier.com/authors/policies-and-guidelines/latex-instructi
 thumbnail: ./thumbnail.png
 authors:
   - name: Alan Lujan
-    website: https://alanlujan91.github.io
+    website: https://econ-ark.org
     github: alanlujan91
     affiliations:
       - Johns Hopkins University
+      - Econ-ARK
 tags:
   - paper
   - journal
