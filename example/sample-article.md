@@ -1,6 +1,6 @@
 ---
 title: A Comprehensive Guide to MyST Markdown with Elsevier CAS Templates
-subtitle: Showcasing All Available Features
+subtitle: Feature Reference and Template Examples
 short_title: MyST & Elsevier Guide
 description: A comprehensive template demonstrating MyST Markdown integration with Elsevier CAS journal templates.
 date: 2026-01-08
@@ -450,6 +450,35 @@ function quadratic_formula(a, b, c)
 end
 ```
 
+# Algorithms
+
+For algorithm pseudocode, use raw LaTeX blocks with the `algorithm` and `algorithmic` environments:
+
+```{raw} latex
+\begin{algorithm}
+\caption{Binary Search}\label{alg:binary-search}
+\begin{algorithmic}[1]
+\Require Sorted array $A[1..n]$, target value $x$
+\Ensure Index $i$ such that $A[i] = x$, or $-1$ if not found
+\State $\textit{low} \gets 1$
+\State $\textit{high} \gets n$
+\While{$\textit{low} \leq \textit{high}$}
+    \State $\textit{mid} \gets \lfloor (\textit{low} + \textit{high}) / 2 \rfloor$
+    \If{$A[\textit{mid}] = x$}
+        \State \textbf{return} $\textit{mid}$
+    \ElsIf{$A[\textit{mid}] < x$}
+        \State $\textit{low} \gets \textit{mid} + 1$
+    \Else
+        \State $\textit{high} \gets \textit{mid} - 1$
+    \EndIf
+\EndWhile
+\State \textbf{return} $-1$
+\end{algorithmic}
+\end{algorithm}
+```
+
+The algorithm environment provides a float with caption and label for cross-referencing.
+
 # Tables
 
 ## Markdown Tables
@@ -563,6 +592,7 @@ This document demonstrates various cross-reference capabilities:
 - **Figures**: {ref}`fig-sample`
 - **Tables**: {ref}`tbl:methods`, {ref}`tbl:dataset`, {ref}`tbl:csv`
 - **Code**: {ref}`code-quadratic`, {ref}`code-julia`
+- **Algorithms**: Algorithm 1 (via raw LaTeX `\ref{alg:binary-search}`)
 - **Theorems**: {prf:ref}`thm-squeeze`, {prf:ref}`thm-ftc`
 - **Definitions**: {prf:ref}`def-convergent`, {prf:ref}`def-continuous`
 - **Lemmas**: {prf:ref}`lem-triangle`

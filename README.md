@@ -29,10 +29,11 @@ A comprehensive MyST Markdown template for Elsevier journal articles using the C
 
 - **MyST Markdown**: Latest version (install via `pip install mystmd` or `npm install -g mystmd`)
 - **LaTeX Distribution**: TeX Live 2022+ or MiKTeX 22.1+ (required for PDF export)
-  - **Important**: This template requires LaTeX3 (2022 or later) due to use of modern LaTeX3 commands
-  - Earlier versions may fail with `vbox_unpack_drop:N` errors
+- **XeLaTeX**: Recommended for Unicode support (included in standard TeX distributions)
 - **Python**: 3.8+ (if using pip installation)
 - **Node.js**: 16+ (if using npm installation)
+
+> **⚠️ LaTeX3 Required**: This template uses modern LaTeX3 commands (`vbox_unpack_drop:N`) introduced in 2022. Earlier LaTeX distributions will fail with cryptic errors. If you encounter `vbox_unpack_drop:N` errors, upgrade your TeX distribution to TeX Live 2022+ or MiKTeX 22.1+.
 
 ## Quick Start
 
@@ -196,6 +197,60 @@ Your abstract here.
 | `cas-model2-names.bst` | Bibliography style (author-year & numeric) |
 | `example/` | Complete working example |
 
+## Supported LaTeX Packages and Environments
+
+The template includes comprehensive package support for scientific writing:
+
+### Mathematics (amsmath, mathtools)
+- `align`, `align*`, `alignat`, `flalign` - Aligned equations
+- `gather`, `gather*` - Centered equation groups
+- `multline`, `multline*` - Multi-line equations
+- `subequations` - Equation sub-numbering
+- `pmatrix`, `bmatrix`, `vmatrix`, `Vmatrix` - Matrix brackets
+- `pmatrix*`, `bmatrix*`, `vmatrix*`, `Vmatrix*` - Matrix brackets with alignment (mathtools)
+
+### Figures (graphicx, caption, subcaption, wrapfig, rotating)
+- `figure`, `figure*` - Standard figures
+- `subfigure` - Sub-figures with individual captions
+- `wrapfigure` - Text-wrapped figures
+- `sidewaysfigure` - Rotated full-page figures
+
+### Tables (array, booktabs, tabularx, longtable, threeparttable)
+- `table`, `table*` - Standard tables
+- `tabular` - Basic table environment
+- `tabularx` - Tables with auto-width columns
+- `longtable` - Multi-page tables
+- `threeparttable` + `tablenotes` - Tables with footnotes
+- `sidewaystable` - Rotated full-page tables
+
+### Lists (enumitem)
+- `enumerate` - Numbered lists
+- `itemize` - Bulleted lists
+- `description` - Description lists
+
+### Quotations (csquotes)
+- `quote`, `quotation` - Standard quote blocks
+- `displayquote` - Enhanced quotations with attribution
+
+### Algorithms (algorithm, algorithmicx)
+- `algorithm` - Algorithm float environment
+- `algorithmic` - Algorithm pseudocode (via algpseudocode)
+
+### Page Layout (changepage, pdflscape)
+- `adjustwidth` - Adjust margins
+- `landscape` - Landscape page orientation
+- `minipage`, `center`, `centering` - Layout control
+
+### Boxes (adjustbox)
+- `adjustbox` - Scale, trim, and adjust content
+
+### Additional Packages
+- `hyperref` - Hyperlinks and PDF metadata
+- `xcolor`, `colortbl` - Colors in text and tables
+- `multirow`, `makecell` - Complex table cells
+- `natbib` - Citation management
+- `csquotes` - Context-sensitive quotation marks
+
 ## Example
 
 See the `example/` directory for a comprehensive demonstration including:
@@ -215,12 +270,6 @@ Build the example:
 cd example
 myst build sample-article.md --pdf
 ```
-
-## Requirements
-
-- [MyST Markdown](https://mystmd.org/) ≥ 1.0
-- LaTeX distribution (TeX Live, MiKTeX, etc.)
-- XeLaTeX (for Unicode support)
 
 ## Credits
 

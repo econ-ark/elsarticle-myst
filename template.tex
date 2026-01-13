@@ -13,6 +13,10 @@
 \usepackage[authoryear,longnamesfirst]{natbib}
 [# endif #]
 
+%% Algorithm support
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+
 [- IMPORTS -]
 
 \begin{document}
@@ -39,21 +43,14 @@
 \tnotetext[1]{[-parts.title_note-]}
 [# endif #]
 
-%% Author metadata: cleaner comma-separated output using inline conditionals
-%% NOTE: URLs should be validated before reaching this template to prevent LaTeX injection
+%% Author metadata with optional attributes (ORCID, social links, etc.)
 [# for author in doc.authors #]
-\author[[- author.affiliations | join(",", "index") -]]{[-author.name-]}
-[#- if author.orcid or author.deceased or author.facebook or author.linkedin -#]
-[
-[#- if author.orcid -#]orcid=[-author.orcid-][#- endif -#]
-[#- if author.orcid and (author.deceased or author.facebook or author.linkedin) -#],[#- endif -#]
-[#- if author.deceased -#]deceased[#- endif -#]
-[#- if author.deceased and (author.facebook or author.linkedin) -#],[#- endif -#]
-[#- if author.facebook -#]facebook=[-author.facebook-][#- endif -#]
-[#- if author.facebook and author.linkedin -#],[#- endif -#]
-[#- if author.linkedin -#]linkedin=[-author.linkedin-][#- endif -#]
-]
-[#- endif -#]
+[#- set author_opts = '' -#]
+[#- if author.orcid -#][#- set author_opts = 'orcid=' ~ author.orcid -#][#- endif -#]
+[#- if author.deceased -#][#- set author_opts = author_opts ~ (',' if author_opts else '') ~ 'deceased' -#][#- endif -#]
+[#- if author.facebook -#][#- set author_opts = author_opts ~ (',' if author_opts else '') ~ 'facebook=' ~ author.facebook -#][#- endif -#]
+[#- if author.linkedin -#][#- set author_opts = author_opts ~ (',' if author_opts else '') ~ 'linkedin=' ~ author.linkedin -#][#- endif -#]
+\author[[- author.affiliations | join(",", "index") -]]{[-author.name-]}[# if author_opts #][[- author_opts -]][# endif #]
 [# if author.corresponding #]
 \cormark[[-loop.index-]]
 [# endif #]
@@ -75,7 +72,8 @@
 [# endfor #]
 
 [# for affiliation in doc.affiliations #]
-\affiliation[[-affiliation.index-]]{organization={[-affiliation.name-]}[# if affiliation.address #],
+\affiliation[[-affiliation.index-]]{organization={[-affiliation.name-]}[# if affiliation.department #],
+            department={[-affiliation.department-]}[# endif #][# if affiliation.address #],
             addressline={[-affiliation.address-]}[# endif #][# if affiliation.city #],
             city={[-affiliation.city-]}[# endif #][# if affiliation.postal_code #],
             postcode={[-affiliation.postal_code-]}[# endif #][# if affiliation.state #],

@@ -25,77 +25,76 @@ tags:
 parts:
   - id: abstract
     description: >
-      A concise summary of the article's main findings and conclusions
-      (100-300 words). Takes precedence over doc.abstract if both are provided.
-      Use this for abstracts with formatting; use doc.abstract for plain text.
+      A concise summary of the article's main findings and conclusions (100-300
+      words). Takes precedence over doc.abstract if both are provided. Use this
+      for abstracts with formatting; use doc.abstract for plain text.
   - id: highlights
     description: >
-      Research highlights as raw LaTeX \\item entries (3-5 items).
-      Use when you need raw LaTeX control. Define with +++ block syntax.
-      For simpler YAML-based highlights, use keypoints in frontmatter instead.
+      Research highlights as raw LaTeX \\item entries (3-5 items). Use when you
+      need raw LaTeX control. Define with +++ block syntax. For simpler
+      YAML-based highlights, use keypoints in frontmatter instead.
   - id: keypoints
     description: >
-      Research highlights as bullet points (3-5 items). Simpler alternative
-      to highlights part. Define as a YAML list in frontmatter. Each item
-      becomes a LaTeX \\item automatically.
+      Research highlights as bullet points (3-5 items). Simpler alternative to
+      highlights part. Define as a YAML list in frontmatter. Each item becomes a
+      LaTeX \\item automatically.
   - id: graphical_abstract
     description: >
-      A graphical abstract as raw LaTeX content.
-      Alternatively, use the graphical_abstract option with a file path.
+      A graphical abstract as raw LaTeX content. Alternatively, use the
+      graphical_abstract option with a file path.
   - id: appendix
     description: >
-      Appendix content. Sections within will be labeled A, B, C, etc.
-      Can reference an external markdown file via parts.appendix in frontmatter.
+      Appendix content. Sections within will be labeled A, B, C, etc. Can
+      reference an external markdown file via parts.appendix in frontmatter.
   - id: title_note
     description: >
       A footnote attached to the title, e.g., funding acknowledgment or
       conference presentation note.
   - id: note
     description: >
-      A general note without a number that appears in the frontmatter.
-      Useful for disclaimers or additional context.
+      A general note without a number that appears in the frontmatter. Useful
+      for disclaimers or additional context.
   - id: biography
     description: >
-      Author biographies as raw LaTeX. Use \\bio{} and \\endbio commands.
-      For photo, use \\bio{path/to/photo}.
+      Author biographies as raw LaTeX. Use \\bio{} and \\endbio commands. For
+      photo, use \\bio{path/to/photo}.
 doc:
   - id: title
     required: true
   - id: subtitle
-    description: >
+    description: |
       Article subtitle displayed below the main title.
   - id: short_title
-    description: >
+    description: |
       Short title for running header (recommended max 50 characters).
   - id: authors
     required: true
     description: >
       List of authors. Each author supports: name, orcid, email, url,
       corresponding (boolean), roles (CRediT), equal_contributor (boolean),
-      deceased (boolean), note (string for author-specific footnote),
-      and social media links.
+      deceased (boolean), note (string for author-specific footnote), and social
+      media links.
 
-      Social media fields:
-      - twitter: Username only (e.g., "username", not full URL)
-      - facebook: Full profile URL (e.g., "https://facebook.com/username")
+      Social media fields: - twitter: Username only (e.g., "username", not full
+      URL) - facebook: Full profile URL (e.g., "https://facebook.com/username")
       - linkedin: Full profile URL (e.g., "https://linkedin.com/in/username")
 
       Note: URLs should be properly formatted and validated before use.
       Improperly formatted URLs may cause LaTeX compilation errors.
   - id: affiliations
     description: >
-      List of affiliations with: name/institution, department, address,
-      city, state, postal_code, country, ror, isni, ringgold.
+      List of affiliations with: name/institution, department, address, city,
+      state, postal_code, country, ror, isni, ringgold.
   - id: abstract
     description: >
       Article abstract as a simple string (100-300 words). Either this or
-      parts.abstract is required. If parts.abstract is also provided, it
-      takes precedence.
+      parts.abstract is required. If parts.abstract is also provided, it takes
+      precedence.
   - id: keywords
-    description: >
+    description: |
       Article keywords (typically 3-6). Will be joined with \\sep in LaTeX.
   - id: bibliography
-    description: >
+    description: |
       Path(s) to BibTeX bibliography files.
 options:
   - id: columns
@@ -136,16 +135,24 @@ files:
   - thumbnails/cas-twitter.jpeg
   - thumbnails/cas-url.jpeg
 packages:
+  - adjustbox
+  - algorithm
+  - algorithmicx
+  - algpseudocode
   - amsfonts
   - amsmath
   - amssymb
   - array
   - balance
   - booktabs
+  - caption
   - cas-common
+  - changepage
   - charis
   - colortbl
+  - csquotes
   - dcolumn
+  - enumitem
   - etoolbox
   - expl3
   - fontenc
@@ -154,13 +161,20 @@ packages:
   - hyperref
   - inconsolata
   - l3regex
+  - longtable
   - makecell
+  - mathtools
   - moreverb
   - multirow
   - natbib
+  - pdflscape
+  - rotating
   - setspace
   - stfloats
   - stix
+  - subcaption
+  - tabularx
+  - threeparttable
   - wrapfig
   - xcolor
   - xparse
