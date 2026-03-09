@@ -61,8 +61,8 @@ parts:
       photo, use \\bio{path/to/photo}.
   - id: acknowledgments
     description: >
-      Acknowledgments section, rendered as a first-page footnote (standard for
-      economics journals). Content appears at bottom of title page.
+      Acknowledgments section, rendered as a first-page unnumbered footnote.
+      Content appears at bottom of title page.
 doc:
   - id: title
     required: true
@@ -163,7 +163,7 @@ packages:
   - fontenc
   - fontspec
   - footmisc
-  - geometry
+  - iftex
   - graphicx
   - hyperref
   - inconsolata

@@ -1502,31 +1502,42 @@
 \tex_gdef:D \abstractname { A\,B\,S\,T\,R\,A\,C\,T }
 \tl_new:N \l_stm_abs_title_tl
 \box_new:N \g_stm_abs_box
+\dim_new:N \g_stm_keybox_ht_dim
 
 \NewDocumentEnvironment { Abstract } { o }
 {
-%  \global\setbox \g_stm_abs_box = \vtop \bgroup 
+%  \global\setbox \g_stm_abs_box = \vtop \bgroup
 %  \hsize = .65 \textwidth \parindent \z@
   \group_begin:
   \IfNoValueTF { #1 } { }
   { \tex_gdef:D \abstractname { #1 } }
   \parindent \z@
   \box_if_empty:NTF \g_stm_key_box
-  { \leftskip = .35 \textwidth }
+  { \leftskip = .35 \textwidth \dim_gzero:N \g_stm_keybox_ht_dim }
   {
     \dim_set:Nn \l_tmpa_dim { \box_ht:N \g_stm_key_box }
     \dim_add:Nn \l_tmpa_dim { \box_dp:N \g_stm_key_box }
+    \dim_gset_eq:NN \g_stm_keybox_ht_dim \l_tmpa_dim
     \leftskip .35\textwidth
     \hspace*{-.35 \textwidth }
-    \noindent\hbox_to_wd:nn {  \z@ } { \box \g_stm_key_box } 
-    \skip_vertical:n { - \l_tmpa_dim } 
+    \noindent\hbox_to_wd:nn {  \z@ } { \box \g_stm_key_box }
+    \skip_vertical:n { - \l_tmpa_dim }
   }
   \noindent \abstractname \par
   \skip_vertical:n { -4pt}
   \noindent \rule{.65\textwidth}{.2pt}\par \footnotesize
   \ignorespaces \everypar { \parindent=1.5em }
 }
-{ \par \group_end: }
+{
+  \par
+  \dim_compare:nNnT { \g_stm_keybox_ht_dim } > { \z@ }
+  {
+    \dim_set:Nn \l_tmpa_dim { \g_stm_keybox_ht_dim - 5\baselineskip }
+    \dim_compare:nNnT { \l_tmpa_dim } > { \z@ }
+    { \skip_vertical:n { \l_tmpa_dim } }
+  }
+  \group_end:
+}
 
 \NewDocumentEnvironment { PrelimsAbstract } { O{} }
   {\parindent=0pt 
@@ -1875,9 +1886,10 @@
   % \iow_term:x { ...~[tmpa-noteht:~ \dim_use:N \g_tmpa_dim ] }
   % \dim_gsub:Nn \g_tmpa_dim { \box_dp:N \g_stm_notes_box }
   % \iow_term:x { ...~[tmpa-notedp:~ \dim_use:N \g_tmpa_dim ] }
-  \dim_gsub:Nn \g_tmpa_dim { \g_tmpb_dim }  
+  \dim_gsub:Nn \g_tmpa_dim { \g_tmpb_dim }
   \vbox_set_split_to_ht:NNn \g_tmpb_box \g_stm_front_box { \g_tmpa_dim }
-  \noindent \vbox_unpack_drop:N \g_tmpb_box 
+  % vbox_unpack_drop:N requires LaTeX3 2022+ (replaces removed vbox_unpack_clear:N)
+  \noindent \vbox_unpack_drop:N \g_tmpb_box
   \printFirstPageNotes
   \dim_gzero:N \g_tmpa_dim
   \dim_gset:Nn \g_tmpa_dim { \box_ht:N \g_stm_front_box }

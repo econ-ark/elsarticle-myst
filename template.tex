@@ -1,6 +1,6 @@
-%% Elsevier CAS Template for MyST
+%% Elsevier CAS Template for MyST (single and double column)
 %% Based on cas-sc-template.tex / cas-dc-template.tex
-%% Copyright 2019-2024 Elsevier Ltd (LPPL-1.3c)
+%% Original copyright 2019-2024 Elsevier Ltd (LPPL-1.3c)
 
 [# if options.columns == 'double' #]
 \documentclass[a4paper,fleqn[# if options.longmktitle #],longmktitle[# endif #]]{cas-dc}
@@ -8,8 +8,11 @@
 \documentclass[a4paper,fleqn[# if options.longmktitle #],longmktitle[# endif #]]{cas-sc}
 [# endif #]
 
-%% Unicode support for XeLaTeX
-\usepackage{fontspec}
+%% Unicode support (XeLaTeX / LuaLaTeX only)
+\usepackage{iftex}
+\iftutex
+  \usepackage{fontspec}
+\fi
 
 [# if options.citation_style == 'numbers' #]
 \usepackage[numbers]{natbib}
@@ -34,6 +37,7 @@
 \shorttitle{[-doc.title-]}
 [# endif #]
 
+%% Extract surname as last word from full name (handles middle initials correctly)
 [# if doc.authors #]
 \shortauthors{[# for author in doc.authors #][-author.name.split(" ") | last-][# if not loop.last #], [# endif #][# endfor #]}
 [# endif #]

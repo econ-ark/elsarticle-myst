@@ -71,17 +71,15 @@
 \colorlet{hscolor}{DarkSlateGrey}
 \hypersetup{%
   pdfcreator={LaTeX3; cas-sc.cls; hyperref.sty},
-  pdfproducer={pdfTeX;},
+  pdfproducer={},
   linkcolor={hscolor},
   urlcolor={hscolor},
   citecolor={hscolor},
   filecolor={hscolor},
   menucolor={hscolor},
 }
-% \AtEndDocument{\hypersetup
-%   {pdftitle={\csuse{__short_title:}},
-%   pdfauthor={\csuse{__short_authors:}}}}
- 
+
+
  \let\comma\@empty
 \let\tnotesep\@empty
 \let\@title\@empty

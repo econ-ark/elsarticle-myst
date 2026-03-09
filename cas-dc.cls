@@ -73,7 +73,7 @@
   pdftitle={\csuse{__short_title:}},
   pdfauthor={\csuse{__short_authors:}},
   pdfcreator={LaTeX3; cas-dc.cls; hyperref.sty},
-  pdfproducer={pdfTeX;},
+  pdfproducer={},
   linkcolor={hscolor},
   urlcolor={hscolor},
   citecolor={hscolor},
