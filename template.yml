@@ -59,9 +59,9 @@ parts:
     description: >
       Author biographies as raw LaTeX. Use \\bio{} and \\endbio commands. For
       photo, use \\bio{path/to/photo}.
-  - id: acknowledgements
+  - id: acknowledgments
     description: >
-      Acknowledgements section, rendered as a first-page footnote (standard for
+      Acknowledgments section, rendered as a first-page footnote (standard for
       economics journals). Content appears at bottom of title page.
 doc:
   - id: title

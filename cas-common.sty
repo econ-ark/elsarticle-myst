@@ -2108,7 +2108,7 @@
   unknown   .code:n      = { 
                               \ifstrempty { #1 } 
                                  {
-                                   \tl_set:Nn \l_tbl_pos_tl { \l_keys_key_tl }
+                                   \tl_set:Nx \l_tbl_pos_tl { \l_keys_key_tl }
                                  }
                                  {
                                    \l_keys_key_tl=#1
@@ -2204,7 +2204,7 @@
   unknown   .code:n      = { 
                               \ifstrempty { #1 } 
                                  {
-                                   \tl_set:Nn \l_fig_pos_tl { \l_keys_key_tl }
+                                   \tl_set:Nx \l_fig_pos_tl { \l_keys_key_tl }
                                  } 
                                  {
                                    \l_keys_key_tl=#1,
