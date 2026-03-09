@@ -59,6 +59,10 @@ parts:
     description: >
       Author biographies as raw LaTeX. Use \\bio{} and \\endbio commands. For
       photo, use \\bio{path/to/photo}.
+  - id: acknowledgments
+    description: >
+      Acknowledgments section, rendered as a first-page unnumbered footnote.
+      Content appears at bottom of title page.
 doc:
   - id: title
     required: true
@@ -157,7 +161,9 @@ packages:
   - etoolbox
   - expl3
   - fontenc
+  - fontspec
   - footmisc
+  - iftex
   - graphicx
   - hyperref
   - inconsolata

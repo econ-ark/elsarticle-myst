@@ -1,11 +1,18 @@
-%% Elsevier CAS Template for MyST
-%% Supports both single column (cas-sc) and double column (cas-dc) layouts
+%% Elsevier CAS Template for MyST (single and double column)
+%% Based on cas-sc-template.tex / cas-dc-template.tex
+%% Original copyright 2019-2024 Elsevier Ltd (LPPL-1.3c)
 
 [# if options.columns == 'double' #]
 \documentclass[a4paper,fleqn[# if options.longmktitle #],longmktitle[# endif #]]{cas-dc}
 [# else #]
 \documentclass[a4paper,fleqn[# if options.longmktitle #],longmktitle[# endif #]]{cas-sc}
 [# endif #]
+
+%% Unicode support (XeLaTeX / LuaLaTeX only)
+\usepackage{iftex}
+\iftutex
+  \usepackage{fontspec}
+\fi
 
 [# if options.citation_style == 'numbers' #]
 \usepackage[numbers]{natbib}
@@ -21,11 +28,13 @@
 
 \begin{document}
 \let\WriteBookmarks\relax
-\def\floatpagepagefraction{1}
-\def\textpagefraction{.001}
+\def\floatpagefraction{1}
+\def\textfraction{.001}
 
 [# if doc.short_title #]
 \shorttitle{[-doc.short_title-]}
+[# else #]
+\shorttitle{[-doc.title-]}
 [# endif #]
 
 %% Extract surname as last word from full name (handles middle initials correctly)
@@ -43,7 +52,6 @@
 \tnotetext[1]{[-parts.title_note-]}
 [# endif #]
 
-%% Author metadata with optional attributes (ORCID, social links, etc.)
 [# for author in doc.authors #]
 [#- set author_opts = '' -#]
 [#- if author.orcid -#][#- set author_opts = 'orcid=' ~ author.orcid -#][#- endif -#]
@@ -72,7 +80,8 @@
 [# endfor #]
 
 [# for affiliation in doc.affiliations #]
-\affiliation[[-affiliation.index-]]{organization={[-affiliation.name-]}[# if affiliation.department #],
+[#- set has_address = affiliation.department or affiliation.address or affiliation.city or affiliation.postal_code or affiliation.state or affiliation.country -#]
+\affiliation[[-affiliation.index-]]{organization={[-affiliation.name-]}[# if not has_address #],op={}[# endif #][# if affiliation.department #],
             department={[-affiliation.department-]}[# endif #][# if affiliation.address #],
             addressline={[-affiliation.address-]}[# endif #][# if affiliation.city #],
             city={[-affiliation.city-]}[# endif #][# if affiliation.postal_code #],
@@ -92,6 +101,10 @@
 
 [# if doc.authors | selectattr("equal_contributor") | list | length > 1 #]
 \nonumnote{These authors contributed equally to this work.}
+[# endif #]
+
+[# if parts.acknowledgments #]
+\nonumnote{[-parts.acknowledgments-]}
 [# endif #]
 
 [# if parts.note #]

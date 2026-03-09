@@ -17,12 +17,6 @@
 
 % $Id: cas-common.sty 94 2024-05-04 09:27:09Z rishi $
 
-%% MyST Markdown Template Modifications:
-%% - Requires LaTeX3 (TeX Live 2022+ or MiKTeX 22.1+) for vbox_unpack_drop:N command
-%% - Added keyword box height tracking to prevent abstract/keyword overlap
-%% - Updated deprecated vbox_unpack_clear:N to vbox_unpack_drop:N (lines ~1897-1915)
-%% For full changes, see: https://github.com/econ-ark/elsarticle-myst
-
  \def\RCSfile{cas-common}%
  \def\RCSversion{2.4}%
  \def\RCSdate{2024/05/04}%
@@ -1508,13 +1502,11 @@
 \tex_gdef:D \abstractname { A\,B\,S\,T\,R\,A\,C\,T }
 \tl_new:N \l_stm_abs_title_tl
 \box_new:N \g_stm_abs_box
-%% MyST fix: Track keyword box height to prevent content overlap when
-%% keywords are taller than the abstract (common with long keyword lists)
 \dim_new:N \g_stm_keybox_ht_dim
 
 \NewDocumentEnvironment { Abstract } { o }
 {
-%  \global\setbox \g_stm_abs_box = \vtop \bgroup 
+%  \global\setbox \g_stm_abs_box = \vtop \bgroup
 %  \hsize = .65 \textwidth \parindent \z@
   \group_begin:
   \IfNoValueTF { #1 } { }
@@ -1523,13 +1515,13 @@
   \box_if_empty:NTF \g_stm_key_box
   { \leftskip = .35 \textwidth \dim_gzero:N \g_stm_keybox_ht_dim }
   {
-    \dim_gset:Nn \l_tmpa_dim { \box_ht:N \g_stm_key_box }
-    \dim_gadd:Nn \l_tmpa_dim { \box_dp:N \g_stm_key_box }
-    \dim_gset_eq:NN \g_stm_keybox_ht_dim \l_tmpa_dim  % Save for end-of-abstract check
+    \dim_set:Nn \l_tmpa_dim { \box_ht:N \g_stm_key_box }
+    \dim_add:Nn \l_tmpa_dim { \box_dp:N \g_stm_key_box }
+    \dim_gset_eq:NN \g_stm_keybox_ht_dim \l_tmpa_dim
     \leftskip .35\textwidth
     \hspace*{-.35 \textwidth }
-    \noindent\hbox_to_wd:nn {  \z@ } { \box \g_stm_key_box } 
-    \skip_vertical:n { - \l_tmpa_dim } 
+    \noindent\hbox_to_wd:nn {  \z@ } { \box \g_stm_key_box }
+    \skip_vertical:n { - \l_tmpa_dim }
   }
   \noindent \abstractname \par
   \skip_vertical:n { -4pt}
@@ -1538,9 +1530,6 @@
 }
 {
   \par
-  %% MyST fix: When keywords extend below the abstract, add vertical space
-  %% to prevent the following content from overlapping the keyword box.
-  %% The 5\baselineskip accounts for the abstract title and rule spacing.
   \dim_compare:nNnT { \g_stm_keybox_ht_dim } > { \z@ }
   {
     \dim_set:Nn \l_tmpa_dim { \g_stm_keybox_ht_dim - 5\baselineskip }
@@ -1899,8 +1888,8 @@
   % \iow_term:x { ...~[tmpa-notedp:~ \dim_use:N \g_tmpa_dim ] }
   \dim_gsub:Nn \g_tmpa_dim { \g_tmpb_dim }
   \vbox_set_split_to_ht:NNn \g_tmpb_box \g_stm_front_box { \g_tmpa_dim }
-  %% Note: vbox_unpack_drop:N replaces deprecated vbox_unpack_clear:N (LaTeX3 2022+)
-  \noindent \vbox_unpack_drop:N \g_tmpb_box 
+  % vbox_unpack_drop:N requires LaTeX3 2022+ (replaces removed vbox_unpack_clear:N)
+  \noindent \vbox_unpack_drop:N \g_tmpb_box
   \printFirstPageNotes
   \dim_gzero:N \g_tmpa_dim
   \dim_gset:Nn \g_tmpa_dim { \box_ht:N \g_stm_front_box }
@@ -2131,12 +2120,12 @@
   unknown   .code:n      = { 
                               \ifstrempty { #1 } 
                                  {
-                                   \tl_set:Nn \l_fig_pos_tl { \l_keys_key_tl }
-                                 } 
+                                   \tl_set:Nx \l_tbl_pos_tl { \l_keys_key_tl }
+                                 }
                                  {
                                    \l_keys_key_tl=#1
-                                 }  
-                           }  
+                                 }
+                           }
 }
 
 \cs_set:Npn \__reset_tbl:
@@ -2227,7 +2216,7 @@
   unknown   .code:n      = { 
                               \ifstrempty { #1 } 
                                  {
-                                   \tl_set:Nn \l_fig_pos_tl { \l_keys_key_tl }
+                                   \tl_set:Nx \l_fig_pos_tl { \l_keys_key_tl }
                                  } 
                                  {
                                    \l_keys_key_tl=#1,
