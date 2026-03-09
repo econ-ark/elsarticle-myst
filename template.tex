@@ -7,6 +7,9 @@
 \documentclass[a4paper,fleqn[# if options.longmktitle #],longmktitle[# endif #]]{cas-sc}
 [# endif #]
 
+%% Unicode support for XeLaTeX
+\usepackage{fontspec}
+
 [# if options.citation_style == 'numbers' #]
 \usepackage[numbers]{natbib}
 [# else #]
@@ -19,13 +22,27 @@
 
 [- IMPORTS -]
 
+%% Floats can only appear after their reference point, not before
+\usepackage{flafter}
+
 \begin{document}
+
+%% Float placement: encourage floats to stay near their definition
+%% Fractions control max float area per page; textfraction sets minimum text
+%% floatpagefraction controls when LaTeX creates float-only pages
+\renewcommand{\topfraction}{.75}
+\renewcommand{\bottomfraction}{.7}
+\renewcommand{\textfraction}{.15}
+\renewcommand{\floatpagefraction}{.8}
+\setcounter{topnumber}{4}
+\setcounter{bottomnumber}{4}
+\setcounter{totalnumber}{10}
 \let\WriteBookmarks\relax
-\def\floatpagepagefraction{1}
-\def\textpagefraction{.001}
 
 [# if doc.short_title #]
 \shorttitle{[-doc.short_title-]}
+[# else #]
+\shorttitle{[-doc.title-]}
 [# endif #]
 
 %% Extract surname as last word from full name (handles middle initials correctly)
@@ -71,8 +88,10 @@
 [# endif #]
 [# endfor #]
 
+%% op={} suppresses "missing address" warning when affiliation has only organization name
 [# for affiliation in doc.affiliations #]
-\affiliation[[-affiliation.index-]]{organization={[-affiliation.name-]}[# if affiliation.department #],
+[#- set has_address = affiliation.department or affiliation.address or affiliation.city or affiliation.postal_code or affiliation.state or affiliation.country -#]
+\affiliation[[-affiliation.index-]]{organization={[-affiliation.name-]}[# if not has_address #],op={}[# endif #][# if affiliation.department #],
             department={[-affiliation.department-]}[# endif #][# if affiliation.address #],
             addressline={[-affiliation.address-]}[# endif #][# if affiliation.city #],
             city={[-affiliation.city-]}[# endif #][# if affiliation.postal_code #],
@@ -92,6 +111,10 @@
 
 [# if doc.authors | selectattr("equal_contributor") | list | length > 1 #]
 \nonumnote{These authors contributed equally to this work.}
+[# endif #]
+
+[# if parts.acknowledgements #]
+\nonumnote{[-parts.acknowledgements-]}
 [# endif #]
 
 [# if parts.note #]

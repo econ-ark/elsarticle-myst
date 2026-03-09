@@ -1525,11 +1525,11 @@
   {
     \dim_gset:Nn \l_tmpa_dim { \box_ht:N \g_stm_key_box }
     \dim_gadd:Nn \l_tmpa_dim { \box_dp:N \g_stm_key_box }
-    \dim_gset_eq:NN \g_stm_keybox_ht_dim \l_tmpa_dim  % Save for end-of-abstract check
+    \dim_gset_eq:NN \g_stm_keybox_ht_dim \l_tmpa_dim
     \leftskip .35\textwidth
     \hspace*{-.35 \textwidth }
-    \noindent\hbox_to_wd:nn {  \z@ } { \box \g_stm_key_box } 
-    \skip_vertical:n { - \l_tmpa_dim } 
+    \noindent\hbox_to_wd:nn { \z@ } { \box \g_stm_key_box }
+    \skip_vertical:n { - \l_tmpa_dim }
   }
   \noindent \abstractname \par
   \skip_vertical:n { -4pt}
@@ -1538,15 +1538,6 @@
 }
 {
   \par
-  %% MyST fix: When keywords extend below the abstract, add vertical space
-  %% to prevent the following content from overlapping the keyword box.
-  %% The 5\baselineskip accounts for the abstract title and rule spacing.
-  \dim_compare:nNnT { \g_stm_keybox_ht_dim } > { \z@ }
-  {
-    \dim_set:Nn \l_tmpa_dim { \g_stm_keybox_ht_dim - 5\baselineskip }
-    \dim_compare:nNnT { \l_tmpa_dim } > { \z@ }
-    { \skip_vertical:n { \l_tmpa_dim } }
-  }
   \group_end:
 }
 
@@ -1834,7 +1825,7 @@
     \noindent \ignorespaces
     \file_if_exist:nT { \jobname.abs } { \file_input:n { \jobname.abs } }
   \end{Abstract}
-  \dashrule{6pt}{3pt}
+  \dashrule{2pt}{0pt}
   \bool_if:NTF \g_stm_breakafter_abstract_bool
   { \newpage } { }
 }
@@ -1869,7 +1860,7 @@
     \noindent \ignorespaces
     \file_if_exist:nT { \jobname.abs } { \file_input:n { \jobname.abs } }
   \end{Abstract}
-  \dashrule{3pt}{3pt}
+  \dashrule{2pt}{0pt}
   }
   \vbox_gset:Nn \g_stm_notes_box
   {  \cs_set_eq:NN \footnotetext \__fn_text:n  \printFirstPageNotes }
@@ -2128,20 +2119,22 @@
   abovetbl  .skip_set:N  =  \l_tbl_abovetbl_skip ,
   belowtbl  .skip_set:N  =  \l_tbl_belowtbl_skip ,
   full      .bool_gset:N =  \g_tbl_full_bool ,
-  unknown   .code:n      = { 
-                              \ifstrempty { #1 } 
+  unknown   .code:n      = {
+                              \ifstrempty { #1 }
                                  {
-                                   \tl_set:Nn \l_fig_pos_tl { \l_keys_key_tl }
-                                 } 
+                                   % APPEND position chars instead of replacing (fixed: was l_fig_pos_tl)
+                                   \tl_put_right:Nn \l_tbl_pos_tl { \l_keys_key_tl }
+                                 }
                                  {
                                    \l_keys_key_tl=#1
-                                 }  
-                           }  
+                                 }
+                           }
 }
 
 \cs_set:Npn \__reset_tbl:
 {
-  \tl_set:Nx \l_tbl_pos_tl { t }
+  % Start empty; will be filled by position chars from argument
+  \tl_set:Nn \l_tbl_pos_tl { }
   \tl_set:Nx \l_tbl_cols_tl { 1 }
   \tl_set:Nn \l_tbl_align_tl { \centering }
   \skip_set:Nn \l_tbl_abovecap_skip { 6pt }
@@ -2157,6 +2150,8 @@
   \bool_gset_false:N \g_tbl_full_bool
   \dim_set:Nn \l_tbl_width_dim { \linewidth }
   \keys_set:nn { cas / tbl } { #1 }
+  % Force !htbp position for all tables (ignore any position from argument)
+  \tl_set:Nn \l_tbl_pos_tl { !htbp }
   \csxdef{fps@table}{\l_tbl_pos_tl}
   \csgdef{tblwidth}{\dim_use:N \l_tbl_width_dim}
   \cs_set_eq:NN \@makecaption \__make_tbl_caption:nn 
@@ -2224,20 +2219,22 @@
   abovefig  .skip_set:N  =  \l_fig_abovefig_skip ,
   belowfig  .skip_set:N  =  \l_fig_belowfig_skip ,
   full      .bool_gset:N =  \g_fig_full_bool ,
-  unknown   .code:n      = { 
-                              \ifstrempty { #1 } 
+  unknown   .code:n      = {
+                              \ifstrempty { #1 }
                                  {
-                                   \tl_set:Nn \l_fig_pos_tl { \l_keys_key_tl }
-                                 } 
+                                   % APPEND position chars instead of replacing
+                                   \tl_put_right:Nn \l_fig_pos_tl { \l_keys_key_tl }
+                                 }
                                  {
                                    \l_keys_key_tl=#1,
-                                 }  
-                           }  
+                                 }
+                           }
 }
 
 \cs_set:Npn \__reset_fig:
 {
-  \tl_set:Nx \l_fig_pos_tl { t }
+  % Start empty; will be filled by position chars from argument
+  \tl_set:Nn \l_fig_pos_tl { }
   \tl_set:Nx \l_fig_cols_tl { 1 }
   \tl_set:Nn \l_fig_align_tl { \raggedleft }
   \skip_set:Nn \l_fig_abovecap_skip { 6pt }
@@ -2249,10 +2246,12 @@
 
 \RenewDocumentEnvironment { figure } { O{} }
   {
-    \__reset_fig: 
+    \__reset_fig:
     \bool_gset_false:N \g_fig_full_bool
     \dim_set:Nn \l_fig_width_dim { \linewidth }
     \keys_set:nn { cas / fig } { #1 }
+    % Force !htbp position for all figures (ignore any position from argument)
+    \tl_set:Nn \l_fig_pos_tl { !htbp }
     \csxdef{fps@figure}{\l_fig_pos_tl}
     \csgdef{figwidth}{\dim_use:N \l_fig_width_dim}
     \cs_set_eq:NN \@makecaption \__make_fig_caption:nn 
