@@ -1,5 +1,5 @@
 %%
-%% This is file `cas-dc.cls'.
+%% This is file `cas-sc.cls'.
 %%
 %% This file is part of the 'CAS Bundle'.
 %% ......................................
@@ -159,7 +159,7 @@
   \iow_term:x {  *********************************************************** }
 }
 
-\file_if_exist:nTF { inconsolata }
+\file_if_exist:nTF { inconsolata.sty }
 { \RequirePackage[scaled=.85]{inconsolata} }
 { \tex_gdef:D \ttdefault { cmtt } }
 

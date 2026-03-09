@@ -161,7 +161,9 @@ packages:
   - etoolbox
   - expl3
   - fontenc
+  - fontspec
   - footmisc
+  - geometry
   - graphicx
   - hyperref
   - inconsolata

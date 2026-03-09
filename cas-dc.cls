@@ -1,14 +1,14 @@
 %%
-%% This is file `cas-sc.cls'.
+%% This is file `cas-dc.cls'.
 %%
 %% This file is part of the 'CAS Bundle'.
 %% ......................................
 %% 
 %% It may be distributed under the conditions of the LaTeX Project Public
-%% License, either version 1.2 of this license or (at your option) any
+%% License, either version 1.3c of this license or (at your option) any
 %% later version.  The latest version of this license is in
 %%    http://www.latex-project.org/lppl.txt
-%% and version 1.2 or later is part of all distributions of LaTeX
+%% and version 1.3c or later is part of all distributions of LaTeX
 %% version 1999/12/01 or later.
 %% 
 %% The list of all files belonging to the 'CAS Bundle' is
@@ -72,7 +72,7 @@
 \hypersetup{%
   pdftitle={\csuse{__short_title:}},
   pdfauthor={\csuse{__short_authors:}},
-  pdfcreator={LaTeX3; cas-sc.cls; hyperref.sty},
+  pdfcreator={LaTeX3; cas-dc.cls; hyperref.sty},
   pdfproducer={pdfTeX;},
   linkcolor={hscolor},
   urlcolor={hscolor},
@@ -91,7 +91,7 @@
 \RequirePackage{cas-common}
 
 %
-% Specific to Single Column
+% Specific to Double Column
 %
 \ExplSyntaxOn
 

@@ -1,5 +1,6 @@
 %% Elsevier CAS Template for MyST
-%% Supports both single column (cas-sc) and double column (cas-dc) layouts
+%% Based on cas-sc-template.tex / cas-dc-template.tex
+%% Copyright 2019-2024 Elsevier Ltd (LPPL-1.3c)
 
 [# if options.columns == 'double' #]
 \documentclass[a4paper,fleqn[# if options.longmktitle #],longmktitle[# endif #]]{cas-dc}
@@ -22,22 +23,10 @@
 
 [- IMPORTS -]
 
-%% Floats can only appear after their reference point, not before
-\usepackage{flafter}
-
 \begin{document}
-
-%% Float placement: encourage floats to stay near their definition
-%% Fractions control max float area per page; textfraction sets minimum text
-%% floatpagefraction controls when LaTeX creates float-only pages
-\renewcommand{\topfraction}{.75}
-\renewcommand{\bottomfraction}{.7}
-\renewcommand{\textfraction}{.15}
-\renewcommand{\floatpagefraction}{.8}
-\setcounter{topnumber}{4}
-\setcounter{bottomnumber}{4}
-\setcounter{totalnumber}{10}
 \let\WriteBookmarks\relax
+\def\floatpagefraction{1}
+\def\textfraction{.001}
 
 [# if doc.short_title #]
 \shorttitle{[-doc.short_title-]}
@@ -45,7 +34,6 @@
 \shorttitle{[-doc.title-]}
 [# endif #]
 
-%% Extract surname as last word from full name (handles middle initials correctly)
 [# if doc.authors #]
 \shortauthors{[# for author in doc.authors #][-author.name.split(" ") | last-][# if not loop.last #], [# endif #][# endfor #]}
 [# endif #]
@@ -60,7 +48,6 @@
 \tnotetext[1]{[-parts.title_note-]}
 [# endif #]
 
-%% Author metadata with optional attributes (ORCID, social links, etc.)
 [# for author in doc.authors #]
 [#- set author_opts = '' -#]
 [#- if author.orcid -#][#- set author_opts = 'orcid=' ~ author.orcid -#][#- endif -#]
@@ -88,7 +75,6 @@
 [# endif #]
 [# endfor #]
 
-%% op={} suppresses "missing address" warning when affiliation has only organization name
 [# for affiliation in doc.affiliations #]
 [#- set has_address = affiliation.department or affiliation.address or affiliation.city or affiliation.postal_code or affiliation.state or affiliation.country -#]
 \affiliation[[-affiliation.index-]]{organization={[-affiliation.name-]}[# if not has_address #],op={}[# endif #][# if affiliation.department #],
