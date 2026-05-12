@@ -38,3 +38,12 @@ node_modules/
 
 # Generated TeX exports (pdf+tex format creates these directories)
 example/exports/*_pdf_tex/
+
+# Generated compile logs (pdf format creates these directories)
+example/exports/*_pdf_logs/
+
+# Local build stdout captured by CI
+example/build.stdout.log
+
+# Patches workspace (used to regenerate PATCHES.md against new upstream)
+.patches/

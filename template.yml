@@ -1,11 +1,11 @@
 jtex: v1
 title: Elsevier CAS Template
 description: >
-  Elsevier CAS (Content Acquisition System) template for journal articles.
+  Elsevier CAS (Complex Article Style) template for journal articles.
   Supports both single column (cas-sc) and double column (cas-dc) layouts,
   author-year or numeric citation styles, ORCID identifiers, CRediT roles,
   research highlights, graphical abstracts, and keywords.
-version: 1.0.0
+version: 1.1.0
 license: LPPL-1.3c
 source: https://www.elsevier.com/authors/policies-and-guidelines/latex-instructions
 thumbnail: ./thumbnail.png
@@ -32,17 +32,20 @@ parts:
   - id: highlights
     description: >
       Research highlights as raw LaTeX \\item entries (3-5 items). Use when you
-      need raw LaTeX control. Define with +++ block syntax. For simpler
-      YAML-based highlights, use keypoints in frontmatter instead.
+      need raw LaTeX control. Define with +++ block syntax. If both parts.highlights
+      and parts.keypoints are provided, parts.highlights wins (parts.keypoints
+      is ignored). For simpler YAML-based highlights, use keypoints in frontmatter
+      instead.
   - id: keypoints
     description: >
       Research highlights as bullet points (3-5 items). Simpler alternative to
-      highlights part. Define as a YAML list in frontmatter. Each item becomes a
-      LaTeX \\item automatically.
+      parts.highlights. Define as a YAML list in frontmatter. Each item becomes
+      a LaTeX \\item automatically. Ignored if parts.highlights is also set.
   - id: graphical_abstract
     description: >
       A graphical abstract as raw LaTeX content. Alternatively, use the
-      graphical_abstract option with a file path.
+      graphical_abstract option with a file path. If both are provided,
+      parts.graphical_abstract wins.
   - id: appendix
     description: >
       Appendix content. Sections within will be labeled A, B, C, etc. Can
@@ -50,7 +53,8 @@ parts:
   - id: title_note
     description: >
       A footnote attached to the title, e.g., funding acknowledgment or
-      conference presentation note.
+      conference presentation note. Special LaTeX characters (&, %, #, _, ^, ~)
+      are escaped automatically.
   - id: note
     description: >
       A general note without a number that appears in the frontmatter. Useful
@@ -71,7 +75,8 @@ doc:
       Article subtitle displayed below the main title.
   - id: short_title
     description: |
-      Short title for running header (recommended max 50 characters).
+      Short title for running header (recommended max 50 characters). Special
+      LaTeX characters (&, %, #, _, ^, ~) are escaped automatically.
   - id: authors
     required: true
     description: >
@@ -80,16 +85,24 @@ doc:
       deceased (boolean), note (string for author-specific footnote), and social
       media links.
 
-      Social media fields: - twitter: Username only (e.g., "username", not full
-      URL) - facebook: Full profile URL (e.g., "https://facebook.com/username")
-      - linkedin: Full profile URL (e.g., "https://linkedin.com/in/username")
+      Social media fields:
+        - twitter:  Username only (e.g., "username", not full URL). Rendered as
+                    an option to the \\author macro alongside facebook/linkedin.
+        - facebook: Full profile URL (e.g., "https://facebook.com/username")
+        - linkedin: Full profile URL (e.g., "https://linkedin.com/in/username")
 
-      Note: URLs should be properly formatted and validated before use.
-      Improperly formatted URLs may cause LaTeX compilation errors.
+      Equal-contribution behavior: when two or more authors carry
+      equal_contributor: true, each marked author receives a shared \\fnmark
+      linked to a single \\fntext that reads "These authors contributed equally
+      to this work."
+
+      Special LaTeX characters in roles and notes are escaped automatically.
+      URLs are emitted verbatim; ensure they are well-formed.
   - id: affiliations
     description: >
       List of affiliations with: name/institution, department, address, city,
-      state, postal_code, country, ror, isni, ringgold.
+      state, postal_code, country, ror, isni, ringgold. Special LaTeX characters
+      in string fields are escaped automatically.
   - id: abstract
     description: >
       Article abstract as a simple string (100-300 words). Either this or
@@ -139,52 +152,16 @@ files:
   - thumbnails/cas-linkedin.jpeg
   - thumbnails/cas-twitter.jpeg
   - thumbnails/cas-url.jpeg
+# Packages listed here are those the template explicitly adds beyond what
+# cas-sc.cls / cas-dc.cls already \RequirePackage. The .cls already loads
+# graphicx, amsmath/amsfonts/amssymb, expl3, xparse, l3regex, etoolbox,
+# booktabs, makecell, multirow, array, colortbl, dcolumn, stfloats, xspace,
+# xstring, footmisc, xcolor (with [svgnames,dvipsnames]), and hyperref (with
+# [colorlinks]). Listing them again here would risk option clashes.
 packages:
-  - adjustbox
   - algorithm
-  - algorithmicx
   - algpseudocode
-  - amsfonts
-  - amsmath
-  - amssymb
-  - array
-  - balance
-  - booktabs
-  - caption
-  - cas-common
-  - changepage
-  - charis
-  - colortbl
-  - csquotes
-  - dcolumn
-  - enumitem
-  - etoolbox
-  - expl3
-  - fontenc
   - fontspec
-  - footmisc
   - iftex
-  - graphicx
-  - hyperref
-  - inconsolata
-  - l3regex
-  - longtable
-  - makecell
-  - mathtools
-  - moreverb
-  - multirow
   - natbib
-  - pdflscape
-  - rotating
-  - setspace
-  - stfloats
-  - stix
-  - subcaption
-  - tabularx
-  - threeparttable
-  - wrapfig
-  - xcolor
-  - xparse
-  - xspace
-  - xstring
 myst: v1

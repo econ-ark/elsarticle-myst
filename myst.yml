@@ -2,7 +2,7 @@ version: 1
 project:
   id: elsevier-myst-template
   title: A Comprehensive Guide to MyST Markdown with Elsevier CAS Templates
-  short_title: MyST & Elsevier Guide
+  short_title: MyST and Elsevier Guide
   description: A comprehensive template demonstrating MyST Markdown integration with Elsevier CAS journal templates, featuring typography, mathematics, proofs, tables, figures, and citations.
   date: 2026-01-08
   authors:

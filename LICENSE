@@ -1,0 +1,49 @@
+MIT License
+
+Copyright (c) 2024-2026 Alan E. Lujan
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+---
+
+This MIT license covers the MyST template configuration files in this
+repository:
+
+- `template.tex`         (Jinja/jtex template)
+- `template.yml`         (template manifest)
+- `myst.yml`             (example project config)
+- `example/*.md`         (example markdown sources)
+- `example/*.bib`        (example bibliography)
+- `README.md`, `PATCHES.md`, and other documentation
+
+The Elsevier CAS LaTeX classes and style files are NOT covered by this MIT
+license. They are licensed under the LaTeX Project Public License version
+1.3c (LPPL-1.3c). See `LICENSE-LATEX` for the full text. The files covered
+by LPPL-1.3c are:
+
+- `cas-sc.cls`
+- `cas-dc.cls`
+- `cas-common.sty`
+- `cas-model2-names.bst`
+- `thumbnails/cas-*.jpeg`
+- `original/*` (verbatim copy of the upstream Elsevier bundle)
+
+The documentation prose in this repository (README.md, PATCHES.md, example
+narrative text) is additionally available under the Creative Commons
+Attribution 4.0 International License (CC-BY-4.0). See `LICENSE-CONTENT`.

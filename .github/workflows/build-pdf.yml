@@ -1,0 +1,110 @@
+name: build-pdf
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Cache npm packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-
+
+      - name: Install mystmd
+        run: npm install -g 'mystmd@^1.6'
+
+      - name: Install TeX Live (XeLaTeX + extras + biber)
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            texlive-xetex \
+            texlive-fonts-extra \
+            texlive-fonts-recommended \
+            texlive-latex-extra \
+            texlive-bibtex-extra \
+            texlive-science \
+            texlive-pictures \
+            biber \
+            latexmk \
+            lmodern
+
+      - name: Verify l3kernel is recent enough
+        run: |
+          if kpsewhich expl3.sty >/dev/null; then
+            ver=$(grep -m1 'expl3 release date' "$(kpsewhich expl3.sty)" 2>/dev/null || true)
+            echo "expl3: $ver"
+          fi
+          if kpsewhich l3kernel.sty >/dev/null 2>&1; then
+            echo "l3kernel present"
+          fi
+
+      - name: Build example PDFs
+        working-directory: example
+        run: |
+          myst build sample-article.md --pdf --force 2>&1 | tee build.stdout.log
+
+      - name: Fail on LaTeX errors in compile logs
+        run: |
+          set -e
+          shopt -s nullglob globstar
+          fail=0
+          for log in example/exports/*_pdf_logs/*.log example/exports/*_pdf_tex/*.log; do
+            [ -f "$log" ] || continue
+            echo "::group::$log"
+            if grep -E 'Misplaced alignment tab character|Undefined control sequence|LaTeX Error:|Emergency stop|! Package .* Error|\*\*\* \(Job aborted' "$log"; then
+              echo "::error file=$log::LaTeX errors found"
+              fail=1
+            else
+              echo "clean"
+            fi
+            echo "::endgroup::"
+          done
+          if [ "$fail" -ne 0 ]; then
+            echo "One or more compile logs contained errors. See annotations above."
+            exit 1
+          fi
+
+      - name: Verify all four exports produced PDFs
+        run: |
+          set -e
+          for name in sample-sc sample-dc sample-sc-numbers sample-long; do
+            f="example/exports/${name}.pdf"
+            if [ ! -s "$f" ]; then
+              echo "::error::$f is missing or empty"
+              exit 1
+            fi
+            echo "ok: $f ($(stat -c '%s' "$f") bytes)"
+          done
+
+      - name: Upload PDFs as artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: example-pdfs
+          path: example/exports/*.pdf
+          if-no-files-found: warn
+
+      - name: Upload TeX/log artifacts on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-failure-logs
+          path: |
+            example/exports/**/*.log
+            example/exports/**/*.tex
+            example/build.stdout.log
+          if-no-files-found: warn

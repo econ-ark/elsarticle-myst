@@ -1,6 +1,15 @@
 %% Elsevier CAS Template for MyST (single and double column)
 %% Based on cas-sc-template.tex / cas-dc-template.tex
 %% Original copyright 2019-2024 Elsevier Ltd (LPPL-1.3c)
+%%
+%% LaTeX escaping of plain-text frontmatter fields (short_title, credit
+%% roles, author notes, affiliation strings) is applied inline via Jinja
+%% `replace` chains. The order of replacements matters: backslash and
+%% braces are escaped first so later replacements that introduce
+%% backslashes do not get re-escaped. Fields that pass through MyST's
+%% markdown AST (title, subtitle, abstract, content) are NOT escaped
+%% here; the AST already handles LaTeX special characters in those
+%% contexts.
 
 [# if options.columns == 'double' #]
 \documentclass[a4paper,fleqn[# if options.longmktitle #],longmktitle[# endif #]]{cas-dc}
@@ -8,8 +17,17 @@
 \documentclass[a4paper,fleqn[# if options.longmktitle #],longmktitle[# endif #]]{cas-sc}
 [# endif #]
 
-%% Unicode support (XeLaTeX / LuaLaTeX only)
+%% Engine check: XeLaTeX or LuaLaTeX is required for Unicode in author
+%% names, titles, and stix/charis fonts. pdflatex falls back to CMR and
+%% may mangle non-ASCII characters; warn loudly so users notice.
 \usepackage{iftex}
+\ifPDFTeX
+  \PackageWarningNoLine{cas-myst-template}{%
+    pdflatex detected. This template targets XeLaTeX or LuaLaTeX.\MessageBreak
+    Unicode in author names, titles, and affiliations may not render\MessageBreak
+    correctly. Re-run with `xelatex` or `lualatex` for full support%
+  }
+\fi
 \iftutex
   \usepackage{fontspec}
 \fi
@@ -31,15 +49,27 @@
 \def\floatpagefraction{1}
 \def\textfraction{.001}
 
+%% --- Footnote-mark index allocation -----------------------------------
+%% CAS uses two independent mark spaces (\cormark and \fnmark), so they
+%% cannot collide with each other. We allocate disjoint integer ranges
+%% inside the \fnmark space:
+%%   [1 .. N]                   per-author notes (loop.index)
+%%   [N+1]                      shared equal-contributor note
+%% where N is the author count. \cormark uses its own [1..]
+%% sequence indexed by corresponding-author order.
+[# set author_count = doc.authors | length if doc.authors else 0 #]
+[# set eq_fnmark = author_count + 1 #]
+[# set has_equal = doc.authors and (doc.authors | selectattr("equal_contributor") | list | length > 1) #]
+
 [# if doc.short_title #]
-\shorttitle{[-doc.short_title-]}
+\shorttitle{[-doc.short_title | replace("\\", "\\textbackslash{}") | replace("{", "\\{") | replace("}", "\\}") | replace("&", "\\&") | replace("%", "\\%") | replace("$", "\\$") | replace("#", "\\#") | replace("_", "\\_") | replace("~", "\\textasciitilde{}") | replace("^", "\\textasciicircum{}")-]}
 [# else #]
-\shorttitle{[-doc.title-]}
+\shorttitle{[-doc.title | replace("\\", "\\textbackslash{}") | replace("{", "\\{") | replace("}", "\\}") | replace("&", "\\&") | replace("%", "\\%") | replace("$", "\\$") | replace("#", "\\#") | replace("_", "\\_") | replace("~", "\\textasciitilde{}") | replace("^", "\\textasciicircum{}")-]}
 [# endif #]
 
 %% Extract surname as last word from full name (handles middle initials correctly)
 [# if doc.authors #]
-\shortauthors{[# for author in doc.authors #][-author.name.split(" ") | last-][# if not loop.last #], [# endif #][# endfor #]}
+\shortauthors{[# for author in doc.authors #][-author.name.split(" ") | last | replace("\\", "\\textbackslash{}") | replace("{", "\\{") | replace("}", "\\}") | replace("&", "\\&") | replace("%", "\\%") | replace("$", "\\$") | replace("#", "\\#") | replace("_", "\\_") | replace("~", "\\textasciitilde{}") | replace("^", "\\textasciicircum{}")-][# if not loop.last #], [# endif #][# endfor #]}
 [# endif #]
 
 \title[mode=title]{[-doc.title-]}
@@ -58,12 +88,16 @@
 [#- if author.deceased -#][#- set author_opts = author_opts ~ (',' if author_opts else '') ~ 'deceased' -#][#- endif -#]
 [#- if author.facebook -#][#- set author_opts = author_opts ~ (',' if author_opts else '') ~ 'facebook=' ~ author.facebook -#][#- endif -#]
 [#- if author.linkedin -#][#- set author_opts = author_opts ~ (',' if author_opts else '') ~ 'linkedin=' ~ author.linkedin -#][#- endif -#]
+[#- if author.twitter -#][#- set author_opts = author_opts ~ (',' if author_opts else '') ~ 'twitter=' ~ author.twitter -#][#- endif -#]
 \author[[- author.affiliations | join(",", "index") -]]{[-author.name-]}[# if author_opts #][[- author_opts -]][# endif #]
 [# if author.corresponding #]
 \cormark[[-loop.index-]]
 [# endif #]
 [# if author.note #]
-\fnmark[[-loop.index + 100-]]
+\fnmark[[-loop.index-]]
+[# endif #]
+[# if author.equal_contributor and has_equal #]
+\fnmark[[-eq_fnmark-]]
 [# endif #]
 [# if author.email #]
 \ead{[-author.email-]}
@@ -71,23 +105,23 @@
 [# if author.url #]
 \ead[url]{[-author.url-]}
 [# endif #]
-[# if author.twitter #]
-\ead[twitter]{[-author.twitter-]}
-[# endif #]
 [# if author.roles #]
-\credit{[-author.roles | join(", ")-]}
+\credit{[# for role in author.roles #][-role | replace("\\", "\\textbackslash{}") | replace("{", "\\{") | replace("}", "\\}") | replace("&", "\\&") | replace("%", "\\%") | replace("$", "\\$") | replace("#", "\\#") | replace("_", "\\_") | replace("~", "\\textasciitilde{}") | replace("^", "\\textasciicircum{}")-][# if not loop.last #], [# endif #][# endfor #]}
 [# endif #]
 [# endfor #]
 
 [# for affiliation in doc.affiliations #]
 [#- set has_address = affiliation.department or affiliation.address or affiliation.city or affiliation.postal_code or affiliation.state or affiliation.country -#]
-\affiliation[[-affiliation.index-]]{organization={[-affiliation.name-]}[# if not has_address #],op={}[# endif #][# if affiliation.department #],
-            department={[-affiliation.department-]}[# endif #][# if affiliation.address #],
-            addressline={[-affiliation.address-]}[# endif #][# if affiliation.city #],
-            city={[-affiliation.city-]}[# endif #][# if affiliation.postal_code #],
-            postcode={[-affiliation.postal_code-]}[# endif #][# if affiliation.state #],
-            state={[-affiliation.state-]}[# endif #][# if affiliation.country #],
-            country={[-affiliation.country-]}[# endif #]}
+%% op={} is the organization-punctuation separator in cas-common.sty; setting it
+%% empty suppresses the trailing comma that would otherwise appear after a
+%% standalone organization name (no department/address/city/etc.).
+\affiliation[[-affiliation.index-]]{organization={[-affiliation.name | replace("\\", "\\textbackslash{}") | replace("{", "\\{") | replace("}", "\\}") | replace("&", "\\&") | replace("%", "\\%") | replace("$", "\\$") | replace("#", "\\#") | replace("_", "\\_") | replace("~", "\\textasciitilde{}") | replace("^", "\\textasciicircum{}")-]}[# if not has_address #],op={}[# endif #][# if affiliation.department #],
+            department={[-affiliation.department | replace("\\", "\\textbackslash{}") | replace("{", "\\{") | replace("}", "\\}") | replace("&", "\\&") | replace("%", "\\%") | replace("$", "\\$") | replace("#", "\\#") | replace("_", "\\_") | replace("~", "\\textasciitilde{}") | replace("^", "\\textasciicircum{}")-]}[# endif #][# if affiliation.address #],
+            addressline={[-affiliation.address | replace("\\", "\\textbackslash{}") | replace("{", "\\{") | replace("}", "\\}") | replace("&", "\\&") | replace("%", "\\%") | replace("$", "\\$") | replace("#", "\\#") | replace("_", "\\_") | replace("~", "\\textasciitilde{}") | replace("^", "\\textasciicircum{}")-]}[# endif #][# if affiliation.city #],
+            city={[-affiliation.city | replace("\\", "\\textbackslash{}") | replace("{", "\\{") | replace("}", "\\}") | replace("&", "\\&") | replace("%", "\\%") | replace("$", "\\$") | replace("#", "\\#") | replace("_", "\\_") | replace("~", "\\textasciitilde{}") | replace("^", "\\textasciicircum{}")-]}[# endif #][# if affiliation.postal_code #],
+            postcode={[-affiliation.postal_code | replace("\\", "\\textbackslash{}") | replace("{", "\\{") | replace("}", "\\}") | replace("&", "\\&") | replace("%", "\\%") | replace("$", "\\$") | replace("#", "\\#") | replace("_", "\\_") | replace("~", "\\textasciitilde{}") | replace("^", "\\textasciicircum{}")-]}[# endif #][# if affiliation.state #],
+            state={[-affiliation.state | replace("\\", "\\textbackslash{}") | replace("{", "\\{") | replace("}", "\\}") | replace("&", "\\&") | replace("%", "\\%") | replace("$", "\\$") | replace("#", "\\#") | replace("_", "\\_") | replace("~", "\\textasciitilde{}") | replace("^", "\\textasciicircum{}")-]}[# endif #][# if affiliation.country #],
+            country={[-affiliation.country | replace("\\", "\\textbackslash{}") | replace("{", "\\{") | replace("}", "\\}") | replace("&", "\\&") | replace("%", "\\%") | replace("$", "\\$") | replace("#", "\\#") | replace("_", "\\_") | replace("~", "\\textasciitilde{}") | replace("^", "\\textasciicircum{}")-]}[# endif #]}
 [# endfor #]
 
 [# for author in doc.authors #]
@@ -95,12 +129,12 @@
 \cortext[[-loop.index-]]{Corresponding author}
 [# endif #]
 [# if author.note #]
-\fntext[[-loop.index + 100-]]{[-author.note-]}
+\fntext[[-loop.index-]]{[-author.note | replace("\\", "\\textbackslash{}") | replace("{", "\\{") | replace("}", "\\}") | replace("&", "\\&") | replace("%", "\\%") | replace("$", "\\$") | replace("#", "\\#") | replace("_", "\\_") | replace("~", "\\textasciitilde{}") | replace("^", "\\textasciicircum{}")-]}
 [# endif #]
 [# endfor #]
 
-[# if doc.authors | selectattr("equal_contributor") | list | length > 1 #]
-\nonumnote{These authors contributed equally to this work.}
+[# if has_equal #]
+\fntext[[-eq_fnmark-]]{These authors contributed equally to this work.}
 [# endif #]
 
 [# if parts.acknowledgments #]
@@ -151,19 +185,16 @@
 
 [-CONTENT-]
 
-[# if parts.appendix #]
-\appendix
-\section*{Appendix}
-\renewcommand{\thesubsection}{\Alph{subsection}}
-\setcounter{subsection}{0}
-[-parts.appendix-]
-[# endif #]
-
 \printcredits
 
 \bibliographystyle{cas-model2-names}
 [# if doc.bibliography #]
 \bibliography{[-doc.bibliography | join(", ")-]}
+[# endif #]
+
+[# if parts.appendix #]
+\appendix
+[-parts.appendix-]
 [# endif #]
 
 [# if parts.biography #]

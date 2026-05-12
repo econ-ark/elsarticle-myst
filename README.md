@@ -27,13 +27,13 @@ A comprehensive MyST Markdown template for Elsevier journal articles using the C
 
 ## Requirements
 
-- **MyST Markdown**: Latest version (install via `pip install mystmd` or `npm install -g mystmd`)
-- **LaTeX Distribution**: TeX Live 2022+ or MiKTeX 22.1+ (required for PDF export)
-- **XeLaTeX**: Recommended for Unicode support (included in standard TeX distributions)
-- **Python**: 3.8+ (if using pip installation)
-- **Node.js**: 16+ (if using npm installation)
+- **MyST Markdown**: `mystmd >= 1.6` (install via `pip install 'mystmd>=1.6'` or `npm install -g mystmd@^1.6`). Tested against `1.9.0`.
+- **LaTeX Distribution**: TeX Live 2022 or later, or MiKTeX 22.1 or later, with a current `l3kernel`. Required for PDF export.
+- **XeLaTeX or LuaLaTeX**: Required for Unicode support and the `stix` / `charis` fonts shipped with the CAS classes. `pdflatex` will emit a warning and silently lose Unicode characters.
+- **Python**: 3.9 or later (if installing via `pip`).
+- **Node.js**: 18 or later (if installing via `npm`).
 
-> **⚠️ LaTeX3 Required**: This template uses modern LaTeX3 commands (`vbox_unpack_drop:N`) introduced in 2022. Earlier LaTeX distributions will fail with cryptic errors. If you encounter `vbox_unpack_drop:N` errors, upgrade your TeX distribution to TeX Live 2022+ or MiKTeX 22.1+.
+> **LaTeX3 2022 or later required**: The patched `cas-common.sty` calls `\vbox_unpack_drop:N`, which replaced the removed `\vbox_unpack_clear:N` in the LaTeX3 kernel in 2022. Older distributions fail with `Undefined control sequence \vbox_unpack_drop:N`. Run `tlmgr update --self --all` (TeX Live) or the MiKTeX update wizard before building. See `PATCHES.md` for the full list of modifications to the upstream Elsevier files.
 
 ## Quick Start
 
@@ -101,25 +101,27 @@ myst build your-article.md --pdf
 
 ```yaml
 title: Article Title
-subtitle: Optional Subtitle  # Displayed below main title
-short_title: Short Title  # For running headers
+subtitle: Optional Subtitle              # rendered below main title
+short_title: Short Title                 # running header (LaTeX specials auto-escaped)
 authors:
   - name: Author Name
     email: author@example.com
     orcid: 0000-0000-0000-0000
-    corresponding: true
-    equal_contributor: true  # Mark as equal contribution
-    deceased: false  # Mark if deceased
-    note: Additional author info  # Author-specific footnote
-    twitter: username  # Twitter/X handle
+    corresponding: true                  # tagged with \cormark and "Corresponding author" footnote
+    equal_contributor: true              # 2+ such authors share a single "contributed equally" footnote
+    deceased: false                      # rendered as a dagger superscript via deceased= option
+    note: Author-specific footnote text  # auto-numbered \fnmark on author, \fntext at bottom of page
+    twitter: username                    # routed through \author options alongside facebook/linkedin
+    facebook: https://facebook.com/user  # full URL
+    linkedin: https://linkedin.com/in/u  # full URL
     affiliations:
       - institution-id
-    roles:
+    roles:                               # CRediT taxonomy; LaTeX specials auto-escaped
       - Conceptualization
-      - Writing – original draft
+      - Writing - original draft
 affiliations:
   - id: institution-id
-    name: Institution Name
+    name: Institution Name               # LaTeX specials auto-escaped on all string fields
     department: Department
     city: City
     country: Country
@@ -127,21 +129,21 @@ keywords:
   - keyword1
   - keyword2
 abstract: |
-  Abstract text...
-keypoints:  # Research highlights
+  Abstract text. Markdown formatting and inline LaTeX math both work.
+keypoints:                               # Research highlights (3-5 items, rendered as \item list)
   - First key finding
   - Second key finding
 parts:
-  title_note: Acknowledgment or note attached to title
-  note: General note without numbering (e.g., disclaimers)
-  appendix: appendix.md  # External appendix file
-  biography: |  # Author biographies (raw LaTeX)
-    \bio{}
-    Author biography text...
-    \endbio
+  title_note: Funding acknowledgment.    # plain text; auto-escaped
+  note: General disclaimer.              # plain text; auto-escaped
+  acknowledgments: Thanks to reviewers.  # plain text; first-page \nonumnote
+  appendix: appendix.md                  # external markdown file (sections become A, B, C ...)
+  # biography goes in a +++ block in the body, not here. See "Document Parts" below.
 bibliography:
   - references.bib
 ```
+
+**Automatic LaTeX escaping**: the template escapes `& % # _ ^ ~ { } $ \` in the following plain-text fields so a stray ampersand does not break compilation: `short_title`, author `roles` and `note`, `affiliation.{name,department,address,city,postal_code,state,country}`. Fields that flow through MyST's markdown AST (`title`, `subtitle`, `abstract`, body content) are NOT double-escaped; the AST already handles specials.
 
 ### CRediT Contributor Roles
 
@@ -164,26 +166,38 @@ Supported roles (per [CRediT taxonomy](https://credit.niso.org/)):
 
 ### Document Parts
 
-Use MyST `parts` for special content:
+Use MyST `parts` for special content. Plain-text parts go in frontmatter; parts containing raw LaTeX go in `+++` blocks inside the markdown body.
+
+**Plain-text parts (frontmatter)**:
 
 ```yaml
 parts:
-  appendix: appendix.md      # External appendix file
-  title_note: Funding note   # Footnote on title
-  note: General disclaimer   # Non-numbered note
-  biography: |               # Author bios (raw LaTeX)
-    \bio{}
-    Biography text...
-    \endbio
+  appendix: appendix.md                                       # external markdown file
+  title_note: Prepared with support from grant XYZ-12345.     # plain-text footnote on title
+  note: Authors declare no competing interests.               # plain-text frontmatter note
+  acknowledgments: We thank the editor and two reviewers.     # plain-text first-page note
 ```
 
-Or inline with block syntax:
+**Parts requiring raw LaTeX (body, `+++` block)**:
 
 ```markdown
-+++ {"part": "abstract"}
-Your abstract here.
++++ {"part": "biography"}
+
+```{raw} latex
+\bio{}
+Author One develops open-source computational tools.
+\endbio
+\bio{}
+Author Two is a professor of economics.
+\endbio
+```
+
 +++
 ```
+
+The same pattern works for `parts.highlights` when you need finer-grained LaTeX control than the YAML-list-based `keypoints` frontmatter offers, and for `parts.graphical_abstract` when you want raw LaTeX rather than a file path.
+
+> **Why two locations?** MyST processes part values through its markdown pipeline before injecting them into the template. A YAML scalar with literal `\bio{}` becomes `\textbackslash bio\{\}` in the rendered LaTeX. The `+++ {"part": ...}` block with a nested `{raw} latex` directive bypasses that pipeline.
 
 ## Files Included
 
@@ -191,11 +205,13 @@ Your abstract here.
 |------|-------------|
 | `template.tex` | Main Jinja/jtex template |
 | `template.yml` | Template configuration |
-| `cas-sc.cls` | Single column document class |
-| `cas-dc.cls` | Double column document class |
-| `cas-common.sty` | Shared style definitions |
-| `cas-model2-names.bst` | Bibliography style (author-year & numeric) |
+| `cas-sc.cls` | Single column document class (**patched**, see `PATCHES.md`) |
+| `cas-dc.cls` | Double column document class (**patched**, see `PATCHES.md`) |
+| `cas-common.sty` | Shared style definitions (**patched**, see `PATCHES.md`) |
+| `cas-model2-names.bst` | Bibliography style (author-year and numeric) |
 | `example/` | Complete working example |
+| `PATCHES.md` | Documents every modification to the upstream Elsevier files |
+| `LICENSE`, `LICENSE-CONTENT`, `LICENSE-LATEX` | MIT for code, CC-BY-4.0 for prose, LPPL-1.3c for class files |
 
 ## Supported LaTeX Packages and Environments
 
@@ -277,6 +293,10 @@ Based on the official [Elsevier CAS LaTeX templates](https://www.elsevier.com/au
 
 ## License
 
-- **Content** (documentation, examples): [CC-BY-4.0](https://creativecommons.org/licenses/by/4.0/)
-- **Code** (template configuration): [MIT](https://opensource.org/licenses/MIT)
-- **LaTeX classes** (`.cls`, `.sty`, `.bst`): [LPPL-1.3c](https://www.latex-project.org/lppl/lppl-1-3c/)
+| Component | License | File |
+|---|---|---|
+| Template configuration (`template.tex`, `template.yml`, `myst.yml`) | [MIT](https://opensource.org/licenses/MIT) | `LICENSE` |
+| Documentation prose, example narrative | [CC-BY-4.0](https://creativecommons.org/licenses/by/4.0/) | `LICENSE-CONTENT` |
+| Elsevier CAS classes (`*.cls`, `cas-common.sty`, `*.bst`) | [LPPL-1.3c](https://www.latex-project.org/lppl/lppl-1-3c/) | `LICENSE-LATEX` |
+
+The class files are patched copies of the upstream Elsevier bundle. The LPPL requires that modified files be clearly identified; `PATCHES.md` enumerates every modification and the original upstream copies are preserved verbatim in `original/els-cas-templates.zip`.

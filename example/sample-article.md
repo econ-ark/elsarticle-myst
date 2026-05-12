@@ -1,7 +1,7 @@
 ---
 title: A Comprehensive Guide to MyST Markdown with Elsevier CAS Templates
 subtitle: Feature Reference and Template Examples
-short_title: MyST & Elsevier Guide
+short_title: MyST and Elsevier Guide
 description: A comprehensive template demonstrating MyST Markdown integration with Elsevier CAS journal templates.
 date: 2026-01-08
 authors:
@@ -92,6 +92,7 @@ abbreviations:
   PDF: Portable Document Format
 thumbnail: images/thumbnail.png
 parts:
+  title_note: Prepared as a demonstration of the elsarticle-myst template.
   appendix: appendix.md
 bibliography:
   - references.bib
@@ -136,7 +137,7 @@ exports:
 (sec-introduction)=
 # Introduction
 
-This document demonstrates the full integration of MyST Markdown {cite:p}`myst2024` with Elsevier's CAS templates. MyST provides a powerful authoring experience while maintaining compatibility with traditional LaTeX journal requirements {cite:p}`latex1994`.
+This document demonstrates the full integration of {abbr}`MyST` Markdown {cite:p}`myst2024` with Elsevier's {abbr}`CAS` templates. MyST provides a powerful authoring experience while maintaining compatibility with traditional LaTeX journal requirements {cite:p}`latex1994`. The template renders to {abbr}`PDF` for camera-ready submission and to HTML for the project website; author identifiers ({abbr}`ORCID`) and persistent links ({abbr}`DOI`) propagate through both pipelines.
 
 ## Background
 
@@ -233,7 +234,7 @@ The templates support full LaTeX math with custom macros defined in frontmatter.
 
 ## Inline Mathematics
 
-Inline math like $E = mc^2$ or $\E[X] = \mu$ works seamlessly. Using our custom macros: for $x \in \R$, we have $\Var(X) = \E[X^2] - (\E[X])^2$.
+Inline math like $E = mc^2$ or $\E[X] = \mu$ works seamlessly. Using our custom macros: for $x \in \R$, we have $\Var(X) = \E[X^2] - (\E[X])^2$ and $\Cov(X, Y) = \E[XY] - \E[X]\,\E[Y]$.
 
 ## Display Equations
 
@@ -256,7 +257,7 @@ Maxwell's equations in differential form:
 \end{aligned}
 ```
 
-The Bellman equation for dynamic programming:
+The Bellman equation for dynamic programming, where the policy is the maximizing action $a^{\star}(s) = \argmax_a \{R(s,a) + \gamma \sum_{s'} P(s'|s,a) V(s')\}$:
 
 $$
 V(s) = \max_a \left\{ R(s, a) + \gamma \sum_{s'} P(s' | s, a) V(s') \right\}
@@ -631,3 +632,16 @@ The Elsevier CAS MyST template provides a modern workflow for scientific writing
 - Citations and bibliography
 
 For questions or contributions, please visit the template repository.
+
++++ {"part": "biography"}
+
+```{raw} latex
+\bio{}
+Alan E. Lujan develops open-source computational tools for economics at Johns Hopkins University and Econ-ARK.
+\endbio
+\bio{}
+Christopher D. Carroll is a professor of economics at Johns Hopkins University and leads the Econ-ARK initiative for reproducible heterogeneous-agent macroeconomics.
+\endbio
+```
+
++++
