@@ -1,0 +1,30 @@
+name: upstream-drift
+
+# Asks CTAN, once a month, whether the vendored bundles are still current. Kept
+# out of build-pdf.yml because it needs network, and a failure here is usually
+# news (a new upstream release), not a reason to block a pull request.
+
+# GitHub disables scheduled workflows after 60 days of repository inactivity, so
+# on a quiet repo this may need re-enabling or a manual workflow_dispatch run.
+on:
+  schedule:
+    - cron: '37 6 3 * *'
+  workflow_dispatch:
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      # texlive-latex-base supplies `latex` for check F. Without it F skips, and
+      # the self-test's F case then fails for the wrong reason.
+      - name: Install minimal LaTeX
+        run: sudo apt-get update && sudo apt-get install -y --no-install-recommends texlive-latex-base
+
+      - name: Rejection-test the checker, then check against CTAN
+        run: |
+          ./scripts/verify-upstream.sh --self-test
+          ./scripts/verify-upstream.sh --online | tee /tmp/verify.log
+          grep -q '^skip' /tmp/verify.log && { echo "::error::a check was skipped"; exit 1; }
+          exit 0

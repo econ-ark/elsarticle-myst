@@ -1,0 +1,39 @@
+--- upstream/cas-sc.cls
++++ root/cas-sc.cls
+@@ -1,5 +1,5 @@
+ %%
+-%% This is file `cas-dc.cls'.
++%% This is file `cas-sc.cls'.
+ %%
+ %% This file is part of the 'CAS Bundle'.
+ %% ......................................
+@@ -71,17 +71,15 @@
+ \colorlet{hscolor}{DarkSlateGrey}
+ \hypersetup{%
+   pdfcreator={LaTeX3; cas-sc.cls; hyperref.sty},
+-  pdfproducer={pdfTeX;},
++  pdfproducer={},
+   linkcolor={hscolor},
+   urlcolor={hscolor},
+   citecolor={hscolor},
+   filecolor={hscolor},
+   menucolor={hscolor},
+ }
+-% \AtEndDocument{\hypersetup
+-%   {pdftitle={\csuse{__short_title:}},
+-%   pdfauthor={\csuse{__short_authors:}}}}
+- 
++
++
+  \let\comma\@empty
+ \let\tnotesep\@empty
+ \let\@title\@empty
+@@ -159,7 +157,7 @@
+   \iow_term:x {  *********************************************************** }
+ }
+ 
+-\file_if_exist:nTF { inconsolata }
++\file_if_exist:nTF { inconsolata.sty }
+ { \RequirePackage[scaled=.85]{inconsolata} }
+ { \tex_gdef:D \ttdefault { cmtt } }
+ 
