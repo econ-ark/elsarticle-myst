@@ -74,10 +74,11 @@ UNPATCHED=(
 PATCHED=(cas-sc.cls cas-dc.cls cas-common.sty)
 LOOSE=(cas-sc-template.tex cas-dc-template.tex)
 
-# elsarticle is distributed as DocStrip source (.dtx + .ins), so these are
-# GENERATED from original/elsarticle.zip, not copied out of it. Check F
-# regenerates and compares, proving they are reproducible from that source.
-GENERATED=(elsarticle.cls elsarticle-num.bst elsarticle-harv.bst elsarticle-num-names.bst)
+# elsarticle.ins generates ONLY the class. The three .bst files ship as zip
+# members, so they are COPIES. One list made F claim it had "reproduced" files
+# it had merely unzipped, and hid a latex failure behind three passing copies.
+GENERATED=(elsarticle.cls)
+ELS_COPIED=(elsarticle-num.bst elsarticle-harv.bst elsarticle-num-names.bst)
 
 fail=0
 ok()   { printf 'ok    %s\n' "$*"; }
@@ -192,14 +193,29 @@ check_generated() {
     bad "F elsarticle.ins not found in original/elsarticle.zip"
     rm -rf "$work"; return
   fi
-  ( cd "$src" && latex -interaction=nonstopmode elsarticle.ins >/dev/null 2>&1 )
+  # Remove the class first so a latex failure cannot leave a stale copy that
+  # compares equal, and check latex's own status rather than discarding it.
+  rm -f "$src/elsarticle.cls"
+  if ! ( cd "$src" && latex -interaction=nonstopmode elsarticle.ins >/dev/null 2>&1 ); then
+    bad "F latex failed while running elsarticle.ins"
+    rm -rf "$work"; return
+  fi
   for f in "${GENERATED[@]}"; do
     if [ ! -f "$src/$f" ]; then
       bad "F $f was not produced by elsarticle.ins"
     elif cmp -s "$src/$f" "$ROOT/$f"; then
-      ok "F $f reproduces byte-for-byte from original/elsarticle.zip"
+      ok "F $f regenerates byte-for-byte from original/elsarticle.zip"
     else
       bad "F $f does not match what original/elsarticle.zip generates"
+    fi
+  done
+  # Distinct wording on purpose: these are compared against zip members, which
+  # is a copy check, not proof that anything was reproducible.
+  for f in "${ELS_COPIED[@]}"; do
+    if cmp -s "$src/$f" "$ROOT/$f"; then
+      ok "F $f is identical to its member in original/elsarticle.zip"
+    else
+      bad "F $f differs from its member in original/elsarticle.zip"
     fi
   done
   rm -rf "$work"

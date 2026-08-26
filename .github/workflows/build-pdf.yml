@@ -87,10 +87,10 @@ jobs:
             [ -f "$log" ] || continue
             n=$((n + 1))
             echo "::group::$log"
-            # '^! ' is TeX's own fatal-error convention and a strict superset of
-            # the named messages below. Without it "Missing $ inserted" and
-            # "Runaway argument" score zero here and ship a broken PDF.
-            if grep -E '^! |Misplaced alignment tab character|Undefined control sequence|LaTeX Error:|Emergency stop|! Package .* Error|\*\*\* \(Job aborted' "$log"; then
+            # '^! ' is TeX's fatal-error convention, a superset of the named
+            # messages. Undefined refs are WARNINGS that render as '?' and are
+            # how the elsarticle tn/cor/fn labels fail, so catch those too.
+            if grep -E '^! |Misplaced alignment tab character|Undefined control sequence|LaTeX Error:|Emergency stop|! Package .* Error|\*\*\* \(Job aborted|LaTeX Warning: (Reference|Citation).*undefined|There were undefined references' "$log"; then
               echo "::error file=$log::LaTeX errors found"
               fail=1
             else

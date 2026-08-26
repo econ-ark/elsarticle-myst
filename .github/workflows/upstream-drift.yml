@@ -34,3 +34,9 @@ jobs:
             echo "::error::a check was skipped rather than run"
             exit 1
           fi
+          # A warn means E2 never compared bytes (no mirror answered). E1 still
+          # passed, so this is not a failure, but a silent green month in which
+          # the byte check never ran should still be visible in the run summary.
+          if grep -q '^warn' /tmp/verify.log; then
+            grep '^warn' /tmp/verify.log | while read -r l; do echo "::warning::$l"; done
+          fi
