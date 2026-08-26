@@ -182,7 +182,9 @@ bibliography:
   - references.bib
 ```
 
-**Automatic LaTeX escaping**: the template escapes `& % # _ ^ ~ { } $ \` in the following plain-text fields so a stray ampersand does not break compilation: `short_title`, author `roles` and `note`, `affiliation.{name,department,address,city,postal_code,state,country}`. Fields that flow through MyST's markdown AST (`title`, `subtitle`, `abstract`, body content) are NOT double-escaped; the AST already handles specials.
+**Automatic LaTeX escaping**: the template escapes `& % # _ ^ ~ { } $ \` in the following plain-text fields so a stray ampersand does not break compilation: `short_title`, author `roles` and `note`, `affiliation.{name,department,address,city,postal_code,state,country}`, and the `journal` option. Fields that flow through MyST's markdown AST (`title`, `subtitle`, `abstract`, `parts.*`, body content) are NOT double-escaped; the AST already handles specials. Verified for `parts.title_note`: `& % _ # ~ ^` all arrive correctly escaped without the template touching them.
+
+A backslash is routed through a sentinel and expanded last. Escaping it first emits `\textbackslash{}`, whose braces the subsequent brace rules would then escape into `\textbackslash\{\}`, typesetting as `\{}` instead of `\`.
 
 ### CRediT Contributor Roles
 

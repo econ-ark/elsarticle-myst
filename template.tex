@@ -66,7 +66,10 @@
 [# endif #]
 
 [# if options.document_class == 'elsarticle' and options.journal #]
-\journal{[-options.journal | replace("\\", "\\textbackslash{}") | replace("{", "\\{") | replace("}", "\\}") | replace("&", "\\&") | replace("%", "\\%") | replace("$", "\\$") | replace("#", "\\#") | replace("_", "\\_") | replace("~", "\\textasciitilde{}") | replace("^", "\\textasciicircum{}")-]}
+%% Backslash goes to a SENTINEL first and is expanded LAST. Escaping it up
+%% front emits \textbackslash{}, whose braces the later brace rules then escape
+%% into \textbackslash\{\}, which typesets as "\{}" instead of "\".
+\journal{[-options.journal | replace("\\", "@BSL@") | replace("{", "\\{") | replace("}", "\\}") | replace("&", "\\&") | replace("%", "\\%") | replace("$", "\\$") | replace("#", "\\#") | replace("_", "\\_") | replace("~", "\\textasciitilde{}") | replace("^", "\\textasciicircum{}") | replace("@BSL@", "\\textbackslash{}")-]}
 [# endif #]
 
 %% Algorithm support
@@ -109,14 +112,14 @@
 [# if options.document_class != 'elsarticle' #]
 %% \shorttitle and \shortauthors are CAS-only; elsarticle has neither.
 [# if doc.short_title #]
-\shorttitle{[-doc.short_title | replace("\\", "\\textbackslash{}") | replace("{", "\\{") | replace("}", "\\}") | replace("&", "\\&") | replace("%", "\\%") | replace("$", "\\$") | replace("#", "\\#") | replace("_", "\\_") | replace("~", "\\textasciitilde{}") | replace("^", "\\textasciicircum{}")-]}
+\shorttitle{[-doc.short_title | replace("\\", "@BSL@") | replace("{", "\\{") | replace("}", "\\}") | replace("&", "\\&") | replace("%", "\\%") | replace("$", "\\$") | replace("#", "\\#") | replace("_", "\\_") | replace("~", "\\textasciitilde{}") | replace("^", "\\textasciicircum{}") | replace("@BSL@", "\\textbackslash{}")-]}
 [# else #]
-\shorttitle{[-doc.title | replace("\\", "\\textbackslash{}") | replace("{", "\\{") | replace("}", "\\}") | replace("&", "\\&") | replace("%", "\\%") | replace("$", "\\$") | replace("#", "\\#") | replace("_", "\\_") | replace("~", "\\textasciitilde{}") | replace("^", "\\textasciicircum{}")-]}
+\shorttitle{[-doc.title | replace("\\", "@BSL@") | replace("{", "\\{") | replace("}", "\\}") | replace("&", "\\&") | replace("%", "\\%") | replace("$", "\\$") | replace("#", "\\#") | replace("_", "\\_") | replace("~", "\\textasciitilde{}") | replace("^", "\\textasciicircum{}") | replace("@BSL@", "\\textbackslash{}")-]}
 [# endif #]
 
 %% Extract surname as last word from full name (handles middle initials correctly)
 [# if doc.authors #]
-\shortauthors{[# for author in doc.authors #][-author.name.split(" ") | last | replace("\\", "\\textbackslash{}") | replace("{", "\\{") | replace("}", "\\}") | replace("&", "\\&") | replace("%", "\\%") | replace("$", "\\$") | replace("#", "\\#") | replace("_", "\\_") | replace("~", "\\textasciitilde{}") | replace("^", "\\textasciicircum{}")-][# if not loop.last #], [# endif #][# endfor #]}
+\shortauthors{[# for author in doc.authors #][-author.name.split(" ") | last | replace("\\", "@BSL@") | replace("{", "\\{") | replace("}", "\\}") | replace("&", "\\&") | replace("%", "\\%") | replace("$", "\\$") | replace("#", "\\#") | replace("_", "\\_") | replace("~", "\\textasciitilde{}") | replace("^", "\\textasciicircum{}") | replace("@BSL@", "\\textbackslash{}")-][# if not loop.last #], [# endif #][# endfor #]}
 [# endif #]
 [# endif #]
 
@@ -170,7 +173,7 @@
 \ead[url]{[-author.url-]}
 [# endif #]
 [# if author.roles and options.document_class != 'elsarticle' #]
-\credit{[# for role in author.roles #][-role | replace("\\", "\\textbackslash{}") | replace("{", "\\{") | replace("}", "\\}") | replace("&", "\\&") | replace("%", "\\%") | replace("$", "\\$") | replace("#", "\\#") | replace("_", "\\_") | replace("~", "\\textasciitilde{}") | replace("^", "\\textasciicircum{}")-][# if not loop.last #], [# endif #][# endfor #]}
+\credit{[# for role in author.roles #][-role | replace("\\", "@BSL@") | replace("{", "\\{") | replace("}", "\\}") | replace("&", "\\&") | replace("%", "\\%") | replace("$", "\\$") | replace("#", "\\#") | replace("_", "\\_") | replace("~", "\\textasciitilde{}") | replace("^", "\\textasciicircum{}") | replace("@BSL@", "\\textbackslash{}")-][# if not loop.last #], [# endif #][# endfor #]}
 [# endif #]
 [# endfor #]
 
@@ -179,13 +182,13 @@
 %% op={} is the organization-punctuation separator (cas-common.sty, and the same
 %% key in elsarticle). Empty suppresses the trailing comma after a standalone
 %% organization name with no department, address, or city.
-\affiliation[[-affiliation.index-]]{organization={[-affiliation.name | replace("\\", "\\textbackslash{}") | replace("{", "\\{") | replace("}", "\\}") | replace("&", "\\&") | replace("%", "\\%") | replace("$", "\\$") | replace("#", "\\#") | replace("_", "\\_") | replace("~", "\\textasciitilde{}") | replace("^", "\\textasciicircum{}")-]}[# if not has_address #],op={}[# endif #][# if affiliation.department #],
-            department={[-affiliation.department | replace("\\", "\\textbackslash{}") | replace("{", "\\{") | replace("}", "\\}") | replace("&", "\\&") | replace("%", "\\%") | replace("$", "\\$") | replace("#", "\\#") | replace("_", "\\_") | replace("~", "\\textasciitilde{}") | replace("^", "\\textasciicircum{}")-]}[# endif #][# if affiliation.address #],
-            addressline={[-affiliation.address | replace("\\", "\\textbackslash{}") | replace("{", "\\{") | replace("}", "\\}") | replace("&", "\\&") | replace("%", "\\%") | replace("$", "\\$") | replace("#", "\\#") | replace("_", "\\_") | replace("~", "\\textasciitilde{}") | replace("^", "\\textasciicircum{}")-]}[# endif #][# if affiliation.city #],
-            city={[-affiliation.city | replace("\\", "\\textbackslash{}") | replace("{", "\\{") | replace("}", "\\}") | replace("&", "\\&") | replace("%", "\\%") | replace("$", "\\$") | replace("#", "\\#") | replace("_", "\\_") | replace("~", "\\textasciitilde{}") | replace("^", "\\textasciicircum{}")-]}[# endif #][# if affiliation.postal_code #],
-            postcode={[-affiliation.postal_code | replace("\\", "\\textbackslash{}") | replace("{", "\\{") | replace("}", "\\}") | replace("&", "\\&") | replace("%", "\\%") | replace("$", "\\$") | replace("#", "\\#") | replace("_", "\\_") | replace("~", "\\textasciitilde{}") | replace("^", "\\textasciicircum{}")-]}[# endif #][# if affiliation.state #],
-            state={[-affiliation.state | replace("\\", "\\textbackslash{}") | replace("{", "\\{") | replace("}", "\\}") | replace("&", "\\&") | replace("%", "\\%") | replace("$", "\\$") | replace("#", "\\#") | replace("_", "\\_") | replace("~", "\\textasciitilde{}") | replace("^", "\\textasciicircum{}")-]}[# endif #][# if affiliation.country #],
-            country={[-affiliation.country | replace("\\", "\\textbackslash{}") | replace("{", "\\{") | replace("}", "\\}") | replace("&", "\\&") | replace("%", "\\%") | replace("$", "\\$") | replace("#", "\\#") | replace("_", "\\_") | replace("~", "\\textasciitilde{}") | replace("^", "\\textasciicircum{}")-]}[# endif #]}
+\affiliation[[-affiliation.index-]]{organization={[-affiliation.name | replace("\\", "@BSL@") | replace("{", "\\{") | replace("}", "\\}") | replace("&", "\\&") | replace("%", "\\%") | replace("$", "\\$") | replace("#", "\\#") | replace("_", "\\_") | replace("~", "\\textasciitilde{}") | replace("^", "\\textasciicircum{}") | replace("@BSL@", "\\textbackslash{}")-]}[# if not has_address #],op={}[# endif #][# if affiliation.department #],
+            department={[-affiliation.department | replace("\\", "@BSL@") | replace("{", "\\{") | replace("}", "\\}") | replace("&", "\\&") | replace("%", "\\%") | replace("$", "\\$") | replace("#", "\\#") | replace("_", "\\_") | replace("~", "\\textasciitilde{}") | replace("^", "\\textasciicircum{}") | replace("@BSL@", "\\textbackslash{}")-]}[# endif #][# if affiliation.address #],
+            addressline={[-affiliation.address | replace("\\", "@BSL@") | replace("{", "\\{") | replace("}", "\\}") | replace("&", "\\&") | replace("%", "\\%") | replace("$", "\\$") | replace("#", "\\#") | replace("_", "\\_") | replace("~", "\\textasciitilde{}") | replace("^", "\\textasciicircum{}") | replace("@BSL@", "\\textbackslash{}")-]}[# endif #][# if affiliation.city #],
+            city={[-affiliation.city | replace("\\", "@BSL@") | replace("{", "\\{") | replace("}", "\\}") | replace("&", "\\&") | replace("%", "\\%") | replace("$", "\\$") | replace("#", "\\#") | replace("_", "\\_") | replace("~", "\\textasciitilde{}") | replace("^", "\\textasciicircum{}") | replace("@BSL@", "\\textbackslash{}")-]}[# endif #][# if affiliation.postal_code #],
+            postcode={[-affiliation.postal_code | replace("\\", "@BSL@") | replace("{", "\\{") | replace("}", "\\}") | replace("&", "\\&") | replace("%", "\\%") | replace("$", "\\$") | replace("#", "\\#") | replace("_", "\\_") | replace("~", "\\textasciitilde{}") | replace("^", "\\textasciicircum{}") | replace("@BSL@", "\\textbackslash{}")-]}[# endif #][# if affiliation.state #],
+            state={[-affiliation.state | replace("\\", "@BSL@") | replace("{", "\\{") | replace("}", "\\}") | replace("&", "\\&") | replace("%", "\\%") | replace("$", "\\$") | replace("#", "\\#") | replace("_", "\\_") | replace("~", "\\textasciitilde{}") | replace("^", "\\textasciicircum{}") | replace("@BSL@", "\\textbackslash{}")-]}[# endif #][# if affiliation.country #],
+            country={[-affiliation.country | replace("\\", "@BSL@") | replace("{", "\\{") | replace("}", "\\}") | replace("&", "\\&") | replace("%", "\\%") | replace("$", "\\$") | replace("#", "\\#") | replace("_", "\\_") | replace("~", "\\textasciitilde{}") | replace("^", "\\textasciicircum{}") | replace("@BSL@", "\\textbackslash{}")-]}[# endif #]}
 [# endfor #]
 
 [# for author in doc.authors #]
@@ -193,7 +196,7 @@
 \cortext[[-corp-][-loop.index-]]{Corresponding author}
 [# endif #]
 [# if author.note #]
-\fntext[[-fnp-][-loop.index-]]{[-author.note | replace("\\", "\\textbackslash{}") | replace("{", "\\{") | replace("}", "\\}") | replace("&", "\\&") | replace("%", "\\%") | replace("$", "\\$") | replace("#", "\\#") | replace("_", "\\_") | replace("~", "\\textasciitilde{}") | replace("^", "\\textasciicircum{}")-]}
+\fntext[[-fnp-][-loop.index-]]{[-author.note | replace("\\", "@BSL@") | replace("{", "\\{") | replace("}", "\\}") | replace("&", "\\&") | replace("%", "\\%") | replace("$", "\\$") | replace("#", "\\#") | replace("_", "\\_") | replace("~", "\\textasciitilde{}") | replace("^", "\\textasciicircum{}") | replace("@BSL@", "\\textbackslash{}")-]}
 [# endif #]
 [# endfor #]
 

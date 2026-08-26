@@ -93,6 +93,11 @@ abbreviations:
 thumbnail: images/thumbnail.png
 parts:
   title_note: Prepared as a demonstration of the elsarticle-myst template.
+  ai_declaration: >-
+    During the preparation of this work the authors used no generative AI or
+    AI-assisted technologies. This statement exercises the ai_declaration part,
+    which the template renders as an unnumbered section between the CRediT
+    statement and the references.
   appendix: appendix.md
 bibliography:
   - references.bib
@@ -140,6 +145,20 @@ exports:
     elsarticle_layout: preprint
     journal: Journal of Economic Dynamics and Control
     graphical_abstract: images/sample-figure.png
+  # Second elsarticle export purely for branch coverage: the numeric
+  # bibliography style, a production layout, review spacing and two columns
+  # are otherwise never compiled by any export.
+  - id: pdf-els-5p
+    format: pdf+tex
+    template: ..
+    output: exports/sample-elsarticle-5p.pdf
+    document_class: elsarticle
+    elsarticle_layout: 5p
+    citation_style: numbers
+    columns: double
+    review: true
+    journal: Journal of Economic Dynamics and Control
+    graphical_abstract: images/sample-figure.png
 ---
 
 (sec-introduction)=
@@ -160,7 +179,7 @@ Reproducible research workflows have become increasingly important, with tools l
 :::{note}
 :class: dropdown
 :open: true
-**About this document**: This article is both a feature reference and a test file for the Elsevier MyST template. Every feature shown here should render correctly in the web preview and in all five PDF exports, under CAS and elsarticle alike.
+**About this document**: This article is both a feature reference and a test file for the Elsevier MyST template. Every feature shown here should render correctly in the web preview and in all six PDF exports, under CAS and elsarticle alike.
 :::
 
 (sec-typography)=

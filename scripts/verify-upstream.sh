@@ -221,6 +221,27 @@ check_generated() {
   rm -rf "$work"
 }
 
+# G. Closure: every class/style/bst at the repo root must be claimed by exactly
+# one of the arrays above. An unclaimed file is never iterated over, so it
+# prints neither ok nor skip and is unverified forever with no signal at all.
+check_closure() {
+  local f base claimed all
+  all=("${UNPATCHED[@]}" "${PATCHED[@]}" "${GENERATED[@]}" "${ELS_COPIED[@]}")
+  for f in "$ROOT"/*.cls "$ROOT"/*.sty "$ROOT"/*.bst "$ROOT"/thumbnails/*.jpeg; do
+    [ -e "$f" ] || continue
+    base=${f#"$ROOT"/}
+    claimed=0
+    for c in "${all[@]}"; do [ "$c" = "$base" ] && claimed=$((claimed + 1)); done
+    if [ "$claimed" -eq 1 ]; then
+      ok "G $base is claimed by exactly one check"
+    elif [ "$claimed" -eq 0 ]; then
+      bad "G $base is verified by NOTHING; add it to UNPATCHED, PATCHED, GENERATED or ELS_COPIED"
+    else
+      bad "G $base is claimed by $claimed arrays; it must be exactly one"
+    fi
+  done
+}
+
 do_verify() {
   local up
   up=$(extract)
@@ -274,6 +295,7 @@ do_verify() {
 
   rm -rf "${up%/els-cas-templates}"
   check_generated
+  check_closure
   [ "$ONLINE" = 1 ] && check_online
   if [ "$fail" -eq 0 ]; then
     echo "PASS: original/ is pristine and every root file matches its recorded state."
@@ -318,6 +340,42 @@ do_self_test() {
   expect_fail "undocumented edit to .cls"  D bash -c 'printf "%% x\n" >> cas-sc.cls'
   expect_fail "deleted patch record"       D rm -f original/patches/cas-common.sty.patch
   expect_fail "edited generated elsarticle" F bash -c 'printf "%% x\n" >> elsarticle.cls'
+  # G: an unclaimed root file used to be silently unverified, printing nothing.
+  expect_fail "unclaimed root .sty"        G bash -c 'printf "%% x\n" > orphan.sty'
+
+  # E1/E2 need the network, so stub curl on PATH inside the throwaway tree.
+  # Without these the only exercise they get is the monthly cron against live
+  # CTAN, where a regression surfaces up to 30 days late.
+  expect_fail_online() {
+    local label=$1 pattern=$2 stub=$3 tmp out fake
+    tmp=$(mktemp -d); fake=$(mktemp -d)
+    mkdir -p "$tmp/original/patches" "$tmp/thumbnails" "$tmp/scripts"
+    cp -r "$ROOT/original/." "$tmp/original/"
+    cp "$ROOT"/cas-*.cls "$ROOT"/cas-common.sty "$ROOT"/cas-model2-names.bst "$tmp/"
+    cp "$ROOT"/elsarticle.cls "$ROOT"/elsarticle-*.bst "$tmp/"
+    cp "$ROOT"/thumbnails/*.jpeg "$tmp/thumbnails/"
+    cp "$ROOT/scripts/verify-upstream.sh" "$tmp/scripts/"
+    printf '%s\n' '#!/bin/sh' "$stub" > "$fake/curl"; chmod +x "$fake/curl"
+    out=$(ROOT="$tmp" PATH="$fake:$PATH" bash "$tmp/scripts/verify-upstream.sh" --online 2>&1)
+    if grep -q "^FAIL  $pattern" <<<"$out"; then
+      printf 'ok    rejection test: %s\n' "$label"
+    else
+      printf 'FAIL  rejection test: %s was NOT caught\n' "$label"
+      rc=1
+    fi
+    rm -rf "$tmp" "$fake"
+  }
+
+  # CTAN reports a version we do not vendor.
+  expect_fail_online "CTAN version drift" E1 \
+    'case "$*" in *ctan.org/json*) echo "{\"version\":{\"number\":\"99.9\"}}"; exit 0;; esac; echo 000'
+  # Mirrors answer with a valid but wrong zip: must FAIL, not warn.
+  expect_fail_online "every mirror serves wrong bytes" E2 \
+    'for a in "$@"; do case "$a" in *ctan.org/json*) exec /usr/bin/curl "$@";; esac; done
+     o=""; p=""; for a in "$@"; do [ "$p" = "-o" ] && o="$a"; p="$a"; done
+     case "$*" in *els-cas-templates.zip) cp '"$ROOT"'/original/elsarticle.zip "$o";;
+                  *elsarticle.zip) cp '"$ROOT"'/original/els-cas-templates.zip "$o";; esac
+     echo 200'
 
   if [ "$rc" -eq 0 ]; then
     echo "PASS: the verifier rejects every seeded defect."

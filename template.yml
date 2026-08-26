@@ -109,9 +109,14 @@ doc:
       URLs are emitted verbatim; ensure they are well-formed.
   - id: affiliations
     description: >
-      List of affiliations with: name/institution, department, address, city,
-      state, postal_code, country, ror, isni, ringgold. Special LaTeX characters
-      in string fields are escaped automatically.
+      List of affiliations. The fields this template emits into LaTeX are
+      name/institution, department, address, city, state, postal_code and
+      country; special characters in them are escaped automatically.
+
+      `ror`, `isni` and `ringgold` are accepted by MyST and appear in the HTML
+      and project metadata, but are NOT rendered in the PDF: neither cas-common
+      nor elsarticle defines an \affiliation key for a persistent identifier.
+      Setting them is harmless; expecting them in the typeset output is not.
   - id: abstract
     description: >
       Article abstract as a simple string (100-300 words). Either this or

@@ -100,8 +100,8 @@ jobs:
           done
           # nullglob means zero logs iterates zero times and passes. A build
           # that wrote no logs at all must fail here, not sail through.
-          if [ "$n" -lt 5 ]; then
-            echo "::error::only $n compile log(s) found; expected at least 5"
+          if [ "$n" -lt 6 ]; then
+            echo "::error::only $n compile log(s) found; expected at least 6"
             exit 1
           fi
           if [ "$fail" -ne 0 ]; then
@@ -109,10 +109,10 @@ jobs:
             exit 1
           fi
 
-      - name: Verify all five exports produced PDFs
+      - name: Verify all six exports produced PDFs
         run: |
           set -e
-          for name in sample-sc sample-dc sample-sc-numbers sample-long sample-elsarticle; do
+          for name in sample-sc sample-dc sample-sc-numbers sample-long sample-elsarticle sample-elsarticle-5p; do
             f="example/exports/${name}.pdf"
             if [ ! -s "$f" ]; then
               echo "::error::$f is missing or empty"
@@ -129,8 +129,8 @@ jobs:
           sudo apt-get install -y --no-install-recommends poppler-utils imagemagick
           ./scripts/check-ink.sh --self-test
           fail=0
-          for name in sample-sc sample-dc sample-sc-numbers sample-long sample-elsarticle; do
-            ./scripts/check-ink.sh "example/exports/${name}.pdf" 1 0.99 || fail=1
+          for name in sample-sc sample-dc sample-sc-numbers sample-long sample-elsarticle sample-elsarticle-5p; do
+            ./scripts/check-ink.sh "example/exports/${name}.pdf" 1 0.8 || fail=1
           done
           exit "$fail"
 
