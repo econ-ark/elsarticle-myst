@@ -187,6 +187,11 @@
 
 \printcredits
 
+[# if parts.ai_declaration #]
+\section*{Declaration of generative AI and AI-assisted technologies in the manuscript preparation process}
+[-parts.ai_declaration-]
+[# endif #]
+
 \bibliographystyle{cas-model2-names}
 [# if doc.bibliography #]
 \bibliography{[-doc.bibliography | join(", ")-]}

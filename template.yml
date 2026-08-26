@@ -67,6 +67,12 @@ parts:
     description: >
       Acknowledgments section, rendered as a first-page unnumbered footnote.
       Content appears at bottom of title page.
+  - id: ai_declaration
+    description: >
+      Body text of the declaration of generative AI and AI-assisted
+      technologies. Rendered as an unnumbered section between the CRediT
+      statement and the references, per Elsevier placement guidance. Supply
+      only the statement text; the section heading is emitted by the template.
 doc:
   - id: title
     required: true
