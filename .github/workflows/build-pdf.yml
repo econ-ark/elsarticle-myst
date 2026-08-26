@@ -52,6 +52,15 @@ jobs:
             echo "l3kernel present"
           fi
 
+      # Must run after TeX Live: check F regenerates elsarticle.cls with latex
+      # and SKIPS if latex is missing, which would read as a pass.
+      - name: Verify upstream sources are pristine and patches match
+        run: |
+          ./scripts/verify-upstream.sh --self-test
+          ./scripts/verify-upstream.sh | tee /tmp/verify.log
+          grep -q '^skip' /tmp/verify.log && { echo "::error::a check was skipped"; exit 1; }
+          exit 0
+
       - name: Build example PDFs
         working-directory: example
         run: |
@@ -78,10 +87,10 @@ jobs:
             exit 1
           fi
 
-      - name: Verify all four exports produced PDFs
+      - name: Verify all five exports produced PDFs
         run: |
           set -e
-          for name in sample-sc sample-dc sample-sc-numbers sample-long; do
+          for name in sample-sc sample-dc sample-sc-numbers sample-long sample-elsarticle; do
             f="example/exports/${name}.pdf"
             if [ ! -s "$f" ]; then
               echo "::error::$f is missing or empty"
@@ -89,6 +98,19 @@ jobs:
             fi
             echo "ok: $f ($(stat -c '%s' "$f") bytes)"
           done
+
+      # A blank graphical abstract passes every other gate: build exits 0, no
+      # LaTeX error is logged, and pdfimages even lists the image as present.
+      # Only rasterising the page catches it.
+      - name: Verify the graphical abstract page is not blank
+        run: |
+          sudo apt-get install -y --no-install-recommends poppler-utils imagemagick
+          ./scripts/check-ink.sh --self-test
+          fail=0
+          for name in sample-sc sample-dc sample-sc-numbers sample-long sample-elsarticle; do
+            ./scripts/check-ink.sh "example/exports/${name}.pdf" 1 0.99 || fail=1
+          done
+          exit "$fail"
 
       - name: Upload PDFs as artifact
         if: always()
