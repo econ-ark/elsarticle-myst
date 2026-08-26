@@ -94,11 +94,22 @@ extract() {
 }
 
 do_update() {
-  local up
+  local up tmp rc
   up=$(extract)
+  # extract()'s `exit 2` only leaves the command substitution, so a failed
+  # unzip arrives here as an empty $up. Without this guard the redirection
+  # below truncates each patch record before diff errors on a bogus path.
+  [ -n "$up" ] && [ -d "$up" ] || { echo "extract failed; refusing to rewrite patches" >&2; exit 2; }
   for f in "${PATCHED[@]}"; do
-    diff -u --label "upstream/$f" --label "root/$f" "$up/$f" "$ROOT/$f" \
-      > "$ROOT/original/patches/$f.patch"
+    tmp=$(mktemp)
+    diff -u --label "upstream/$f" --label "root/$f" "$up/$f" "$ROOT/$f" > "$tmp"
+    rc=$?
+    # diff: 0 = identical, 1 = differences, 2 = trouble. Only move on 0 or 1,
+    # so a failed diff can never replace a good patch record with an empty one.
+    if [ "$rc" -gt 1 ]; then
+      rm -f "$tmp"; echo "diff failed for $f; patch record left untouched" >&2; exit 2
+    fi
+    mv "$tmp" "$ROOT/original/patches/$f.patch"
     echo "wrote original/patches/$f.patch"
   done
   ( cd "$ROOT/original" && sha256sum els-cas-templates.zip elsarticle.zip "${LOOSE[@]}" > SHA256SUMS )
@@ -281,7 +292,10 @@ do_self_test() {
     rm -rf "$tmp"
   }
 
-  expect_fail "modified upstream zip"      A bash -c 'printf x >> original/els-cas-templates.zip'
+  # Corrupt the checksum file, not the zip: appending to the zip only reaches
+  # check A if unzip tolerates trailing garbage, which ties this case to zip
+  # format tolerance rather than to check A's own comparison.
+  expect_fail "checksum mismatch in original/" A bash -c 'sed -i "s/^./0/" original/SHA256SUMS'
   # Also refreshes SHA256SUMS, so check A passes and only B can catch this one.
   expect_fail "modified original/*.tex"    B bash -c 'printf "%% x\n" >> original/cas-sc-template.tex; (cd original && sha256sum els-cas-templates.zip elsarticle.zip cas-sc-template.tex cas-dc-template.tex > SHA256SUMS)'
   expect_fail "drift in unpatched .bst"    C bash -c 'printf "%% x\n" >> cas-model2-names.bst'

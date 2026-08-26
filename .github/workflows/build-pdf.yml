@@ -56,14 +56,25 @@ jobs:
       # and SKIPS if latex is missing, which would read as a pass.
       - name: Verify upstream sources are pristine and patches match
         run: |
+          # GitHub's default shell is `bash -e {0}` with NO pipefail, so
+          # `verifier | tee` would report tee's status and every FAIL would
+          # go green. Do not remove this line.
+          set -eo pipefail
           ./scripts/verify-upstream.sh --self-test
           ./scripts/verify-upstream.sh | tee /tmp/verify.log
-          grep -q '^skip' /tmp/verify.log && { echo "::error::a check was skipped"; exit 1; }
-          exit 0
+          if grep -q '^skip' /tmp/verify.log; then
+            echo "::error::a check was skipped rather than run"
+            exit 1
+          fi
 
       - name: Build example PDFs
         working-directory: example
         run: |
+          # The exports are git-tracked, so a checkout already contains last
+          # commit's PDFs. Without deleting them first, a build that produces
+          # nothing leaves stale artifacts for the later gates to "verify".
+          set -eo pipefail
+          rm -f exports/*.pdf
           myst build sample-article.md --pdf --force 2>&1 | tee build.stdout.log
 
       - name: Fail on LaTeX errors in compile logs
@@ -71,10 +82,15 @@ jobs:
           set -e
           shopt -s nullglob globstar
           fail=0
+          n=0
           for log in example/exports/*_pdf_logs/*.log example/exports/*_pdf_tex/*.log; do
             [ -f "$log" ] || continue
+            n=$((n + 1))
             echo "::group::$log"
-            if grep -E 'Misplaced alignment tab character|Undefined control sequence|LaTeX Error:|Emergency stop|! Package .* Error|\*\*\* \(Job aborted' "$log"; then
+            # '^! ' is TeX's own fatal-error convention and a strict superset of
+            # the named messages below. Without it "Missing $ inserted" and
+            # "Runaway argument" score zero here and ship a broken PDF.
+            if grep -E '^! |Misplaced alignment tab character|Undefined control sequence|LaTeX Error:|Emergency stop|! Package .* Error|\*\*\* \(Job aborted' "$log"; then
               echo "::error file=$log::LaTeX errors found"
               fail=1
             else
@@ -82,6 +98,12 @@ jobs:
             fi
             echo "::endgroup::"
           done
+          # nullglob means zero logs iterates zero times and passes. A build
+          # that wrote no logs at all must fail here, not sail through.
+          if [ "$n" -lt 5 ]; then
+            echo "::error::only $n compile log(s) found; expected at least 5"
+            exit 1
+          fi
           if [ "$fail" -ne 0 ]; then
             echo "One or more compile logs contained errors. See annotations above."
             exit 1

@@ -24,7 +24,13 @@ jobs:
 
       - name: Rejection-test the checker, then check against CTAN
         run: |
+          # GitHub's default shell is `bash -e {0}` with NO pipefail, so
+          # `verifier | tee` would report tee's status and every FAIL would
+          # go green. Do not remove this line.
+          set -eo pipefail
           ./scripts/verify-upstream.sh --self-test
           ./scripts/verify-upstream.sh --online | tee /tmp/verify.log
-          grep -q '^skip' /tmp/verify.log && { echo "::error::a check was skipped"; exit 1; }
-          exit 0
+          if grep -q '^skip' /tmp/verify.log; then
+            echo "::error::a check was skipped rather than run"
+            exit 1
+          fi
