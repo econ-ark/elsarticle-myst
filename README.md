@@ -1,6 +1,6 @@
 # Elsevier CAS Template for MyST Markdown
 
-A comprehensive MyST Markdown template for Elsevier journal articles using the CAS (Content Acquisition System) document classes.
+A MyST Markdown template for Elsevier journal articles, covering both the CAS (Complex Article Service) classes and the elsarticle class.
 
 ![Template Preview](thumbnail.png)
 
@@ -29,7 +29,7 @@ A comprehensive MyST Markdown template for Elsevier journal articles using the C
 
 - **MyST Markdown**: `mystmd >= 1.6` (install via `pip install 'mystmd>=1.6'` or `npm install -g mystmd@^1.6`). Tested against `1.9.0`.
 - **LaTeX Distribution**: TeX Live 2022 or later, or MiKTeX 22.1 or later, with a current `l3kernel`. Required for PDF export.
-- **XeLaTeX or LuaLaTeX**: Required for Unicode support and the `stix` / `charis` fonts shipped with the CAS classes. `pdflatex` will emit a warning and silently lose Unicode characters.
+- **XeLaTeX or LuaLaTeX**: Required for Unicode support and the `stix` / `charis` fonts the CAS classes load. `pdflatex` will emit a warning and silently lose Unicode characters.
 - **Python**: 3.9 or later (if installing via `pip`).
 - **Node.js**: 18 or later (if installing via `npm`).
 
@@ -90,10 +90,49 @@ myst build your-article.md --pdf
 
 | Option | Type | Default | Description |
 |--------|------|---------|-------------|
+| `document_class` | choice | `cas` | Which Elsevier class: `cas` or `elsarticle` |
 | `columns` | choice | `single` | Layout: `single` or `double` column |
 | `citation_style` | choice | `authoryear` | Citation style: `authoryear` or `numbers` |
-| `longmktitle` | boolean | `false` | Use if frontmatter spans multiple pages |
-| `graphical_abstract` | file | — | Path to graphical abstract image |
+| `longmktitle` | boolean | `false` | Use if frontmatter spans multiple pages. CAS only |
+| `graphical_abstract` | file | (none) | Path to graphical abstract image. See the known limitation below |
+| `elsarticle_layout` | choice | `preprint` | `preprint`, `1p`, `3p`, or `5p`. elsarticle only |
+| `review` | boolean | `false` | Double line spacing for review copies. elsarticle only |
+| `journal` | string | (none) | Target journal for the preprint footer. elsarticle only |
+
+### Graphical abstract images must not be 16-bit-plus-alpha PNGs
+
+A PNG that is **both** 16 bits per channel **and** carries an alpha channel
+disappears from the graphical abstract page under XeLaTeX. The heading, title,
+and authors render, the image is embedded in the PDF file, and no warning or
+error is issued, but nothing is painted. Convert before use:
+
+```bash
+magick your-abstract.png -depth 8 your-abstract.png    # keeps transparency
+```
+
+The trigger is narrow and was isolated by bisection: 16-bit without alpha
+renders, 8-bit with alpha renders, only the two together fail. It is a
+`xdvipdfmx` interaction with the deferred box both classes use to hold the
+graphical abstract; the same image renders correctly in the document body, and
+the same file builds fine under `pdflatex`. `\leavevmode`, `\mbox`,
+`\centerline`, an explicit width, and `\savebox`/`\usebox` make no difference.
+
+The example image in `example/images/` is stored at 8-bit for this reason.
+
+### Choosing a class
+
+`cas` is Elsevier's current bundle and the richer of the two: it supports CRediT
+roles (`\credit` / `\printcredits`), a running short title, and short authors.
+`elsarticle` supports none of those, and the template drops them rather than
+emitting undefined macros. Everything else carries across: abstract, highlights,
+graphical abstract, keywords, ORCID, corresponding-author and equal-contributor
+footnotes, and author notes all work under both.
+
+Which one a journal wants is the deciding factor, and both are accepted by
+Elsevier's submission system. Worth knowing when you have a free choice:
+elsarticle is at 3.5 (January 2026) while CAS has been frozen at 2.4 since May
+2024, still calling an expl3 macro the LaTeX3 kernel removed in 2022. See
+[`PATCHES.md`](PATCHES.md).
 
 ## Document Structure
 

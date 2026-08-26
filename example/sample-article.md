@@ -1,8 +1,8 @@
 ---
-title: A Comprehensive Guide to MyST Markdown with Elsevier CAS Templates
+title: MyST Markdown with the Elsevier CAS and elsarticle Classes
 subtitle: Feature Reference and Template Examples
 short_title: MyST and Elsevier Guide
-description: A comprehensive template demonstrating MyST Markdown integration with Elsevier CAS journal templates.
+description: A template demonstrating MyST Markdown integration with Elsevier's CAS and elsarticle journal classes.
 date: 2026-01-08
 authors:
   - id: alujan
@@ -72,7 +72,7 @@ license:
 open_access: true
 github: https://github.com/econ-ark/elsarticle-myst
 abstract: |
-  This article demonstrates MyST Markdown integration with Elsevier's CAS templates, showcasing typography, math, cross-references, admonitions, proofs, tables, figures, and code blocks.
+  This article demonstrates MyST Markdown integration with Elsevier's CAS and elsarticle classes, covering typography, math, cross-references, admonitions, proofs, tables, figures, and code blocks.
 keypoints:
   - MyST Markdown enables reproducible scientific writing
   - Seamless export to multiple journal formats
@@ -86,7 +86,7 @@ math:
   '\argmax': '\operatorname{argmax}'
 abbreviations:
   MyST: Markedly Structured Text
-  CAS: Content Acquisition System
+  CAS: Complex Article Service
   ORCID: Open Researcher and Contributor ID
   DOI: Digital Object Identifier
   PDF: Portable Document Format
@@ -132,6 +132,14 @@ exports:
     columns: single
     longmktitle: true
     graphical_abstract: images/sample-figure.png
+  - id: pdf-els
+    format: pdf+tex
+    template: ..
+    output: exports/sample-elsarticle.pdf
+    document_class: elsarticle
+    elsarticle_layout: preprint
+    journal: Journal of Economic Dynamics and Control
+    graphical_abstract: images/sample-figure.png
 ---
 
 (sec-introduction)=
@@ -141,7 +149,7 @@ This document demonstrates the full integration of {abbr}`MyST` Markdown {cite:p
 
 ## Background
 
-Scientific publishing has traditionally relied on LaTeX for high-quality typesetting {cite:p}`pandocscholar2017`. However, the learning curve and complexity of LaTeX can be a barrier for many researchers. MyST Markdown bridges this gap by providing:
+Scientific publishing has traditionally relied on LaTeX for high-quality typesetting {cite:p}`pandocscholar2017`. However, the learning curve and complexity of LaTeX can be a barrier for authors who write outside it day to day. MyST Markdown bridges this gap by providing:
 
 1. A familiar Markdown syntax based on CommonMark {cite:p}`markdown2004`
 2. Rich scientific features (equations, citations, cross-references)
@@ -152,7 +160,7 @@ Reproducible research workflows have become increasingly important, with tools l
 :::{note}
 :class: dropdown
 :open: true
-**About this document**: This article serves as both a comprehensive guide and a test file for the Elsevier CAS MyST template. Every feature demonstrated here should render correctly in both the web preview and PDF exports.
+**About this document**: This article is both a feature reference and a test file for the Elsevier MyST template. Every feature shown here should render correctly in the web preview and in all five PDF exports, under CAS and elsarticle alike.
 :::
 
 (sec-typography)=
@@ -173,7 +181,7 @@ Fleas\
 Adam\
 Had 'em.
 
-—Strickland Gillilan
+---Strickland Gillilan
 
 ## Quotations
 
@@ -181,7 +189,7 @@ Block quotes are useful for highlighting important passages:
 
 > We know what we are, but know not what we may be.
 >
-> — William Shakespeare, Hamlet
+> --- William Shakespeare, Hamlet
 
 :::{pull-quote}
 The important thing is not to stop questioning. Curiosity has its own reason for existing.
@@ -190,7 +198,7 @@ The important thing is not to stop questioning. Curiosity has its own reason for
 :::{epigraph}
 In the middle of difficulty lies opportunity.
 
-— Albert Einstein
+--- Albert Einstein
 :::
 
 ## Definition Lists
@@ -207,7 +215,7 @@ jtex
 : A Jinja-based templating system for LaTeX documents
 
 CAS
-: Content Acquisition System, Elsevier's journal template system
+: Complex Article Service, the Elsevier workflow the cas-sc and cas-dc classes target
 
 ## Footnotes
 
@@ -234,7 +242,7 @@ The templates support full LaTeX math with custom macros defined in frontmatter.
 
 ## Inline Mathematics
 
-Inline math like $E = mc^2$ or $\E[X] = \mu$ works seamlessly. Using our custom macros: for $x \in \R$, we have $\Var(X) = \E[X^2] - (\E[X])^2$ and $\Cov(X, Y) = \E[XY] - \E[X]\,\E[Y]$.
+Inline math like $E = mc^2$ or $\E[X] = \mu$ sets in running text without extra markup. Using our custom macros: for $x \in \R$, we have $\Var(X) = \E[X^2] - (\E[X])^2$ and $\Cov(X, Y) = \E[XY] - \E[X]\,\E[Y]$.
 
 ## Display Equations
 
@@ -369,7 +377,7 @@ This is a note admonition. Use it to highlight supplementary information that re
 :::
 
 :::{warning}
-This is a warning. Use it to alert readers about potential pitfalls or important caveats in your methodology.
+Use a warning to alert readers about pitfalls or caveats in your methodology.
 :::
 
 :::{tip}
@@ -549,7 +557,7 @@ For complex tables requiring advanced features, use raw LaTeX blocks. The CAS te
 ```{raw} latex
 \begin{table}[h]
 \centering
-\caption{Comprehensive table showcasing CAS template features}
+\caption{Table features: multi-column headers, aligned decimals, and stacked cells}
 \label{tbl:complex}
 \begin{tabular}{@{}l l c D{.}{.}{2.2} r @{}}
 \toprule
