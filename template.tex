@@ -245,17 +245,23 @@
 \end{highlights}
 [# endif #]
 
-%% The environment is `keyword' (singular) in elsarticle and `keywords'
-%% (plural) in the CAS classes. Both take \sep-separated entries.
-[# if doc.keywords #]
+%% `keyword' (singular) in elsarticle, `keywords' (plural) in CAS; both take
+%% \sep-separated entries. JEL codes must sit INSIDE the environment, since
+%% elsarticle defines \JEL only there. The classes disagree on its signature.
+[# if doc.keywords or parts.jel_codes #]
 [# if options.document_class == 'elsarticle' #]
+%% elsarticle's \JEL is an argument-less SWITCH (label, then following text);
+%% cas-common's is \NewDocumentCommand{m} and needs the braced group. Passing
+%% the wrong one either typesets literal braces or swallows the codes.
 \begin{keyword}
-[-doc.keywords | join(" \\sep ")-]
-\end{keyword}
+[# if doc.keywords #][-doc.keywords | join(" \\sep ")-]
+[# endif #][# if parts.jel_codes #]\JEL [-parts.jel_codes | trim-]
+[# endif #]\end{keyword}
 [# else #]
 \begin{keywords}
-[-doc.keywords | join(" \\sep ")-]
-\end{keywords}
+[# if doc.keywords #][-doc.keywords | join(" \\sep ")-]
+[# endif #][# if parts.jel_codes #]\JEL{[-parts.jel_codes | trim-]}
+[# endif #]\end{keywords}
 [# endif #]
 [# endif #]
 

@@ -93,6 +93,7 @@ abbreviations:
 thumbnail: images/thumbnail.png
 parts:
   title_note: Prepared as a demonstration of the elsarticle-myst template.
+  jel_codes: D14; C61; G11
   ai_declaration: >-
     During the preparation of this work the authors used no generative AI or
     AI-assisted technologies. This statement exercises the ai_declaration part,

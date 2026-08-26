@@ -70,6 +70,18 @@ parts:
     description: >
       Acknowledgments section, rendered as a first-page unnumbered footnote.
       Content appears at bottom of title page.
+  - id: jel_codes
+    description: >
+      JEL classification codes, printed after the keywords. Supply a plain
+      STRING exactly as it should appear, e.g. "D14; C61; G11"; a YAML list
+      renders as a bullet list and is not what journals expect.
+
+      Both classes emit the label themselves and it reads "JEL:", not "JEL
+      classification:". Changing that would mean patching the class files,
+      which this repository deliberately keeps to the minimum in PATCHES.md.
+
+      Renders inside the keyword environment, which is where both classes
+      require it. Works with or without doc.keywords.
   - id: ai_declaration
     description: >
       Body text of the declaration of generative AI and AI-assisted
