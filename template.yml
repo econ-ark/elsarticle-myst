@@ -1,11 +1,13 @@
 jtex: v1
-title: Elsevier CAS Template
+title: Elsevier Template (CAS and elsarticle)
 description: >
-  Elsevier CAS (Complex Article Style) template for journal articles.
-  Supports both single column (cas-sc) and double column (cas-dc) layouts,
-  author-year or numeric citation styles, ORCID identifiers, CRediT roles,
-  research highlights, graphical abstracts, and keywords.
-version: 1.1.0
+  Elsevier journal article template covering both of Elsevier's LaTeX
+  classes. CAS (Complex Article Service) offers single column (cas-sc) and
+  double column (cas-dc) layouts with CRediT roles; elsarticle offers the
+  preprint and 1p/3p/5p production layouts. Both support author-year or
+  numeric citations, ORCID identifiers, research highlights, graphical
+  abstracts, and keywords.
+version: 1.2.0
 license: LPPL-1.3c
 source: https://www.elsevier.com/authors/policies-and-guidelines/latex-instructions
 thumbnail: ./thumbnail.png
@@ -23,6 +25,7 @@ tags:
   - one-column
   - two-column
   - cas
+  - elsarticle
 parts:
   - id: abstract
     description: >
@@ -121,6 +124,45 @@ doc:
     description: |
       Path(s) to BibTeX bibliography files.
 options:
+  - id: document_class
+    type: choice
+    title: Document Class
+    description: >
+      Which Elsevier class to typeset with. `cas` uses the CAS bundle
+      (cas-sc / cas-dc, v2.4) and supports CRediT roles, short title, and
+      short authors. `elsarticle` uses the elsarticle class (v3.5), which
+      has none of those but is the more actively maintained of the two and
+      is what many journals' author guidelines still name.
+    default: cas
+    choices:
+      - cas
+      - elsarticle
+  - id: elsarticle_layout
+    type: choice
+    title: elsarticle Layout
+    description: >
+      Layout for the elsarticle class; ignored when document_class is `cas`.
+      `preprint` is the double-spaced submission format. `1p`, `3p`, and `5p`
+      are Elsevier's production layouts, in increasing density.
+    default: preprint
+    choices:
+      - preprint
+      - 1p
+      - 3p
+      - 5p
+  - id: review
+    type: boolean
+    title: Review Mode
+    description: >
+      Double line spacing for review copies. elsarticle only; ignored when
+      document_class is `cas`.
+    default: false
+  - id: journal
+    type: string
+    title: Journal Name
+    description: >
+      Target journal, printed in the elsarticle preprint footer. elsarticle
+      only; ignored when document_class is `cas`.
   - id: columns
     type: choice
     title: Column Layout
@@ -152,22 +194,57 @@ files:
   - cas-dc.cls
   - cas-common.sty
   - cas-model2-names.bst
+  - elsarticle.cls
+  - elsarticle-num.bst
+  - elsarticle-harv.bst
+  - elsarticle-num-names.bst
   - thumbnails/cas-email.jpeg
   - thumbnails/cas-facebook.jpeg
   - thumbnails/cas-gplus.jpeg
   - thumbnails/cas-linkedin.jpeg
   - thumbnails/cas-twitter.jpeg
   - thumbnails/cas-url.jpeg
-# Packages listed here are those the template explicitly adds beyond what
-# cas-sc.cls / cas-dc.cls already \RequirePackage. The .cls already loads
-# graphicx, amsmath/amsfonts/amssymb, expl3, xparse, l3regex, etoolbox,
-# booktabs, makecell, multirow, array, colortbl, dcolumn, stfloats, xspace,
-# xstring, footmisc, xcolor (with [svgnames,dvipsnames]), and hyperref (with
-# [colorlinks]). Listing them again here would risk option clashes.
+# Every package already loaded by template.tex or a class/style file in `files:`.
+# jtex uses this to SUPPRESS its own \usepackage emission, so a missing entry
+# means MyST re-loads a package the class already had. Populate via `jtex check`.
 packages:
   - algorithm
   - algpseudocode
+  - amsfonts
+  - amsmath
+  - amssymb
+  - array
+  - balance
+  - booktabs
+  - caption
+  - cas-common
+  - charis
+  - colortbl
+  - dcolumn
+  - endfloat
+  - etoolbox
+  - expl3
+  - fontenc
   - fontspec
+  - footmisc
+  - geometry
+  - graphicx
+  - hyperref
   - iftex
+  - inconsolata
+  - l3regex
+  - makecell
+  - moreverb
+  - multirow
   - natbib
+  - setspace
+  - stfloats
+  - stix
+  - times
+  - txfonts
+  - wrapfig
+  - xcolor
+  - xparse
+  - xspace
+  - xstring
 myst: v1

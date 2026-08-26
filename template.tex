@@ -1,6 +1,6 @@
-%% Elsevier CAS Template for MyST (single and double column)
-%% Based on cas-sc-template.tex / cas-dc-template.tex
-%% Original copyright 2019-2024 Elsevier Ltd (LPPL-1.3c)
+%% Elsevier template for MyST: CAS (cas-sc, cas-dc) and elsarticle
+%% Based on cas-sc-template.tex, cas-dc-template.tex, elsarticle-template-num.tex
+%% Original copyright 2007-2024 Elsevier Ltd (LPPL-1.3c)
 %%
 %% LaTeX escaping of plain-text frontmatter fields (short_title, credit
 %% roles, author notes, affiliation strings) is applied inline via Jinja
@@ -11,7 +11,11 @@
 %% here; the AST already handles LaTeX special characters in those
 %% contexts.
 
-[# if options.columns == 'double' #]
+[# if options.document_class == 'elsarticle' #]
+%% Citation style rides on the class options here (\@biboptions), because
+%% elsarticle loads natbib itself. See the package block below.
+\documentclass[[- options.elsarticle_layout -],[# if options.columns == 'double' #]twocolumn,[# endif #][# if options.citation_style == 'numbers' #]number[# else #]authoryear[# endif #][# if options.review #],review[# endif #]]{elsarticle}
+[# elif options.columns == 'double' #]
 \documentclass[a4paper,fleqn[# if options.longmktitle #],longmktitle[# endif #]]{cas-dc}
 [# else #]
 \documentclass[a4paper,fleqn[# if options.longmktitle #],longmktitle[# endif #]]{cas-sc}
@@ -22,7 +26,7 @@
 %% may mangle non-ASCII characters; warn loudly so users notice.
 \usepackage{iftex}
 \ifPDFTeX
-  \PackageWarningNoLine{cas-myst-template}{%
+  \PackageWarningNoLine{elsevier-myst-template}{%
     pdflatex detected. This template targets XeLaTeX or LuaLaTeX.\MessageBreak
     Unicode in author names, titles, and affiliations may not render\MessageBreak
     correctly. Re-run with `xelatex` or `lualatex` for full support%
@@ -32,35 +36,78 @@
   \usepackage{fontspec}
 \fi
 
-[# if options.citation_style == 'numbers' #]
+[# if options.document_class == 'elsarticle' #]
+%% natbib is already loaded by elsarticle.cls; loading it again would clash.
+%% cas-sc.cls loads the table stack below, elsarticle does not, and MyST emits
+%% markup needing it either way. Order: array first, xcolor before colortbl.
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{array}
+\usepackage{booktabs}
+\usepackage{makecell}
+\usepackage{multirow}
+\usepackage[svgnames,dvipsnames]{xcolor}
+\usepackage{colortbl}
+\usepackage{dcolumn}
+\usepackage{stfloats}
+\usepackage{xspace}
+\usepackage{xstring}
+\usepackage{etoolbox}
+\usepackage[colorlinks,allcolors=blue]{hyperref}
+
+%% CAS has a `bio' environment for author biographies; elsarticle has none,
+%% so the same part would die on an undefined control sequence. The argument
+%% is CAS's photo path, unused here. Shim keeps the content rather than drop it.
+\newenvironment{bio}[1]{\par\medskip\small\noindent\ignorespaces}{\par\medskip}
+[# elif options.citation_style == 'numbers' #]
 \usepackage[numbers]{natbib}
 [# else #]
 \usepackage[authoryear,longnamesfirst]{natbib}
+[# endif #]
+
+[# if options.document_class == 'elsarticle' and options.journal #]
+\journal{[-options.journal | replace("\\", "\\textbackslash{}") | replace("{", "\\{") | replace("}", "\\}") | replace("&", "\\&") | replace("%", "\\%") | replace("$", "\\$") | replace("#", "\\#") | replace("_", "\\_") | replace("~", "\\textasciitilde{}") | replace("^", "\\textasciicircum{}")-]}
 [# endif #]
 
 %% Algorithm support
 \usepackage{algorithm}
 \usepackage{algpseudocode}
 
+%% MyST renders a blockquote attribution as \caption* inside a figure. Neither
+%% Elsevier class defines the starred form, so without this LaTeX typesets
+%% "Figure N: *" and burns a figure number on every quote.
+\usepackage{caption}
+
 [- IMPORTS -]
 
 \begin{document}
+[# if options.document_class != 'elsarticle' #]
 \let\WriteBookmarks\relax
 \def\floatpagefraction{1}
 \def\textfraction{.001}
+[# endif #]
 
-%% --- Footnote-mark index allocation -----------------------------------
-%% CAS uses two independent mark spaces (\cormark and \fnmark), so they
-%% cannot collide with each other. We allocate disjoint integer ranges
-%% inside the \fnmark space:
-%%   [1 .. N]                   per-author notes (loop.index)
-%%   [N+1]                      shared equal-contributor note
-%% where N is the author count. \cormark uses its own [1..]
-%% sequence indexed by corresponding-author order.
+[# if options.document_class == 'elsarticle' #]
+%% elsarticle needs every frontmatter declaration inside this environment; the
+%% CAS classes take them at top level. Everything down to \maketitle is shared.
+\begin{frontmatter}
+[# endif #]
+
+%% \cormark and \fnmark are independent mark spaces and cannot collide, so only
+%% \fnmark needs disjoint ranges: [1..N] per-author notes by loop.index, [N+1]
+%% the shared equal-contributor note, for N authors.
 [# set author_count = doc.authors | length if doc.authors else 0 #]
 [# set eq_fnmark = author_count + 1 #]
 [# set has_equal = doc.authors and (doc.authors | selectattr("equal_contributor") | list | length > 1) #]
+%% elsarticle resolves title-note, corresponding and footnote labels in ONE
+%% namespace shared with affiliations, so bare integers collide: \tnoteref{1}
+%% would render the affiliation mark. Prefixes are empty for CAS, which is safe.
+[# set tnp = 'tn' if options.document_class == 'elsarticle' else '' #]
+[# set corp = 'cor' if options.document_class == 'elsarticle' else '' #]
+[# set fnp = 'fn' if options.document_class == 'elsarticle' else '' #]
 
+[# if options.document_class != 'elsarticle' #]
+%% \shorttitle and \shortauthors are CAS-only; elsarticle has neither.
 [# if doc.short_title #]
 \shorttitle{[-doc.short_title | replace("\\", "\\textbackslash{}") | replace("{", "\\{") | replace("}", "\\}") | replace("&", "\\&") | replace("%", "\\%") | replace("$", "\\$") | replace("#", "\\#") | replace("_", "\\_") | replace("~", "\\textasciitilde{}") | replace("^", "\\textasciicircum{}")-]}
 [# else #]
@@ -71,15 +118,25 @@
 [# if doc.authors #]
 \shortauthors{[# for author in doc.authors #][-author.name.split(" ") | last | replace("\\", "\\textbackslash{}") | replace("{", "\\{") | replace("}", "\\}") | replace("&", "\\&") | replace("%", "\\%") | replace("$", "\\$") | replace("#", "\\#") | replace("_", "\\_") | replace("~", "\\textasciitilde{}") | replace("^", "\\textasciicircum{}")-][# if not loop.last #], [# endif #][# endfor #]}
 [# endif #]
+[# endif #]
 
+[# if options.document_class == 'elsarticle' #]
+%% elsarticle's \title takes no mode key and has no subtitle slot, so a
+%% subtitle is appended after a colon rather than silently dropped.
+\title{[-doc.title-][# if doc.subtitle #]: [-doc.subtitle-][# endif #][# if parts.title_note #]\tnoteref{[-tnp-]1}[# endif #]}
+[# else #]
 \title[mode=title]{[-doc.title-]}
 [# if doc.subtitle #]
 \title[mode=sub]{[-doc.subtitle-]}
 [# endif #]
+[# endif #]
 
+%% CAS marks the title separately; elsarticle carries \tnoteref inside \title.
 [# if parts.title_note #]
+[# if options.document_class != 'elsarticle' #]
 \tnotemark[1]
-\tnotetext[1]{[-parts.title_note-]}
+[# endif #]
+\tnotetext[[-tnp-]1]{[-parts.title_note-]}
 [# endif #]
 
 [# for author in doc.authors #]
@@ -89,6 +146,12 @@
 [#- if author.facebook -#][#- set author_opts = author_opts ~ (',' if author_opts else '') ~ 'facebook=' ~ author.facebook -#][#- endif -#]
 [#- if author.linkedin -#][#- set author_opts = author_opts ~ (',' if author_opts else '') ~ 'linkedin=' ~ author.linkedin -#][#- endif -#]
 [#- if author.twitter -#][#- set author_opts = author_opts ~ (',' if author_opts else '') ~ 'twitter=' ~ author.twitter -#][#- endif -#]
+%% Two CAS-only shapes here. The trailing [orcid=...] group: elsarticle's \author
+%% takes only the affiliation label, so a second group prints as literal text.
+%% The marks: elsarticle wants \corref/\fnref INSIDE the name group, not after.
+[# if options.document_class == 'elsarticle' #]
+\author[[- author.affiliations | join(",", "index") -]]{[-author.name-][# if author.corresponding #]\corref{[-corp-][-loop.index-]}[# endif #][# if author.note #]\fnref{[-fnp-][-loop.index-]}[# endif #][# if author.equal_contributor and has_equal #]\fnref{[-fnp-][-eq_fnmark-]}[# endif #]}
+[# else #]
 \author[[- author.affiliations | join(",", "index") -]]{[-author.name-]}[# if author_opts #][[- author_opts -]][# endif #]
 [# if author.corresponding #]
 \cormark[[-loop.index-]]
@@ -99,22 +162,23 @@
 [# if author.equal_contributor and has_equal #]
 \fnmark[[-eq_fnmark-]]
 [# endif #]
+[# endif #]
 [# if author.email #]
 \ead{[-author.email-]}
 [# endif #]
 [# if author.url #]
 \ead[url]{[-author.url-]}
 [# endif #]
-[# if author.roles #]
+[# if author.roles and options.document_class != 'elsarticle' #]
 \credit{[# for role in author.roles #][-role | replace("\\", "\\textbackslash{}") | replace("{", "\\{") | replace("}", "\\}") | replace("&", "\\&") | replace("%", "\\%") | replace("$", "\\$") | replace("#", "\\#") | replace("_", "\\_") | replace("~", "\\textasciitilde{}") | replace("^", "\\textasciicircum{}")-][# if not loop.last #], [# endif #][# endfor #]}
 [# endif #]
 [# endfor #]
 
 [# for affiliation in doc.affiliations #]
 [#- set has_address = affiliation.department or affiliation.address or affiliation.city or affiliation.postal_code or affiliation.state or affiliation.country -#]
-%% op={} is the organization-punctuation separator in cas-common.sty; setting it
-%% empty suppresses the trailing comma that would otherwise appear after a
-%% standalone organization name (no department/address/city/etc.).
+%% op={} is the organization-punctuation separator (cas-common.sty, and the same
+%% key in elsarticle). Empty suppresses the trailing comma after a standalone
+%% organization name with no department, address, or city.
 \affiliation[[-affiliation.index-]]{organization={[-affiliation.name | replace("\\", "\\textbackslash{}") | replace("{", "\\{") | replace("}", "\\}") | replace("&", "\\&") | replace("%", "\\%") | replace("$", "\\$") | replace("#", "\\#") | replace("_", "\\_") | replace("~", "\\textasciitilde{}") | replace("^", "\\textasciicircum{}")-]}[# if not has_address #],op={}[# endif #][# if affiliation.department #],
             department={[-affiliation.department | replace("\\", "\\textbackslash{}") | replace("{", "\\{") | replace("}", "\\}") | replace("&", "\\&") | replace("%", "\\%") | replace("$", "\\$") | replace("#", "\\#") | replace("_", "\\_") | replace("~", "\\textasciitilde{}") | replace("^", "\\textasciicircum{}")-]}[# endif #][# if affiliation.address #],
             addressline={[-affiliation.address | replace("\\", "\\textbackslash{}") | replace("{", "\\{") | replace("}", "\\}") | replace("&", "\\&") | replace("%", "\\%") | replace("$", "\\$") | replace("#", "\\#") | replace("_", "\\_") | replace("~", "\\textasciitilde{}") | replace("^", "\\textasciicircum{}")-]}[# endif #][# if affiliation.city #],
@@ -126,15 +190,15 @@
 
 [# for author in doc.authors #]
 [# if author.corresponding #]
-\cortext[[-loop.index-]]{Corresponding author}
+\cortext[[-corp-][-loop.index-]]{Corresponding author}
 [# endif #]
 [# if author.note #]
-\fntext[[-loop.index-]]{[-author.note | replace("\\", "\\textbackslash{}") | replace("{", "\\{") | replace("}", "\\}") | replace("&", "\\&") | replace("%", "\\%") | replace("$", "\\$") | replace("#", "\\#") | replace("_", "\\_") | replace("~", "\\textasciitilde{}") | replace("^", "\\textasciicircum{}")-]}
+\fntext[[-fnp-][-loop.index-]]{[-author.note | replace("\\", "\\textbackslash{}") | replace("{", "\\{") | replace("}", "\\}") | replace("&", "\\&") | replace("%", "\\%") | replace("$", "\\$") | replace("#", "\\#") | replace("_", "\\_") | replace("~", "\\textasciitilde{}") | replace("^", "\\textasciicircum{}")-]}
 [# endif #]
 [# endfor #]
 
 [# if has_equal #]
-\fntext[[-eq_fnmark-]]{These authors contributed equally to this work.}
+\fntext[[-fnp-][-eq_fnmark-]]{These authors contributed equally to this work.}
 [# endif #]
 
 [# if parts.acknowledgments #]
@@ -161,7 +225,10 @@
 \end{graphicalabstract}
 [# elif options.graphical_abstract #]
 \begin{graphicalabstract}
-\includegraphics{[-options.graphical_abstract-]}
+%% A PNG that is BOTH 16-bit and alpha silently fails to paint here under
+%% xdvipdfmx, in either class: it is embedded in the PDF but never drawn.
+%% Convert to 8-bit first. See "Graphical abstract images" in README.md.
+\includegraphics[width=\linewidth,keepaspectratio]{[-options.graphical_abstract-]}
 \end{graphicalabstract}
 [# endif #]
 
@@ -175,24 +242,44 @@
 \end{highlights}
 [# endif #]
 
+%% The environment is `keyword' (singular) in elsarticle and `keywords'
+%% (plural) in the CAS classes. Both take \sep-separated entries.
 [# if doc.keywords #]
+[# if options.document_class == 'elsarticle' #]
+\begin{keyword}
+[-doc.keywords | join(" \\sep ")-]
+\end{keyword}
+[# else #]
 \begin{keywords}
 [-doc.keywords | join(" \\sep ")-]
 \end{keywords}
 [# endif #]
+[# endif #]
 
+[# if options.document_class == 'elsarticle' #]
+%% \end{frontmatter} typesets the frontmatter; elsarticle has no \maketitle.
+\end{frontmatter}
+[# else #]
 \maketitle
+[# endif #]
 
 [-CONTENT-]
 
+[# if options.document_class != 'elsarticle' #]
 \printcredits
+[# endif #]
 
 [# if parts.ai_declaration #]
 \section*{Declaration of generative AI and AI-assisted technologies in the manuscript preparation process}
 [-parts.ai_declaration-]
 [# endif #]
 
+[# if options.document_class == 'elsarticle' #]
+%% elsarticle provides three styles; the numeric one has an author-name variant.
+\bibliographystyle{[# if options.citation_style == 'numbers' #]elsarticle-num[# else #]elsarticle-harv[# endif #]}
+[# else #]
 \bibliographystyle{cas-model2-names}
+[# endif #]
 [# if doc.bibliography #]
 \bibliography{[-doc.bibliography | join(", ")-]}
 [# endif #]
