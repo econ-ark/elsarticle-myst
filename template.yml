@@ -7,7 +7,7 @@ description: >
   preprint and 1p/3p/5p production layouts. Both support author-year or
   numeric citations, ORCID identifiers, research highlights, graphical
   abstracts, and keywords.
-version: 1.2.0
+version: 1.2.1
 license: LPPL-1.3c
 source: https://www.elsevier.com/authors/policies-and-guidelines/latex-instructions
 thumbnail: ./thumbnail.png
