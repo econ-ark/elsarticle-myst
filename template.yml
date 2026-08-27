@@ -70,18 +70,6 @@ parts:
     description: >
       Acknowledgments section, rendered as a first-page unnumbered footnote.
       Content appears at bottom of title page.
-  - id: jel_codes
-    description: >
-      JEL classification codes, printed after the keywords. Supply a plain
-      STRING exactly as it should appear, e.g. "D14; C61; G11"; a YAML list
-      renders as a bullet list and is not what journals expect.
-
-      Both classes emit the label themselves and it reads "JEL:", not "JEL
-      classification:". Changing that would mean patching the class files,
-      which this repository deliberately keeps to the minimum in PATCHES.md.
-
-      Renders inside the keyword environment, which is where both classes
-      require it. Works with or without doc.keywords.
   - id: ai_declaration
     description: >
       Body text of the declaration of generative AI and AI-assisted
@@ -134,6 +122,17 @@ doc:
       Article abstract as a simple string (100-300 words). Either this or
       parts.abstract is required. If parts.abstract is also provided, it takes
       precedence.
+  - id: tags
+    description: >
+      JEL classification codes, printed after the keywords as "JEL: ...".
+      A list such as [D14, C61, G11] is joined with "; ". This is MyST's
+      built-in tags key, reused rather than adding a custom one; if the paper
+      also needs tags for site navigation, those would appear here too.
+  - id: venue
+    description: >
+      Target journal. `venue.title` is emitted as elsarticle's \journal{},
+      which prints in the preprint footer. Ignored by the CAS classes, which
+      have no equivalent. MyST built-in; no custom option needed.
   - id: keywords
     description: |
       Article keywords (typically 3-6). Will be joined with \\sep in LaTeX.
@@ -174,12 +173,42 @@ options:
       Double line spacing for review copies. elsarticle only; ignored when
       document_class is `cas`.
     default: false
-  - id: journal
-    type: string
-    title: Journal Name
+  - id: blind
+    type: choice
+    title: Blinding
     description: >
-      Target journal, printed in the elsarticle preprint footer. elsarticle
-      only; ignored when document_class is `cas`.
+      Anonymised submission. `double` maps to the doubleblind class option in
+      both classes. `single` maps to singleblind, which only the CAS classes
+      define; under elsarticle it has no effect, because elsarticle ships no
+      singleblind option.
+
+      Blinding covers the TITLE BLOCK only. Author names in body content are
+      untouched, so parts.biography and any self-identifying text in the
+      manuscript must be removed by hand before submitting a blind copy.
+    default: none
+    choices:
+      - none
+      - single
+      - double
+  - id: class_options
+    type: string
+    title: Extra Class Options
+    description: >
+      Raw comma-separated options appended verbatim to \documentclass, for
+      anything without a named option above. This is deliberate: it covers
+      every remaining class option, and any Elsevier adds later, without
+      growing the template's key surface.
+
+      elsarticle: nopreprintline, final, times, endfloat, numafflabel,
+      longtitle, lefttitle, centertitle, reversenotenum.
+      CAS: final.
+
+      NOT validated. Two distinct failure modes: an option the selected class
+      does not define is a LaTeX error, whereas an option whose support package
+      is missing can be a SILENT no-op. elsarticle's endfloat is the second
+      kind, guarded by \IfFileExists with an empty else-branch, so without
+      endfloat.sty it does nothing and the build still succeeds. Check the PDF,
+      not the flag. Avoid `nonatbib`: citation handling assumes natbib.
   - id: columns
     type: choice
     title: Column Layout

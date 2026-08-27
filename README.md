@@ -93,11 +93,39 @@ myst build your-article.md --pdf
 | `document_class` | choice | `cas` | Which Elsevier class: `cas` or `elsarticle` |
 | `columns` | choice | `single` | Layout: `single` or `double` column |
 | `citation_style` | choice | `authoryear` | Citation style: `authoryear` or `numbers` |
+| `blind` | choice | `none` | Anonymised submission: `none`, `single`, `double`. `single` is CAS-only. Blinds the **title block only**, not author names in body text |
+| `class_options` | string | (none) | Extra class options appended verbatim. See below |
 | `longmktitle` | boolean | `false` | Use if frontmatter spans multiple pages. CAS only |
-| `graphical_abstract` | file | (none) | Path to graphical abstract image. See the known limitation below |
+| `review` | boolean | `false` | Double line spacing for review copies. Both classes |
 | `elsarticle_layout` | choice | `preprint` | `preprint`, `1p`, `3p`, or `5p`. elsarticle only |
-| `review` | boolean | `false` | Double line spacing for review copies. elsarticle only |
-| `journal` | string | (none) | Target journal for the preprint footer. elsarticle only |
+| `graphical_abstract` | file | (none) | Path to graphical abstract image. See the limitation below |
+
+### Frontmatter keys, not template options
+
+Things other Elsevier templates expose as custom options are read from MyST's
+own frontmatter here, to keep the key surface small:
+
+| MyST key | Becomes | Notes |
+|---|---|---|
+| `tags` | JEL classification codes | A list like `[D14, C61, G11]`, joined with `; ` and printed after the keywords as "JEL: ...". Both classes support it, with different macro signatures the template handles |
+| `venue.title` | the preprint footer | elsarticle only; CAS has no equivalent |
+| `keywords` | separated keywords | |
+
+### Extra class options
+
+`class_options` is appended verbatim to the document class, so every option
+either class defines is reachable without a template change, including ones
+Elsevier adds later:
+
+- **elsarticle**: `nopreprintline`, `final`, `times`, `endfloat`, `numafflabel`, `longtitle`, `lefttitle`, `centertitle`, `reversenotenum`
+- **CAS**: `final`
+
+Two failure modes, and only one is loud. An option the selected class does not
+define raises a LaTeX error. An option whose support package is missing can be
+a **silent no-op**: elsarticle guards `endfloat` with an existence test and an
+empty else-branch, so without `endfloat.sty` installed it does nothing and the
+build still succeeds. Verify in the PDF rather than trusting the flag. Avoid
+`nonatbib`, since citation handling assumes natbib is loaded.
 
 ### Graphical abstract images must not be 16-bit-plus-alpha PNGs
 

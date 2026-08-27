@@ -121,9 +121,30 @@ jobs:
             echo "ok: $f ($(stat -c '%s' "$f") bytes)"
           done
 
-      # A blank graphical abstract passes every other gate: build exits 0, no
-      # LaTeX error is logged, and pdfimages even lists the image as present.
-      # Only rasterising the page catches it.
+      # class_options reach the class unvalidated, and elsarticle's endfloat
+      # option has an EMPTY else-branch: absent endfloat.sty it silently does
+      # nothing and the build passes. Assert the effect, not the flag.
+      - name: Verify class_options actually took effect
+        run: |
+          set -eo pipefail
+          t=$(pdftotext example/exports/sample-elsarticle-5p.pdf - | grep -c 'about here' || true)
+          if [ "$t" -lt 1 ]; then
+            echo "::error::endfloat produced no float markers; the class option was a no-op"
+            exit 1
+          fi
+          echo "endfloat: $t float marker(s)"
+          # Frontmatter pages only. doubleblind anonymises the title block; it
+          # does NOT strip author names from body content such as parts.biography,
+          # so scanning the whole PDF would fail for a reason blinding never promised.
+          if pdftotext -f 1 -l 4 example/exports/sample-elsarticle-5p.pdf - | grep -qi 'Lujan'; then
+            echo "::error::doubleblind export still names an author in the title block"
+            exit 1
+          fi
+          echo "doubleblind: title block carries no author names"
+
+      # A blank graphical abstract passes every other gate: exit 0, no LaTeX
+      # error, and pdfimages lists the image as present. Only rasterising it
+      # catches the failure.
       - name: Verify the graphical abstract page is not blank
         run: |
           sudo apt-get install -y --no-install-recommends poppler-utils imagemagick

@@ -59,6 +59,12 @@ affiliations:
   - id: econ-ark
     name: Econ-ARK
     url: https://econ-ark.org
+tags:
+  - D14
+  - C61
+  - G11
+venue:
+  title: Journal of Economic Dynamics and Control
 keywords:
   - MyST Markdown
   - Elsevier
@@ -93,7 +99,6 @@ abbreviations:
 thumbnail: images/thumbnail.png
 parts:
   title_note: Prepared as a demonstration of the elsarticle-myst template.
-  jel_codes: D14; C61; G11
   ai_declaration: >-
     During the preparation of this work the authors used no generative AI or
     AI-assisted technologies. This statement exercises the ai_declaration part,
@@ -144,7 +149,6 @@ exports:
     output: exports/sample-elsarticle.pdf
     document_class: elsarticle
     elsarticle_layout: preprint
-    journal: Journal of Economic Dynamics and Control
     graphical_abstract: images/sample-figure.png
   # Second elsarticle export purely for branch coverage: the numeric
   # bibliography style, a production layout, review spacing and two columns
@@ -158,7 +162,8 @@ exports:
     citation_style: numbers
     columns: double
     review: true
-    journal: Journal of Economic Dynamics and Control
+    blind: double
+    class_options: endfloat
     graphical_abstract: images/sample-figure.png
 ---
 

@@ -12,13 +12,15 @@
 %% contexts.
 
 [# if options.document_class == 'elsarticle' #]
-%% Citation style rides on the class options here (\@biboptions), because
-%% elsarticle loads natbib itself. See the package block below.
-\documentclass[[- options.elsarticle_layout -],[# if options.columns == 'double' #]twocolumn,[# endif #][# if options.citation_style == 'numbers' #]number[# else #]authoryear[# endif #][# if options.review #],review[# endif #]]{elsarticle}
+%% Citation style rides on the class options (\@biboptions): elsarticle loads
+%% natbib itself. Named options exist only where the classes disagree on a
+%% NAME; everything else rides on class_options verbatim, future ones included.
+[# set extra = (',' ~ options.class_options | trim) if options.class_options else '' #]
+\documentclass[[- options.elsarticle_layout -],[# if options.columns == 'double' #]twocolumn,[# endif #][# if options.citation_style == 'numbers' #]number[# else #]authoryear[# endif #][# if options.review #],review[# endif #][# if options.blind == 'double' #],doubleblind[# endif #][-extra-]]{elsarticle}
 [# elif options.columns == 'double' #]
-\documentclass[a4paper,fleqn[# if options.longmktitle #],longmktitle[# endif #]]{cas-dc}
+\documentclass[a4paper,fleqn[# if options.longmktitle #],longmktitle[# endif #][# if options.review #],review[# endif #][# if options.blind == 'double' #],doubleblind[# elif options.blind == 'single' #],singleblind[# endif #][-extra-]]{cas-dc}
 [# else #]
-\documentclass[a4paper,fleqn[# if options.longmktitle #],longmktitle[# endif #]]{cas-sc}
+\documentclass[a4paper,fleqn[# if options.longmktitle #],longmktitle[# endif #][# if options.review #],review[# endif #][# if options.blind == 'double' #],doubleblind[# elif options.blind == 'single' #],singleblind[# endif #][-extra-]]{cas-sc}
 [# endif #]
 
 %% Engine check: XeLaTeX or LuaLaTeX is required for Unicode in author
@@ -65,11 +67,12 @@
 \usepackage[authoryear,longnamesfirst]{natbib}
 [# endif #]
 
-[# if options.document_class == 'elsarticle' and options.journal #]
-%% Backslash goes to a SENTINEL first and is expanded LAST. Escaping it up
-%% front emits \textbackslash{}, whose braces the later brace rules then escape
-%% into \textbackslash\{\}, which typesets as "\{}" instead of "\".
-\journal{[-options.journal | replace("\\", "@BSL@") | replace("{", "\\{") | replace("}", "\\}") | replace("&", "\\&") | replace("%", "\\%") | replace("$", "\\$") | replace("#", "\\#") | replace("_", "\\_") | replace("~", "\\textasciitilde{}") | replace("^", "\\textasciicircum{}") | replace("@BSL@", "\\textbackslash{}")-]}
+%% Target journal comes from the BUILT-IN `venue`, MyST's key for where a work
+%% is submitted or published, rather than a custom option. Backslash goes to a
+%% SENTINEL and is expanded LAST, or the brace rules would re-escape its braces.
+[# set jrnl = doc.venue.title if doc.venue and doc.venue.title else '' #]
+[# if options.document_class == 'elsarticle' and jrnl #]
+\journal{[-jrnl | replace("\\", "@BSL@") | replace("{", "\\{") | replace("}", "\\}") | replace("&", "\\&") | replace("%", "\\%") | replace("$", "\\$") | replace("#", "\\#") | replace("_", "\\_") | replace("~", "\\textasciitilde{}") | replace("^", "\\textasciicircum{}") | replace("@BSL@", "\\textbackslash{}")-]}
 [# endif #]
 
 %% Algorithm support
@@ -245,22 +248,23 @@
 \end{highlights}
 [# endif #]
 
-%% `keyword' (singular) in elsarticle, `keywords' (plural) in CAS; both take
-%% \sep-separated entries. JEL codes must sit INSIDE the environment, since
-%% elsarticle defines \JEL only there. The classes disagree on its signature.
-[# if doc.keywords or parts.jel_codes #]
+%% `keyword' (singular) in elsarticle, `keywords' (plural) in CAS. JEL codes
+%% must sit INSIDE the environment: elsarticle defines \JEL only there. They
+%% come from the BUILT-IN `tags`, which is what tags are for.
+[# set jel = doc.tags | join("; ") if doc.tags else '' #]
+[# if doc.keywords or jel #]
 [# if options.document_class == 'elsarticle' #]
 %% elsarticle's \JEL is an argument-less SWITCH (label, then following text);
 %% cas-common's is \NewDocumentCommand{m} and needs the braced group. Passing
 %% the wrong one either typesets literal braces or swallows the codes.
 \begin{keyword}
 [# if doc.keywords #][-doc.keywords | join(" \\sep ")-]
-[# endif #][# if parts.jel_codes #]\JEL [-parts.jel_codes | trim-]
+[# endif #][# if jel #]\JEL [-jel-]
 [# endif #]\end{keyword}
 [# else #]
 \begin{keywords}
 [# if doc.keywords #][-doc.keywords | join(" \\sep ")-]
-[# endif #][# if parts.jel_codes #]\JEL{[-parts.jel_codes | trim-]}
+[# endif #][# if jel #]\JEL{[-jel-]}
 [# endif #]\end{keywords}
 [# endif #]
 [# endif #]
