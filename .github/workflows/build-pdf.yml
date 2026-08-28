@@ -88,9 +88,9 @@ jobs:
             n=$((n + 1))
             echo "::group::$log"
             # '^! ' is TeX's fatal-error convention, a superset of the named
-            # messages. Undefined refs are WARNINGS that render as '?' and are
-            # how the elsarticle tn/cor/fn labels fail, so catch those too.
-            if grep -E '^! |Misplaced alignment tab character|Undefined control sequence|LaTeX Error:|Emergency stop|! Package .* Error|\*\*\* \(Job aborted|LaTeX Warning: (Reference|Citation).*undefined|There were undefined references' "$log"; then
+            # messages; undefined refs and citations are WARNINGS that render
+            # as '?'. See README.md "What CI asserts" for why each is here.
+            if grep -E '^! |Misplaced alignment tab character|Undefined control sequence|LaTeX Error:|Emergency stop|! Package .* Error|\*\*\* \(Job aborted|Warning: (Reference|Citation).*undefined|There were undefined (references|citations)' "$log"; then
               echo "::error file=$log::LaTeX errors found"
               fail=1
             else
@@ -109,7 +109,44 @@ jobs:
             exit 1
           fi
 
-      - name: Verify all six exports produced PDFs
+      # mystmd deletes the .blg with the other aux files, so build.stdout.log is
+      # the only surviving bibtex output. 'gave return code' is here because
+      # mystmd copies the PDF even after xelatex has exited non-zero.
+      - name: Fail on bibtex errors and non-zero latex exits
+        working-directory: example
+        run: |
+          set -e
+          if [ ! -s build.stdout.log ]; then
+            echo "::error::build.stdout.log is missing; the build gate has nothing to read"
+            exit 1
+          fi
+          # Positive control: bibtex must actually have run, or an empty
+          # bibliography would satisfy every pattern below by never appearing.
+          if ! grep -q 'This is BibTeX' build.stdout.log; then
+            echo "::error::bibtex never ran; this gate would pass on any input"
+            exit 1
+          fi
+          if grep -E "didn't find a database entry|I couldn't open|Warning--|gave return code" build.stdout.log; then
+            echo "::error::bibtex or latexmk reported a problem; see above"
+            exit 1
+          fi
+          # A jtex render error reaches no compile log: mystmd prints "Exported
+          # TeX", then the error, then exits 0, leaving a stale PDF on disk.
+          # See README.md "What CI asserts" for why the pattern is this narrow.
+          if grep -E 'Template render error|TypeError' build.stdout.log; then
+            echo "::error::the template failed to render; any PDF on disk is stale"
+            exit 1
+          fi
+          echo "bibtex ran and the template rendered with no errors"
+
+      # The template escapes LaTeX specials in raw frontmatter strings. That was
+      # documented and never asserted, and title/subtitle/keywords/tags/author
+      # names were silently unescaped for six releases. Assert the escaping.
+      - name: Round-trip LaTeX specials through the template
+        run: |
+          set -eo pipefail
+          ./scripts/check-escaping.sh --self-test
+          ./scripts/check-escaping.sh
         run: |
           set -e
           for name in sample-sc sample-dc sample-sc-numbers sample-long sample-elsarticle sample-elsarticle-5p; do
@@ -133,6 +170,15 @@ jobs:
             exit 1
           fi
           echo "endfloat: $t float marker(s)"
+          # POSITIVE CONTROL FIRST: this absence assertion is keyed on a
+          # hard-coded surname, so renaming the example's authors would leave it
+          # green and vacuous. Prove the needle exists unblinded before trusting.
+          n=$(pdftotext -f 1 -l 4 example/exports/sample-elsarticle.pdf - | grep -ci 'Lujan' || true)
+          if [ "$n" -lt 1 ]; then
+            echo "::error::'Lujan' does not appear in the unblinded title block; the doubleblind check below is vacuous. Update the surname it looks for."
+            exit 1
+          fi
+          echo "doubleblind positive control: $n occurrence(s) in the unblinded export"
           # Frontmatter pages only. doubleblind anonymises the title block; it
           # does NOT strip author names from body content such as parts.biography,
           # so scanning the whole PDF would fail for a reason blinding never promised.
@@ -154,6 +200,15 @@ jobs:
             ./scripts/check-ink.sh "example/exports/${name}.pdf" 1 0.8 || fail=1
           done
           exit "$fail"
+
+      # Every gate above asks whether the build SUCCEEDED. This one asks what it
+      # PRODUCED. It is what would have caught the appendix headings shipping as
+      # ".1. Supplementary Methods" and the appendix table as "Table .5".
+      - name: Diff PDF text against committed snapshots
+        run: |
+          set -eo pipefail
+          ./scripts/check-content.sh --self-test
+          ./scripts/check-content.sh
 
       - name: Upload PDFs as artifact
         if: always()
