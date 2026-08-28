@@ -27,7 +27,7 @@ A MyST Markdown template for Elsevier journal articles, covering both the CAS (C
 
 ## Requirements
 
-- **MyST Markdown**: `mystmd >= 1.6` (install via `pip install 'mystmd>=1.6'` or `npm install -g mystmd@^1.6`). Tested against `1.9.0`.
+- **MyST Markdown**: `mystmd >= 1.6` (install via `pip install 'mystmd>=1.6'` or `npm install -g mystmd@^1.6`). Tested against `1.10.1`. Changing this version means re-running the probes in "Known upstream limitations".
 - **LaTeX Distribution**: TeX Live 2022 or later, or MiKTeX 22.1 or later, with a current `l3kernel`. Required for PDF export.
 - **XeLaTeX or LuaLaTeX**: Required for Unicode support and the `stix` / `charis` fonts the CAS classes load. `pdflatex` will emit a warning and silently lose Unicode characters.
 - **Python**: 3.9 or later (if installing via `pip`).
@@ -287,6 +287,8 @@ The template has no `parts.appendix` key, and adding one back would reintroduce 
 ### Known upstream limitations
 
 Three mystmd bugs are reachable from this template. All are silent: `myst build` exits 0 and produces a PDF. Measured on mystmd 1.10.1.
+
+> **These entries expire on someone else's merge.** Two have open PRs. When the PR lands, the entry becomes *obsolete* rather than wrong, and nothing in CI will say so — a gate can catch a claim that has become false, but not one that has become unnecessary. **Re-run the probes in each entry whenever the pinned mystmd version changes**, and delete any entry whose bug no longer reproduces.
 
 **Four `prf:` kinds vanish from the PDF** ([#3030](https://github.com/jupyter-book/mystmd/issues/3030), PR [#3031](https://github.com/jupyter-book/mystmd/pull/3031)). `algorithm`, `assumption`, `criterion` and `property` match no case in `myst-to-tex`'s `kindToEnvironment`, so the block **and its `\label`** are omitted, while any `\ref` to it is still emitted and resolves to `??`. The other eleven kinds are fine. This template ships `algorithm` and `algpseudocode`, so writing `:::{prf:algorithm}` is a natural thing to try, and the body simply disappears. Until the PR lands, write algorithms as a `{raw} latex` block (see below) or use a supported kind.
 
