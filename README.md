@@ -284,6 +284,19 @@ Sections after `\appendix` are lettered A, B, C. `example/sample-article.md` doe
 
 The template has no `parts.appendix` key, and adding one back would reintroduce a silent bug. MyST excludes frontmatter parts from the rendered document and harvests the `.bib` from that document, so a work cited only inside an appendix part reaches the `.tex` and never the `.bib`: an undefined citation that renders as `?` while every build step exits 0. A frontmatter part's headings are also demoted one level, which drops the appendix letter and prints `A.1` as `.1`. Both are upstream mystmd behaviour ([#3032](https://github.com/jupyter-book/mystmd/issues/3032), [#3034](https://github.com/jupyter-book/mystmd/issues/3034)); the body-level form avoids both. `example/appendix.md` cites one work that nothing else cites, so CI keeps testing this path.
 
+### Raw LaTeX: which fence
+
+Two forms, and they are not interchangeable.
+
+| Form | Behaviour |
+|---|---|
+| ```` ```{raw} latex ```` (argument) | Stored in both `value` and `tex`. mystmd parses it, so the HTML site renders it *and* the LaTeX export writes it verbatim. Use for content the site should show: tables, figures, paragraphs. |
+| `:::{raw:latex}` (colon) | Stored as `tex` only. Correct in the PDF, **invisible on the site**. Use for anything that only steers LaTeX: `\appendix`, counter redefinitions, `\bio`/`\endbio`. |
+
+Put a macro mystmd's LaTeX parser does not know in the argument form and it emits `Unhandled TEX conversion for node of "macro_x"` and **drops the node from the site**, while the PDF stays correct — so the failure is invisible unless you read the build log. This template's biography part carried `\bio`/`\endbio` in the argument form and produced 24 such errors per build; moving it to the colon form removed all 24 with byte-identical PDF text. CI now fails on that message.
+
+A bare `\appendix` parses cleanly in either form, so the appendix block in `example/sample-article.md` is left as-is.
+
 ### Escaping
 
 The template escapes LaTeX specials in the frontmatter strings it interpolates itself. Which fields those are is not guessable from the template source, because MyST **promotes** some frontmatter keys to rendered parts and hands them to jtex already converted to LaTeX. Promotion, not template syntax, decides the side a field falls on: `abstract` written as a plain YAML scalar arrives escaped, while `title` in the same file arrives raw.
@@ -308,7 +321,7 @@ The template escapes LaTeX specials in the frontmatter strings it interpolates i
 | `check-escaping.sh` + `--self-test` | The escaping was documented and never asserted for six releases, during which `title` was raw. |
 | Compile-log grep | latexmk's exit code is not enough: mystmd prints "Exported PDF" and copies the file after xelatex exits non-zero. `^!` is TeX's fatal-error convention; undefined references and citations are only warnings but render as `?`. natbib prefixes its warnings `Package natbib Warning:`, not `LaTeX Warning:`, so the pattern matches the bare `Warning: Citation` form. |
 | bibtex gate on `build.stdout.log` | mystmd deletes the `.blg` with the other aux files. A positive control requires `This is BibTeX` in the log, so the gate cannot pass by bibtex never running. |
-| `Template render error` / `TypeError` on `build.stdout.log` | A jtex failure happens before LaTeX runs, so no compile log exists to grep. mystmd prints "Exported TeX", *then* the error, then exits 0 — leaving the previous PDF on disk with a stale mtime, which every later gate then "verifies". The pattern deliberately excludes `Unhandled TEX conversion`: mystmd emits that for every macro inside a legitimate `{raw} latex` block (`\bio`, `\appendix`) and passes them through regardless, 24 times on a healthy build. |
+| `Template render error` / `TypeError` / `Unhandled TEX conversion` on `build.stdout.log` | A jtex failure happens before LaTeX runs, so no compile log exists to grep. mystmd prints "Exported TeX", *then* the error, then exits 0 — leaving the previous PDF on disk with a stale mtime, which every later gate then "verifies". `Unhandled TEX conversion` was originally excluded because it fired 24 times on a healthy build; that turned out to be a real defect rather than noise. See "Raw LaTeX: which fence" below. |
 | `check-escaping.sh` absent-field fixtures | A fixture that supplies every field cannot catch a field being *absent*. MyST only warns on an author with no `name`, so it reaches the template, where a property access on undefined aborts the render and an unfiltered loop emits its separator anyway (`\shortauthors{, Solo}`). Six cases, both classes, including a page that declares nothing and inherits project scope. |
 | `check-content.sh` + `--self-test` | Every other gate asks whether the build *succeeded*; this one asks what it *produced*. It diffs `pdftotext` output against committed snapshots in `example/exports/snapshots/`. Nothing else would have caught the appendix headings shipping as `.1. Supplementary Methods` and the appendix table as `Table .5`. A snapshot diff is *expected* to fail when the sample or template changes on purpose — read the diff, then re-record with `--update` in the same commit. |
 | double-blind positive control | The blinding gate is an *absence* assertion keyed on a hard-coded surname. Renaming the example's authors would leave it green and vacuous forever, so it now first asserts the surname *does* appear in the unblinded export. |

@@ -144,8 +144,8 @@ jobs:
           fi
           # A jtex render error reaches no compile log: mystmd prints "Exported
           # TeX", then the error, then exits 0, leaving a stale PDF on disk.
-          # See README.md "What CI asserts" for why the pattern is this narrow.
-          if grep -E 'Template render error|TypeError' build.stdout.log; then
+          # See README.md "What CI asserts" for the third pattern's history.
+          if grep -E 'Template render error|TypeError|Unhandled TEX conversion' build.stdout.log; then
             echo "::error::the template failed to render; any PDF on disk is stale"
             exit 1
           fi

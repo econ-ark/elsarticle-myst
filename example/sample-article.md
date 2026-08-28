@@ -677,13 +677,13 @@ For questions or contributions, please visit the template repository.
 
 +++ {"part": "biography"}
 
-```{raw} latex
+:::{raw:latex}
 \bio{}
 Alan E. Lujan develops open-source computational tools for economics at Johns Hopkins University and Econ-ARK.
 \endbio
 \bio{}
 Christopher D. Carroll is a professor of economics at Johns Hopkins University and leads the Econ-ARK initiative for reproducible heterogeneous-agent macroeconomics.
 \endbio
-```
+:::
 
 +++
