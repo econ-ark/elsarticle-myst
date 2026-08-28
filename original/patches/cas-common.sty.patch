@@ -1,6 +1,25 @@
 --- upstream/cas-common.sty
 +++ root/cas-common.sty
-@@ -1502,31 +1502,42 @@
+@@ -424,14 +424,17 @@
+ 
+ \NewDocumentCommand \printorcid { }
+ {
++  \seq_if_empty:NF \g_stm_orcid_seq
++  {
+   \group_begin:
+     \tex_let:D \thefootnote \relax \footnotetext
+     {
+       \raggedright
+-      \textsc{orcid}(s):\c_space_token 
++      \textsc{orcid}(s):\c_space_token
+       \seq_use:Nn \g_stm_orcid_seq { ;~ }
+     }
+   \group_end:
++  }
+ }
+ 
+ %
+@@ -1502,31 +1505,42 @@
  \tex_gdef:D \abstractname { A\,B\,S\,T\,R\,A\,C\,T }
  \tl_new:N \l_stm_abs_title_tl
  \box_new:N \g_stm_abs_box
@@ -50,7 +69,7 @@
  
  \NewDocumentEnvironment { PrelimsAbstract } { O{} }
    {\parindent=0pt 
-@@ -1875,9 +1886,10 @@
+@@ -1875,9 +1889,10 @@
    % \iow_term:x { ...~[tmpa-noteht:~ \dim_use:N \g_tmpa_dim ] }
    % \dim_gsub:Nn \g_tmpa_dim { \box_dp:N \g_stm_notes_box }
    % \iow_term:x { ...~[tmpa-notedp:~ \dim_use:N \g_tmpa_dim ] }
@@ -63,7 +82,7 @@
    \printFirstPageNotes
    \dim_gzero:N \g_tmpa_dim
    \dim_gset:Nn \g_tmpa_dim { \box_ht:N \g_stm_front_box }
-@@ -1887,15 +1899,15 @@
+@@ -1887,15 +1902,15 @@
    \dim_compare:nNnTF { \dim_use:N \g_tmpa_dim } > { \the\textheight }
    {
      \vbox_set_split_to_ht:NNn \g_tmpb_box \g_stm_front_box { \textheight }
@@ -84,7 +103,7 @@
    } 
   \normalcolor \normalfont 
  }
-@@ -2108,12 +2120,12 @@
+@@ -2108,12 +2123,12 @@
    unknown   .code:n      = { 
                                \ifstrempty { #1 } 
                                   {
@@ -101,7 +120,7 @@
  }
  
  \cs_set:Npn \__reset_tbl:
-@@ -2204,7 +2216,7 @@
+@@ -2204,7 +2219,7 @@
    unknown   .code:n      = { 
                                \ifstrempty { #1 } 
                                   {
