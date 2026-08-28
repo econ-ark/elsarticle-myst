@@ -7,7 +7,7 @@ description: >
   preprint and 1p/3p/5p production layouts. Both support author-year or
   numeric citations, ORCID identifiers, research highlights, graphical
   abstracts, and keywords.
-version: 1.2.1
+version: 1.3.0
 license: LPPL-1.3c
 source: https://www.elsevier.com/authors/policies-and-guidelines/latex-instructions
 thumbnail: ./thumbnail.png
@@ -49,15 +49,11 @@ parts:
       A graphical abstract as raw LaTeX content. Alternatively, use the
       graphical_abstract option with a file path. If both are provided,
       parts.graphical_abstract wins.
-  - id: appendix
-    description: >
-      Appendix content. Sections within will be labeled A, B, C, etc. Can
-      reference an external markdown file via parts.appendix in frontmatter.
   - id: title_note
     description: >
       A footnote attached to the title, e.g., funding acknowledgment or
-      conference presentation note. Special LaTeX characters (&, %, #, _, ^, ~)
-      are escaped automatically.
+      conference presentation note. This is a `parts:` entry, so MyST renders it
+      to LaTeX and escapes special characters before the template ever sees it.
   - id: note
     description: >
       A general note without a number that appears in the frontmatter. Useful
@@ -83,9 +79,11 @@ doc:
     description: |
       Article subtitle displayed below the main title.
   - id: short_title
-    description: |
-      Short title for running header (recommended max 50 characters). Special
-      LaTeX characters (&, %, #, _, ^, ~) are escaped automatically.
+    description: >
+      Short title for running header (recommended max 50 characters). `&`, `%`
+      and `#` are escaped automatically; `$`, `_`, `^` and `\` are left alone so
+      that inline mathematics such as $x_1$ still typesets. A literal underscore
+      outside mathematics must be written as `\_`.
   - id: authors
     required: true
     description: >
@@ -105,8 +103,11 @@ doc:
       linked to a single \\fntext that reads "These authors contributed equally
       to this work."
 
-      Special LaTeX characters in roles and notes are escaped automatically.
-      URLs are emitted verbatim; ensure they are well-formed.
+      Special LaTeX characters in `name`, `roles` and `note` are escaped
+      automatically. `email` and `url` are emitted VERBATIM, because escaping
+      `_` or `%` there breaks the link the class builds from them. A literal
+      `%` or `#` in either field therefore breaks the LaTeX build; percent-
+      encode it (`%25`, `%23`) or write `\%` yourself.
   - id: affiliations
     description: >
       List of affiliations. The fields this template emits into LaTeX are
@@ -134,8 +135,10 @@ doc:
       which prints in the preprint footer. Ignored by the CAS classes, which
       have no equivalent. MyST built-in; no custom option needed.
   - id: keywords
-    description: |
-      Article keywords (typically 3-6). Will be joined with \\sep in LaTeX.
+    description: >
+      Article keywords (typically 3-6), joined with \\sep in LaTeX. Escaped
+      per item, not after joining, so the separator survives; `&`, `%` and `#`
+      are escaped and mathematics such as $\\alpha$-mixing is preserved.
   - id: bibliography
     description: |
       Path(s) to BibTeX bibliography files.

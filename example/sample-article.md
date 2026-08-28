@@ -104,7 +104,6 @@ parts:
     AI-assisted technologies. This statement exercises the ai_declaration part,
     which the template renders as an unnumbered section between the CRediT
     statement and the references.
-  appendix: appendix.md
 bibliography:
   - references.bib
 downloads:
@@ -665,6 +664,16 @@ The Elsevier CAS MyST template provides a modern workflow for scientific writing
 - Citations and bibliography
 
 For questions or contributions, please visit the template repository.
+
+<!-- Appendices go in the BODY, not in parts.appendix: MyST harvests the .bib
+     from the rendered document, and frontmatter parts are excluded from it. -->
+
+```{raw} latex
+\appendix
+```
+
+:::{include} appendix.md
+:::
 
 +++ {"part": "biography"}
 

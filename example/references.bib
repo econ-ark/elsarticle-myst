@@ -37,6 +37,21 @@
   doi = {10.3233/978-1-61499-649-1-87}
 }
 
+% Cited ONLY from appendix.md, on purpose. A work cited only from an appendix
+% is what disappeared from the .bib while the appendix lived in parts.appendix,
+% so the example keeps that path exercised on every CI build.
+@book{latexcompanion2004,
+  author = {Mittelbach, Frank and Goossens, Michel},
+  title = {The {LaTeX} Companion},
+  publisher = {Addison-Wesley},
+  year = {2004},
+  edition = {2nd},
+  address = {Boston, MA},
+  isbn = {0-201-36299-6},
+  % Print monograph, no DOI exists; identified by ISBN, as with latex1994.
+  bibcheck = {skip}
+}
+
 @misc{markdown2004,
   author = {Gruber, John},
   title = {Markdown},

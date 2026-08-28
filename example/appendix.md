@@ -8,6 +8,11 @@ This appendix provides additional methodological details that support the main t
 
 The data was processed using standard procedures as described in the literature.
 
+This paragraph cites @latexcompanion2004, a work no other section cites. It is
+here to keep the appendix on the bibliography-harvesting path: while this file
+was pulled in through `parts.appendix`, a citation made here reached the `.tex`
+and never the `.bib`, and no build step reported anything.
+
 (sec-additional-tables)=
 # Additional Tables
 

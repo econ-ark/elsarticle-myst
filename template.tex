@@ -2,14 +2,14 @@
 %% Based on cas-sc-template.tex, cas-dc-template.tex, elsarticle-template-num.tex
 %% Original copyright 2007-2024 Elsevier Ltd (LPPL-1.3c)
 %%
-%% LaTeX escaping of plain-text frontmatter fields (short_title, credit
-%% roles, author notes, affiliation strings) is applied inline via Jinja
-%% `replace` chains. The order of replacements matters: backslash and
-%% braces are escaped first so later replacements that introduce
-%% backslashes do not get re-escaped. Fields that pass through MyST's
-%% markdown AST (title, subtitle, abstract, content) are NOT escaped
-%% here; the AST already handles LaTeX special characters in those
-%% contexts.
+%% Two escapers for raw frontmatter strings; which field takes which is not
+%% guessable from the template. See "Escaping" in README.md.
+%% esc(): everything. Backslash rides a sentinel so braces cannot re-escape it.
+[# macro esc(s) #][- s | default("") | replace("\\", "@BSL@") | replace("{", "\\{") | replace("}", "\\}") | replace("&", "\\&") | replace("%", "\\%") | replace("$", "\\$") | replace("#", "\\#") | replace("_", "\\_") | replace("~", "\\textasciitilde{}") | replace("^", "\\textasciicircum{}") | replace("@BSL@", "\\textbackslash{}") -][# endmacro #]
+%% esctext(): & % # only, for fields that legitimately carry math ($x_1$,
+%% $\alpha$-mixing). Those three corrupt output silently; a stray _ or $ raises
+%% a TeX error the CI log grep already catches, so it need not be escaped here.
+[# macro esctext(s) #][- s | default("") | replace("&", "\\&") | replace("%", "\\%") | replace("#", "\\#") -][# endmacro #]
 
 [# if options.document_class == 'elsarticle' #]
 %% Citation style rides on the class options (\@biboptions): elsarticle loads
@@ -72,16 +72,16 @@
 %% SENTINEL and is expanded LAST, or the brace rules would re-escape its braces.
 [# set jrnl = doc.venue.title if doc.venue and doc.venue.title else '' #]
 [# if options.document_class == 'elsarticle' and jrnl #]
-\journal{[-jrnl | replace("\\", "@BSL@") | replace("{", "\\{") | replace("}", "\\}") | replace("&", "\\&") | replace("%", "\\%") | replace("$", "\\$") | replace("#", "\\#") | replace("_", "\\_") | replace("~", "\\textasciitilde{}") | replace("^", "\\textasciicircum{}") | replace("@BSL@", "\\textbackslash{}")-]}
+\journal{[- esc(jrnl) -]}
 [# endif #]
 
 %% Algorithm support
 \usepackage{algorithm}
 \usepackage{algpseudocode}
 
-%% MyST renders a blockquote attribution as \caption* inside a figure. Neither
-%% Elsevier class defines the starred form, so without this LaTeX typesets
-%% "Figure N: *" and burns a figure number on every quote.
+%% A blank `>` line followed by a dash-prefixed line makes MyST wrap the quote in
+%% a figure with \caption*. Measured: the BLANK LINE is the trigger, `--` and
+%% `---` behave alike, and without it neither does. Unshimmed: "Figure N: *".
 \usepackage{caption}
 
 [- IMPORTS -]
@@ -115,25 +115,28 @@
 [# if options.document_class != 'elsarticle' #]
 %% \shorttitle and \shortauthors are CAS-only; elsarticle has neither.
 [# if doc.short_title #]
-\shorttitle{[-doc.short_title | replace("\\", "@BSL@") | replace("{", "\\{") | replace("}", "\\}") | replace("&", "\\&") | replace("%", "\\%") | replace("$", "\\$") | replace("#", "\\#") | replace("_", "\\_") | replace("~", "\\textasciitilde{}") | replace("^", "\\textasciicircum{}") | replace("@BSL@", "\\textbackslash{}")-]}
+\shorttitle{[- esctext(doc.short_title) -]}
 [# else #]
-\shorttitle{[-doc.title | replace("\\", "@BSL@") | replace("{", "\\{") | replace("}", "\\}") | replace("&", "\\&") | replace("%", "\\%") | replace("$", "\\$") | replace("#", "\\#") | replace("_", "\\_") | replace("~", "\\textasciitilde{}") | replace("^", "\\textasciicircum{}") | replace("@BSL@", "\\textbackslash{}")-]}
+\shorttitle{[- esctext(doc.title) -]}
 [# endif #]
 
-%% Extract surname as last word from full name (handles middle initials correctly)
-[# if doc.authors #]
-\shortauthors{[# for author in doc.authors #][-author.name.split(" ") | last | replace("\\", "@BSL@") | replace("{", "\\{") | replace("}", "\\}") | replace("&", "\\&") | replace("%", "\\%") | replace("$", "\\$") | replace("#", "\\#") | replace("_", "\\_") | replace("~", "\\textasciitilde{}") | replace("^", "\\textasciicircum{}") | replace("@BSL@", "\\textbackslash{}")-][# if not loop.last #], [# endif #][# endfor #]}
+%% Surname is the last word of the full name (handles middle initials). MyST only
+%% WARNS on an author with no name, so a nameless author reaches here: filter the
+%% list FIRST, or the separator is emitted for an entry that prints nothing.
+[# set named_authors = doc.authors | selectattr("name") | list if doc.authors else [] #]
+[# if named_authors #]
+\shortauthors{[# for author in named_authors #][- esc(author.name.split(" ") | last) -][# if not loop.last #], [# endif #][# endfor #]}
 [# endif #]
 [# endif #]
 
 [# if options.document_class == 'elsarticle' #]
 %% elsarticle's \title takes no mode key and has no subtitle slot, so a
 %% subtitle is appended after a colon rather than silently dropped.
-\title{[-doc.title-][# if doc.subtitle #]: [-doc.subtitle-][# endif #][# if parts.title_note #]\tnoteref{[-tnp-]1}[# endif #]}
+\title{[- esctext(doc.title) -][# if doc.subtitle #]: [- esctext(doc.subtitle) -][# endif #][# if parts.title_note #]\tnoteref{[-tnp-]1}[# endif #]}
 [# else #]
-\title[mode=title]{[-doc.title-]}
+\title[mode=title]{[- esctext(doc.title) -]}
 [# if doc.subtitle #]
-\title[mode=sub]{[-doc.subtitle-]}
+\title[mode=sub]{[- esctext(doc.subtitle) -]}
 [# endif #]
 [# endif #]
 
@@ -156,9 +159,9 @@
 %% takes only the affiliation label, so a second group prints as literal text.
 %% The marks: elsarticle wants \corref/\fnref INSIDE the name group, not after.
 [# if options.document_class == 'elsarticle' #]
-\author[[- author.affiliations | join(",", "index") -]]{[-author.name-][# if author.corresponding #]\corref{[-corp-][-loop.index-]}[# endif #][# if author.note #]\fnref{[-fnp-][-loop.index-]}[# endif #][# if author.equal_contributor and has_equal #]\fnref{[-fnp-][-eq_fnmark-]}[# endif #]}
+\author[[- author.affiliations | join(",", "index") -]]{[- esc(author.name) -][# if author.corresponding #]\corref{[-corp-][-loop.index-]}[# endif #][# if author.note #]\fnref{[-fnp-][-loop.index-]}[# endif #][# if author.equal_contributor and has_equal #]\fnref{[-fnp-][-eq_fnmark-]}[# endif #]}
 [# else #]
-\author[[- author.affiliations | join(",", "index") -]]{[-author.name-]}[# if author_opts #][[- author_opts -]][# endif #]
+\author[[- author.affiliations | join(",", "index") -]]{[- esc(author.name) -]}[# if author_opts #][[- author_opts -]][# endif #]
 [# if author.corresponding #]
 \cormark[[-loop.index-]]
 [# endif #]
@@ -176,7 +179,7 @@
 \ead[url]{[-author.url-]}
 [# endif #]
 [# if author.roles and options.document_class != 'elsarticle' #]
-\credit{[# for role in author.roles #][-role | replace("\\", "@BSL@") | replace("{", "\\{") | replace("}", "\\}") | replace("&", "\\&") | replace("%", "\\%") | replace("$", "\\$") | replace("#", "\\#") | replace("_", "\\_") | replace("~", "\\textasciitilde{}") | replace("^", "\\textasciicircum{}") | replace("@BSL@", "\\textbackslash{}")-][# if not loop.last #], [# endif #][# endfor #]}
+\credit{[# for role in author.roles #][- esc(role) -][# if not loop.last #], [# endif #][# endfor #]}
 [# endif #]
 [# endfor #]
 
@@ -185,13 +188,13 @@
 %% op={} is the organization-punctuation separator (cas-common.sty, and the same
 %% key in elsarticle). Empty suppresses the trailing comma after a standalone
 %% organization name with no department, address, or city.
-\affiliation[[-affiliation.index-]]{organization={[-affiliation.name | replace("\\", "@BSL@") | replace("{", "\\{") | replace("}", "\\}") | replace("&", "\\&") | replace("%", "\\%") | replace("$", "\\$") | replace("#", "\\#") | replace("_", "\\_") | replace("~", "\\textasciitilde{}") | replace("^", "\\textasciicircum{}") | replace("@BSL@", "\\textbackslash{}")-]}[# if not has_address #],op={}[# endif #][# if affiliation.department #],
-            department={[-affiliation.department | replace("\\", "@BSL@") | replace("{", "\\{") | replace("}", "\\}") | replace("&", "\\&") | replace("%", "\\%") | replace("$", "\\$") | replace("#", "\\#") | replace("_", "\\_") | replace("~", "\\textasciitilde{}") | replace("^", "\\textasciicircum{}") | replace("@BSL@", "\\textbackslash{}")-]}[# endif #][# if affiliation.address #],
-            addressline={[-affiliation.address | replace("\\", "@BSL@") | replace("{", "\\{") | replace("}", "\\}") | replace("&", "\\&") | replace("%", "\\%") | replace("$", "\\$") | replace("#", "\\#") | replace("_", "\\_") | replace("~", "\\textasciitilde{}") | replace("^", "\\textasciicircum{}") | replace("@BSL@", "\\textbackslash{}")-]}[# endif #][# if affiliation.city #],
-            city={[-affiliation.city | replace("\\", "@BSL@") | replace("{", "\\{") | replace("}", "\\}") | replace("&", "\\&") | replace("%", "\\%") | replace("$", "\\$") | replace("#", "\\#") | replace("_", "\\_") | replace("~", "\\textasciitilde{}") | replace("^", "\\textasciicircum{}") | replace("@BSL@", "\\textbackslash{}")-]}[# endif #][# if affiliation.postal_code #],
-            postcode={[-affiliation.postal_code | replace("\\", "@BSL@") | replace("{", "\\{") | replace("}", "\\}") | replace("&", "\\&") | replace("%", "\\%") | replace("$", "\\$") | replace("#", "\\#") | replace("_", "\\_") | replace("~", "\\textasciitilde{}") | replace("^", "\\textasciicircum{}") | replace("@BSL@", "\\textbackslash{}")-]}[# endif #][# if affiliation.state #],
-            state={[-affiliation.state | replace("\\", "@BSL@") | replace("{", "\\{") | replace("}", "\\}") | replace("&", "\\&") | replace("%", "\\%") | replace("$", "\\$") | replace("#", "\\#") | replace("_", "\\_") | replace("~", "\\textasciitilde{}") | replace("^", "\\textasciicircum{}") | replace("@BSL@", "\\textbackslash{}")-]}[# endif #][# if affiliation.country #],
-            country={[-affiliation.country | replace("\\", "@BSL@") | replace("{", "\\{") | replace("}", "\\}") | replace("&", "\\&") | replace("%", "\\%") | replace("$", "\\$") | replace("#", "\\#") | replace("_", "\\_") | replace("~", "\\textasciitilde{}") | replace("^", "\\textasciicircum{}") | replace("@BSL@", "\\textbackslash{}")-]}[# endif #]}
+\affiliation[[-affiliation.index-]]{organization={[- esc(affiliation.name) -]}[# if not has_address #],op={}[# endif #][# if affiliation.department #],
+            department={[- esc(affiliation.department) -]}[# endif #][# if affiliation.address #],
+            addressline={[- esc(affiliation.address) -]}[# endif #][# if affiliation.city #],
+            city={[- esc(affiliation.city) -]}[# endif #][# if affiliation.postal_code #],
+            postcode={[- esc(affiliation.postal_code) -]}[# endif #][# if affiliation.state #],
+            state={[- esc(affiliation.state) -]}[# endif #][# if affiliation.country #],
+            country={[- esc(affiliation.country) -]}[# endif #]}
 [# endfor #]
 
 [# for author in doc.authors #]
@@ -199,7 +202,7 @@
 \cortext[[-corp-][-loop.index-]]{Corresponding author}
 [# endif #]
 [# if author.note #]
-\fntext[[-fnp-][-loop.index-]]{[-author.note | replace("\\", "@BSL@") | replace("{", "\\{") | replace("}", "\\}") | replace("&", "\\&") | replace("%", "\\%") | replace("$", "\\$") | replace("#", "\\#") | replace("_", "\\_") | replace("~", "\\textasciitilde{}") | replace("^", "\\textasciicircum{}") | replace("@BSL@", "\\textbackslash{}")-]}
+\fntext[[-fnp-][-loop.index-]]{[- esc(author.note) -]}
 [# endif #]
 [# endfor #]
 
@@ -248,23 +251,19 @@
 \end{highlights}
 [# endif #]
 
-%% `keyword' (singular) in elsarticle, `keywords' (plural) in CAS. JEL codes
-%% must sit INSIDE the environment: elsarticle defines \JEL only there. They
-%% come from the BUILT-IN `tags`, which is what tags are for.
-[# set jel = doc.tags | join("; ") if doc.tags else '' #]
-[# if doc.keywords or jel #]
+%% `keyword' (singular) in elsarticle, `keywords' (plural) in CAS; JEL codes
+%% come from the BUILT-IN `tags` and must sit INSIDE the environment.
+%% elsarticle's \JEL is an argument-less SWITCH; cas-common's takes a group.
+[# if doc.keywords or doc.tags #]
 [# if options.document_class == 'elsarticle' #]
-%% elsarticle's \JEL is an argument-less SWITCH (label, then following text);
-%% cas-common's is \NewDocumentCommand{m} and needs the braced group. Passing
-%% the wrong one either typesets literal braces or swallows the codes.
 \begin{keyword}
-[# if doc.keywords #][-doc.keywords | join(" \\sep ")-]
-[# endif #][# if jel #]\JEL [-jel-]
+[# if doc.keywords #][# for kw in doc.keywords #][- esctext(kw) -][# if not loop.last #] \sep [# endif #][# endfor #]
+[# endif #][# if doc.tags #]\JEL [# for code in doc.tags #][- esc(code) -][# if not loop.last #]; [# endif #][# endfor #]
 [# endif #]\end{keyword}
 [# else #]
 \begin{keywords}
-[# if doc.keywords #][-doc.keywords | join(" \\sep ")-]
-[# endif #][# if jel #]\JEL{[-jel-]}
+[# if doc.keywords #][# for kw in doc.keywords #][- esctext(kw) -][# if not loop.last #] \sep [# endif #][# endfor #]
+[# endif #][# if doc.tags #]\JEL{[# for code in doc.tags #][- esc(code) -][# if not loop.last #]; [# endif #][# endfor #]}
 [# endif #]\end{keywords}
 [# endif #]
 [# endif #]
@@ -297,11 +296,9 @@
 \bibliography{[-doc.bibliography | join(", ")-]}
 [# endif #]
 
-[# if parts.appendix #]
-\appendix
-[-parts.appendix-]
-[# endif #]
-
+%% There is deliberately no parts.appendix branch: a work cited only inside a
+%% frontmatter part reaches the .tex and never the .bib, which is an undefined
+%% citation at exit 0. Put appendices in the body, per README.md "Appendices".
 [# if parts.biography #]
 [-parts.biography-]
 [# endif #]
