@@ -84,7 +84,10 @@ jobs:
           fail=0
           n=0
           for log in example/exports/*_pdf_logs/*.log example/exports/*_pdf_tex/*.log; do
-            [ -f "$log" ] || continue
+            # -s, not -f. Half the files this glob matches are zero-byte
+            # *.shell.log, and grepping an empty file reports "clean", so
+            # counting them lets six empties satisfy the threshold below.
+            [ -s "$log" ] || continue
             n=$((n + 1))
             echo "::group::$log"
             # '^! ' is TeX's fatal-error convention, a superset of the named
@@ -101,9 +104,18 @@ jobs:
           # nullglob means zero logs iterates zero times and passes. A build
           # that wrote no logs at all must fail here, not sail through.
           if [ "$n" -lt 6 ]; then
-            echo "::error::only $n compile log(s) found; expected at least 6"
+            echo "::error::only $n NON-EMPTY compile log(s) found; expected at least 6"
             exit 1
           fi
+          # Positive control: the clean verdicts above are worthless unless
+          # xelatex actually ran. A log can exist, be non-empty, and still
+          # predate this build.
+          x=$(grep -lc 'This is XeTeX' example/exports/*_pdf_logs/*.log 2>/dev/null | wc -l)
+          if [ "$x" -lt 6 ]; then
+            echo "::error::only $x log(s) show a XeTeX run; the clean results above are vacuous"
+            exit 1
+          fi
+          echo "$n non-empty log(s) checked, $x with a confirmed XeTeX run"
           if [ "$fail" -ne 0 ]; then
             echo "One or more compile logs contained errors. See annotations above."
             exit 1
