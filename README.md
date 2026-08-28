@@ -293,7 +293,11 @@ Two forms, and they are not interchangeable.
 | ```` ```{raw} latex ```` (argument) | Stored in both `value` and `tex`. mystmd parses it, so the HTML site renders it *and* the LaTeX export writes it verbatim. Use for content the site should show: tables, figures, paragraphs. |
 | `:::{raw:latex}` (colon) | Stored as `tex` only. Correct in the PDF, **invisible on the site**. Use for anything that only steers LaTeX: `\appendix`, counter redefinitions, `\bio`/`\endbio`. |
 
-Put a macro mystmd's LaTeX parser does not know in the argument form and it emits `Unhandled TEX conversion for node of "macro_x"` and **drops the node from the site**, while the PDF stays correct — so the failure is invisible unless you read the build log. This template's biography part carried `\bio`/`\endbio` in the argument form and produced 24 such errors per build; moving it to the colon form removed all 24 with byte-identical PDF text. CI now fails on that message.
+Put a macro mystmd's LaTeX parser does not know in the argument form and it emits `Unhandled TEX conversion for node of "macro_x"`. Measured on mystmd 1.10.1: the **macro node** is dropped, but the surrounding content is not — a `\bio{}`-wrapped paragraph and a `\legend`-annotated table both still reach the site in full, and the PDF is correct either way. So the message ranges from cosmetic to a lost element depending on what the macro carried, and it is worth reading rather than silencing.
+
+This template's biography part carried `\bio`/`\endbio` in the argument form and produced 24 such errors per build. Moving it to the colon form removed all 24 with byte-identical PDF text, at no cost because a frontmatter part never reaches the site anyway. CI now fails on that message.
+
+**If you add a raw block and CI goes red here, weakening the gate is the wrong fix.** Check first whether the block is content the site should show. If it is (a table, a figure, a paragraph), keep the argument form and narrow the gate to the specific macro, as the sibling `econsoc_template` does with `macro_(begin|end)`. If it only steers LaTeX, move it to the colon form and the message goes away on its own.
 
 A bare `\appendix` parses cleanly in either form, so the appendix block in `example/sample-article.md` is left as-is.
 

@@ -145,8 +145,15 @@ jobs:
           # A jtex render error reaches no compile log: mystmd prints "Exported
           # TeX", then the error, then exits 0, leaving a stale PDF on disk.
           # See README.md "What CI asserts" for the third pattern's history.
-          if grep -E 'Template render error|TypeError|Unhandled TEX conversion' build.stdout.log; then
+          if grep -E 'Template render error|TypeError' build.stdout.log; then
             echo "::error::the template failed to render; any PDF on disk is stale"
+            exit 1
+          fi
+          # Kept broad because the samples sit at zero, so ANY occurrence is new
+          # and worth a human look. The message carries the fix, since a red gate
+          # invites weakening and the right answer is usually the other fence.
+          if grep -E 'Unhandled TEX conversion' build.stdout.log; then
+            echo "::error::a {raw} latex block holds a macro mystmd cannot parse. If the block only steers LaTeX, move it to :::{raw:latex}. If it is content the site must show, KEEP the fence and narrow this pattern to the specific macro - do not delete the check. See README.md 'Raw LaTeX: which fence'."
             exit 1
           fi
           echo "bibtex ran and the template rendered with no errors"
