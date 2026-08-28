@@ -204,8 +204,8 @@ parts:
   title_note: Funding acknowledgment.    # plain text; auto-escaped
   note: General disclaimer.              # plain text; auto-escaped
   acknowledgments: Thanks to reviewers.  # plain text; first-page \nonumnote
-  appendix: appendix.md                  # external markdown file (sections become A, B, C ...)
-  # biography goes in a +++ block in the body, not here. See "Document Parts" below.
+  # biography goes in a +++ block in the body, and appendices go in the body
+  # as raw \appendix. Neither belongs here. See "Document Parts" below.
 bibliography:
   - references.bib
 ```
@@ -241,7 +241,6 @@ Use MyST `parts` for special content. Plain-text parts go in frontmatter; parts 
 
 ```yaml
 parts:
-  appendix: appendix.md                                       # external markdown file
   title_note: Prepared with support from grant XYZ-12345.     # plain-text footnote on title
   note: Authors declare no competing interests.               # plain-text frontmatter note
   acknowledgments: We thank the editor and two reviewers.     # plain-text first-page note
@@ -267,6 +266,54 @@ Author Two is a professor of economics.
 The same pattern works for `parts.highlights` when you need finer-grained LaTeX control than the YAML-list-based `keypoints` frontmatter offers, and for `parts.graphical_abstract` when you want raw LaTeX rather than a file path.
 
 > **Why two locations?** MyST processes part values through its markdown pipeline before injecting them into the template. A YAML scalar with literal `\bio{}` becomes `\textbackslash bio\{\}` in the rendered LaTeX. The `+++ {"part": ...}` block with a nested `{raw} latex` directive bypasses that pipeline.
+
+### Appendices
+
+Appendices go in the **body**, not in a `parts:` entry. Open one with a raw `\appendix`, then write ordinary headings or include a separate file:
+
+````markdown
+```{raw} latex
+\appendix
+```
+
+:::{include} appendix.md
+:::
+````
+
+Sections after `\appendix` are lettered A, B, C. `example/sample-article.md` does exactly this.
+
+The template has no `parts.appendix` key, and adding one back would reintroduce a silent bug. MyST excludes frontmatter parts from the rendered document and harvests the `.bib` from that document, so a work cited only inside an appendix part reaches the `.tex` and never the `.bib`: an undefined citation that renders as `?` while every build step exits 0. A frontmatter part's headings are also demoted one level, which drops the appendix letter and prints `A.1` as `.1`. Both are upstream mystmd behaviour ([#3032](https://github.com/jupyter-book/mystmd/issues/3032), [#3034](https://github.com/jupyter-book/mystmd/issues/3034)); the body-level form avoids both. `example/appendix.md` cites one work that nothing else cites, so CI keeps testing this path.
+
+### Escaping
+
+The template escapes LaTeX specials in the frontmatter strings it interpolates itself. Which fields those are is not guessable from the template source, because MyST **promotes** some frontmatter keys to rendered parts and hands them to jtex already converted to LaTeX. Promotion, not template syntax, decides the side a field falls on: `abstract` written as a plain YAML scalar arrives escaped, while `title` in the same file arrives raw.
+
+| Field | Handling |
+|---|---|
+| `abstract`, every `parts.*`, body content | Escaped by MyST. The template must **not** touch these; a second pass emits `\textbackslash{}%` and prints it literally. |
+| `title`, `subtitle`, `short_title`, `keywords` | `esctext()`: `&`, `%` and `#` only, so `$x_1$` and `$\alpha$-mixing` still typeset. A literal `_` outside mathematics must be written `\_`. |
+| `authors[].name`, `.note`, `.roles`, all `affiliations[].*`, `tags` (JEL), `venue.title` | `esc()`: every special. These never carry mathematics. |
+| `authors[].email`, `.url`, `.orcid`, social links | Verbatim. Escaping `_` or `%` breaks the link the class builds. A literal `%` or `#` here breaks the build; percent-encode it. |
+
+`&` is the character that matters most in economics (R&D, Q&A, "Risk & Return", institutional names) and it fails **silently**: unescaped, `Risk & Return` typesets as `Risk Return` and a `K&W` keyword as `KW`. An unescaped `%` is worse, because it comments out the rest of the line including the closing brace, and the field vanishes from a PDF that still ships.
+
+`scripts/check-escaping.sh` asserts all three columns on every CI run, and `--self-test` seeds both a raw and a doubly-escaped fixture to prove the checker can fail.
+
+### What CI asserts
+
+| Gate | Why it is not redundant |
+|---|---|
+| `jtex check` | Keeps `packages:` honest; a missing entry means MyST re-emits a `\usepackage` the class already loaded. |
+| `verify-upstream.sh` + `--self-test` | The vendored classes differ from upstream by exactly the patches in `PATCHES.md`. A `skip` line is treated as an error, since a skipped check reads as a pass. |
+| `check-escaping.sh` + `--self-test` | The escaping was documented and never asserted for six releases, during which `title` was raw. |
+| Compile-log grep | latexmk's exit code is not enough: mystmd prints "Exported PDF" and copies the file after xelatex exits non-zero. `^!` is TeX's fatal-error convention; undefined references and citations are only warnings but render as `?`. natbib prefixes its warnings `Package natbib Warning:`, not `LaTeX Warning:`, so the pattern matches the bare `Warning: Citation` form. |
+| bibtex gate on `build.stdout.log` | mystmd deletes the `.blg` with the other aux files. A positive control requires `This is BibTeX` in the log, so the gate cannot pass by bibtex never running. |
+| `Template render error` / `TypeError` on `build.stdout.log` | A jtex failure happens before LaTeX runs, so no compile log exists to grep. mystmd prints "Exported TeX", *then* the error, then exits 0 — leaving the previous PDF on disk with a stale mtime, which every later gate then "verifies". The pattern deliberately excludes `Unhandled TEX conversion`: mystmd emits that for every macro inside a legitimate `{raw} latex` block (`\bio`, `\appendix`) and passes them through regardless, 24 times on a healthy build. |
+| `check-escaping.sh` absent-field fixtures | A fixture that supplies every field cannot catch a field being *absent*. MyST only warns on an author with no `name`, so it reaches the template, where a property access on undefined aborts the render and an unfiltered loop emits its separator anyway (`\shortauthors{, Solo}`). Six cases, both classes, including a page that declares nothing and inherits project scope. |
+| `check-content.sh` + `--self-test` | Every other gate asks whether the build *succeeded*; this one asks what it *produced*. It diffs `pdftotext` output against committed snapshots in `example/exports/snapshots/`. Nothing else would have caught the appendix headings shipping as `.1. Supplementary Methods` and the appendix table as `Table .5`. A snapshot diff is *expected* to fail when the sample or template changes on purpose — read the diff, then re-record with `--update` in the same commit. |
+| double-blind positive control | The blinding gate is an *absence* assertion keyed on a hard-coded surname. Renaming the example's authors would leave it green and vacuous forever, so it now first asserts the surname *does* appear in the unblinded export. |
+| `check-ink.sh` | A blank graphical abstract passes every other gate: exit 0, no LaTeX error, and `pdfimages` lists the image as present. |
+| `endfloat` / `doubleblind` effect checks | `class_options` reach the class unvalidated, and elsarticle's `endfloat` sits behind an `\IfFileExists` with an empty else-branch: without `endfloat.sty` the option silently does nothing. Assert the effect, not the flag. |
 
 ## Files Included
 
