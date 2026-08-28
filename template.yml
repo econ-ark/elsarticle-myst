@@ -123,6 +123,11 @@ doc:
       Article abstract as a simple string (100-300 words). Either this or
       parts.abstract is required. If parts.abstract is also provided, it takes
       precedence.
+
+      Do NOT cite a work here that nothing in the body cites. MyST excludes
+      frontmatter parts from the rendered document and harvests the .bib from
+      that document, so the citation reaches the .tex and never the .bib, and
+      renders as `?` at exit 0. Upstream jupyter-book/mystmd#3032.
   - id: tags
     description: >
       JEL classification codes, printed after the keywords as "JEL: ...".

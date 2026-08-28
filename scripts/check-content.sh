@@ -66,6 +66,20 @@ check_substance() {
   ok "$name: substantive ($lines lines, every anchor present)"
 }
 
+# A literal '??' is an unresolved cross-reference, and two ways it arises raise
+# NO LaTeX warning, so the compile-log gate cannot see them. See README.md
+# "Known upstream limitations".
+check_no_unresolved_refs() {
+  local name=$1 text=$2 hit
+  hit=$(grep -n '??' <<<"$text" | head -3)
+  if [ -n "$hit" ]; then
+    bad "$name: unresolved cross-reference(s) in the PDF text"
+    printf '      %s\n' "$hit"
+  else
+    ok "$name: no unresolved cross-references"
+  fi
+}
+
 compare_one() {
   local name=$1 pdf="$EXPORTS/$1.pdf" snap="$SNAPS/$1.txt" text
   if [ ! -s "$pdf" ]; then
@@ -86,6 +100,7 @@ compare_one() {
   # let an equally degraded build compare equal and pass.
   check_substance "$name built" "$text"
   check_substance "$name snapshot" "$(cat "$snap")"
+  check_no_unresolved_refs "$name" "$text"
   if diff -u --label "snapshot/$name" --label "built/$name" "$snap" "$built" > "$diff_out"; then
     ok "$name: text matches the committed snapshot"
   else
@@ -182,6 +197,23 @@ do_self_test() {
     bash -c 'head -c 3000 example/exports/sample-sc-numbers.pdf > t && mv t example/exports/sample-sc-numbers.pdf'
   expect_fail "deleted snapshot" "sample-elsarticle: no committed snapshot" \
     rm -f example/exports/snapshots/sample-elsarticle.txt
+  # The ?? check is exercised at FUNCTION level: seeding it through a real PDF
+  # would need a PDF writer in CI, and rebuilding a sample with a broken ref is
+  # far slower than feeding the extracted text directly.
+  out=$( fail=0; check_no_unresolved_refs probe "Cross-ref: Sec ?? and Algorithm ??."; echo "__fail=$fail" )
+  if grep -q '^FAIL  probe: unresolved cross-reference' <<<"$out"; then
+    printf 'ok    rejection test: an unresolved cross-reference is caught\n'
+  else
+    printf 'FAIL  rejection test: an unresolved cross-reference was NOT caught\n'
+    rc=1
+  fi
+  out=$( fail=0; check_no_unresolved_refs probe "Ordinary prose with no markers."; echo "__fail=$fail" )
+  if grep -q '^ok    probe: no unresolved' <<<"$out"; then
+    printf 'ok    control: clean text does not trip the ?? check\n'
+  else
+    printf 'FAIL  control: the ?? check fires on clean text\n'
+    rc=1
+  fi
   expect_fail "unclaimed export" "closure: orphan.pdf is compared by NOTHING" \
     bash -c 'cp example/exports/sample-sc.pdf example/exports/orphan.pdf'
 
