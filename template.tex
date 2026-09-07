@@ -55,7 +55,10 @@
 \usepackage{xspace}
 \usepackage{xstring}
 \usepackage{etoolbox}
-\usepackage[colorlinks,allcolors=blue]{hyperref}
+\usepackage[colorlinks]{hyperref}
+%% elsarticle.cls resets every link color to blue in its own \AtBeginDocument hook, so
+%% package options are inert; this later hook wins. Internal refs black, cites/URLs blue.
+\AtBeginDocument{\hypersetup{linkcolor=black,citecolor=blue,urlcolor=blue}}
 
 %% CAS has a `bio' environment for author biographies; elsarticle has none,
 %% so the same part would die on an undefined control sequence. The argument
