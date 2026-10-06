@@ -1,0 +1,154 @@
+name: check
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+# No TeX here: CI renders the template to .tex and checks the COMMITTED PDFs as
+# they are. Building the PDFs and the gates that need TeX run locally, in
+# scripts/check-pdfs.sh, before a commit.
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Cache npm packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-
+
+      - name: Install mystmd
+        run: npm install -g mystmd@1.11.0
+
+      # pdftotext/pdffonts/pdfinfo and ImageMagick read the committed PDFs.
+      - name: Install PDF readers
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends poppler-utils imagemagick
+
+      # Check F regenerates elsarticle.cls with latex, which this runner lacks,
+      # so F alone may skip. Any other skip still reads as a failure.
+      - name: Verify upstream sources are pristine and patches match
+        run: |
+          # GitHub's default shell is `bash -e {0}` with NO pipefail, so
+          # `verifier | tee` would report tee's status and every FAIL would
+          # go green. Do not remove this line.
+          set -eo pipefail
+          ./scripts/verify-upstream.sh --self-test
+          ./scripts/verify-upstream.sh | tee /tmp/verify.log
+          if grep '^skip' /tmp/verify.log | grep -qv '^skip  F elsarticle regeneration: no latex on PATH'; then
+            echo "::error::a check other than F was skipped rather than run"
+            exit 1
+          fi
+
+      # The committed PDFs are reproducible only with the fixed build date that
+      # scripts/check-pdfs.sh uses; README.md's build command must match it.
+      - name: README build command matches the local builder
+        run: |
+          set -e
+          epoch=$(sed -n 's/^EPOCH=//p' scripts/check-pdfs.sh)
+          [ -n "$epoch" ] || { echo "::error::no EPOCH= line in scripts/check-pdfs.sh"; exit 1; }
+          if ! grep -qF "SOURCE_DATE_EPOCH=$epoch FORCE_SOURCE_DATE=1 myst build" README.md; then
+            echo "::error::README.md's build command does not use SOURCE_DATE_EPOCH=$epoch; local rebuilds would churn the tracked PDFs"
+            exit 1
+          fi
+
+      # Every sample export, rendered to .tex: a template render abort or a raw
+      # block mystmd cannot parse fails here, with no PDF built.
+      - name: Render every sample export to TeX
+        run: |
+          set -eo pipefail
+          ./scripts/check-render.sh --self-test
+          ./scripts/check-render.sh
+
+      # The template escapes LaTeX specials in raw frontmatter strings. That was
+      # documented and never asserted, and title/subtitle/keywords/tags/author
+      # names were silently unescaped for six releases. Assert the escaping.
+      - name: Round-trip LaTeX specials through the template
+        run: |
+          set -eo pipefail
+          ./scripts/check-escaping.sh --self-test
+          ./scripts/check-escaping.sh
+
+      # MyST drops an undeclared frontmatter part without a word, and a part
+      # that is declared but never printed vanishes the same way.
+      - name: Check that every declared part reaches the .tex
+        run: |
+          set -eo pipefail
+          ./scripts/check-parts.sh --self-test
+          ./scripts/check-parts.sh
+
+      - name: Verify all six committed PDFs exist
+        run: |
+          set -e
+          for name in sample-sc sample-dc sample-sc-numbers sample-long sample-elsarticle sample-elsarticle-5p; do
+            f="example/exports/${name}.pdf"
+            if [ ! -s "$f" ]; then
+              echo "::error::$f is missing or empty"
+              exit 1
+            fi
+            echo "ok: $f ($(stat -c '%s' "$f") bytes)"
+          done
+
+      # class_options reach the class unvalidated, and elsarticle's endfloat
+      # option has an EMPTY else-branch: absent endfloat.sty it silently does
+      # nothing and the build passes. Assert the effect, not the flag.
+      - name: Verify class_options actually took effect
+        run: |
+          set -eo pipefail
+          # Without this, a missing pdftotext reads as "no float markers" below.
+          command -v pdftotext >/dev/null || { echo "::error::pdftotext is not installed"; exit 1; }
+          t=$(pdftotext example/exports/sample-elsarticle-5p.pdf - | grep -c 'about here' || true)
+          if [ "$t" -lt 1 ]; then
+            echo "::error::endfloat produced no float markers; the class option was a no-op"
+            exit 1
+          fi
+          echo "endfloat: $t float marker(s)"
+          # POSITIVE CONTROL FIRST: this absence assertion is keyed on a
+          # hard-coded surname, so renaming the example's authors would leave it
+          # green and vacuous. Prove the needle exists unblinded before trusting.
+          n=$(pdftotext -f 1 -l 4 example/exports/sample-elsarticle.pdf - | grep -ci 'Lujan' || true)
+          if [ "$n" -lt 1 ]; then
+            echo "::error::'Lujan' does not appear in the unblinded title block; the doubleblind check below is vacuous. Update the surname it looks for."
+            exit 1
+          fi
+          echo "doubleblind positive control: $n occurrence(s) in the unblinded export"
+          # Frontmatter pages only. doubleblind anonymises the title block; it
+          # does NOT strip author names from body content such as parts.biography,
+          # so scanning the whole PDF would fail for a reason blinding never promised.
+          if pdftotext -f 1 -l 4 example/exports/sample-elsarticle-5p.pdf - | grep -qi 'Lujan'; then
+            echo "::error::doubleblind export still names an author in the title block"
+            exit 1
+          fi
+          echo "doubleblind: title block carries no author names"
+
+      # A blank graphical abstract passes every other gate: exit 0, no LaTeX
+      # error, and pdfimages lists the image as present. Only rasterising it
+      # catches the failure.
+      - name: Verify the graphical abstract page is not blank
+        run: |
+          ./scripts/check-ink.sh --self-test
+          fail=0
+          for name in sample-sc sample-dc sample-sc-numbers sample-long sample-elsarticle sample-elsarticle-5p; do
+            ./scripts/check-ink.sh "example/exports/${name}.pdf" 1 0.8 || fail=1
+          done
+          exit "$fail"
+
+      # What the committed PDFs PRODUCE: text against the committed snapshots,
+      # metadata, fonts and title-note marks. Both were built locally by
+      # scripts/check-pdfs.sh, so they must agree exactly.
+      - name: Diff committed PDF text against committed snapshots
+        run: |
+          set -eo pipefail
+          ./scripts/check-content.sh --self-test
+          ./scripts/check-content.sh

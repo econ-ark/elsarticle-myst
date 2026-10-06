@@ -375,8 +375,11 @@ The template escapes LaTeX specials in the frontmatter strings it interpolates i
 
 ### What CI asserts
 
+CI installs no TeX. It renders every export to `.tex` and checks the committed PDFs as they are. Building the PDFs, and the gates that need a TeX run, happen locally in `scripts/check-pdfs.sh`: the compile-log grep and its `Overfull \hbox` check, the bibtex gate, `check-math-macros.sh` and `check-title-gap.sh`. The committed PDFs and snapshots both come from that local build. A TeX Live of a different year breaks columns differently, so CI does not rebuild them.
+
 | Gate | Why it is not redundant |
 |---|---|
+| `check-render.sh` + `--self-test` | CI's whole-template render. It renders a copy of the sample with every export turned to `format: tex`, since `--tex` still runs xelatex for a `pdf+tex` export, and fails on a render abort or an unparsed raw block. |
 | `jtex check` | Keeps `packages:` honest; a missing entry means MyST re-emits a `\usepackage` the class already loaded. |
 | `verify-upstream.sh` + `--self-test` | The vendored classes differ from upstream by exactly the patches in `PATCHES.md`. A `skip` line is treated as an error, since a skipped check reads as a pass. |
 | `check-escaping.sh` + `--self-test` | The escaping was documented and never asserted for six releases, during which `title` was raw. |
@@ -485,7 +488,7 @@ cd example
 SOURCE_DATE_EPOCH=1756400000 FORCE_SOURCE_DATE=1 myst build sample-article.md --pdf
 ```
 
-The PDFs in `example/exports/` are tracked. XeTeX stamps each one with its build time, which changes every byte on every rebuild; the fixed epoch, the same constant CI uses, makes a rebuild with unchanged sources reproduce the committed file exactly.
+The PDFs in `example/exports/` are tracked. XeTeX stamps each one with its build time, which changes every byte on every rebuild; the fixed epoch, the constant `scripts/check-pdfs.sh` builds with, makes a rebuild with unchanged sources reproduce the committed file exactly. Before committing a change to the template, the classes or the sample, run `scripts/check-pdfs.sh`: it rebuilds the six PDFs and runs every gate that needs TeX. CI installs no TeX.
 
 ## Credits
 

@@ -1,7 +1,7 @@
 name: upstream-drift
 
 # Asks CTAN, once a month, whether the vendored bundles are still current. Kept
-# out of build-pdf.yml because it needs network, and a failure here is usually
+# out of check.yml because it needs network, and a failure here is usually
 # news (a new upstream release), not a reason to block a pull request.
 
 # GitHub disables scheduled workflows after 60 days of repository inactivity, so
