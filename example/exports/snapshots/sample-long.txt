@@ -32,11 +32,14 @@ JEL: D14; C61; G11
 This article demonstrates MyST Markdown integration with Elsevier’s CAS and
 elsarticle classes, covering typography, math, cross-references, admonitions, proofs,
 tables, figures, and code blocks.
-Summary. One Markdown source produces both Elsevier layouts and a website.
 
+Summary
+One Markdown source produces both Elsevier layouts and a website.
+
+Dedication
 To everyone who has fought a LaTeX class file at midnight.
 Beware of bugs in the above code; I have only proved it correct, not tried it.
-Donald E. Knuth
+— Donald E. Knuth
 
 1. Introduction
 This document demonstrates the full integration of MyST Markdown (Cockett, Purves, Koch and
@@ -52,9 +55,6 @@ write outside it day to day. MyST Markdown bridges this gap by providing:
 1. A familiar Markdown syntax based on CommonMark (Gruber, 2004)
 2. Rich scientific features (equations, citations, cross-references)
 3. Export to multiple formats including PDF via LaTeX
-Reproducible research workflows have become increasingly important, with tools like Jupyter Notebooks
-(Kluyver, Ragan-Kelley, Pérez, Granger, Bussonnier, Frederic, Kelley, Hamrick, Grout, Corlay, Ivanov, Avila,
-Abdalla, Willing and Jupyter Development Team, 2016) enabling literate programming approaches.
 ⋆
 
 Prepared as a demonstration of the elsarticle-myst template.
@@ -76,6 +76,9 @@ The important thing is not to stop questioning. Curiosity has its own reason for
 In the middle of diﬀiculty lies opportunity.
 Figure 0: Albert Einstein
 
+Reproducible research workflows have become increasingly important, with tools like Jupyter Notebooks
+(Kluyver, Ragan-Kelley, Pérez, Granger, Bussonnier, Frederic, Kelley, Hamrick, Grout, Corlay, Ivanov, Avila,
+Abdalla, Willing and Jupyter Development Team, 2016) enabling literate programming approaches.
 Note
 About this document: This article is both a feature reference and a test file for the Elsevier MyST
 template. Every feature shown here should render correctly in the web preview and in all six PDF
@@ -107,17 +110,15 @@ LaTeX A document preparation system for high-quality typesetting
 jtex A Jinja-based templating system for LaTeX documents
 CAS Complex Article Service, the Elsevier workflow the cas-sc and cas-dc classes target
 
-2.5. Footnotes
-MyST supports footnotes1 which are automatically numbered and placed at the end of the document.
-You can have multiple footnotes2 throughout your text.
-1 This is a footnote demonstrating the feature. Footnotes can contain formatted text and even code.
-2 Another footnote with additional information. Footnotes are essential for academic writing.
-
 Lujan, Carroll, White: Preprint submitted to Elsevier
 
 Page 2 of 10
 
 MyST and Elsevier Guide
+
+2.5. Footnotes
+MyST supports footnotes1 which are automatically numbered and placed at the end of the document.
+You can have multiple footnotes2 throughout your text.
 
 2.6. Task Lists
 Task lists can track progress (rendered as bullet points in LaTeX):
@@ -186,16 +187,18 @@ P (s |s, a)V (s )
 s′
 
 Equations can be cross-referenced: see (1) for the quadratic formula and (2) for Maxwell’s equations.
-
-4. Proofs and Theorems
-MyST supports formal mathematical environments using proof directives. These are essential for
-mathematical and theoretical papers.
+1 This is a footnote demonstrating the feature. Footnotes can contain formatted text and even code.
+2 Another footnote with additional information. Footnotes are essential for academic writing.
 
 Lujan, Carroll, White: Preprint submitted to Elsevier
 
 Page 3 of 10
 
 MyST and Elsevier Guide
+
+4. Proofs and Theorems
+MyST supports formal mathematical environments using proof directives. These are essential for
+mathematical and theoretical papers.
 
 4.1. Definitions
 Definition 4.1 (Convergent Sequence). A sequence (an ) in R is said to be convergent if there exists a

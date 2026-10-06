@@ -20,18 +20,20 @@ Abstract
 This article demonstrates MyST Markdown integration with Elsevier’s CAS
 and elsarticle classes, covering typography, math, cross-references, admonitions,
 proofs, tables, figures, and code blocks.
-Summary. One Markdown source produces both Elsevier layouts and a website.
 Keywords: MyST Markdown, Elsevier, LaTeX, CAS Template, Scientific
 Publishing, Reproducible Research
 JEL: D14; C61; G11
+
+Summary
+One Markdown source produces both Elsevier layouts and a website.
+Dedication
 To everyone who has fought a LaTeX class file at midnight.
-Beware of bugs in the above code; I have only proved it
-correct, not tried it.
-Donald E. Knuth
+Beware of bugs in the above code; I have only proved it correct, not tried
+it.
+— Donald E. Knuth
 
 1. Introduction
-This document demonstrates the full integration of MyST Markdown (Cockett et al., 2024) with Elsevier’s CAS templates. MyST provides a powerful authoring experience while maintaining compatibility with traditional LaTeX journal requirements (Lamport, 1994). The template renders to PDF for cameraready submission and to HTML for the project website; author identifiers (ORCID) and persistent links (DOI) propagate through both pipelines.
-⋆ Prepared as a demonstration of the elsarticle-myst template.
+This document demonstrates the full integration of MyST Markdown (Cockett et al., 2024) with Elsevier’s CAS templates. MyST provides a powerful authoring experience while maintaining compatibility with traditional LaTeX jour⋆ Prepared as a demonstration of the elsarticle-myst template.
 ∗ Corresponding author
 
 Email addresses: alujan@jhu.edu (Alan E. Lujan), ccarroll@jhu.edu (Christopher D.
@@ -39,7 +41,8 @@ Carroll)
 URL: https://econ-ark.org (Alan E. Lujan), https://econ.jhu.edu/people/ccarroll
 (Christopher D. Carroll)
 
-1.1. Background
+nal requirements (Lamport, 1994). The template renders to PDF for cameraready submission and to HTML for the project website; author identifiers (ORCID) and persistent links (DOI) propagate through both pipelines.
+1.1. Background
 Scientific publishing has traditionally relied on LaTeX for high-quality typesetting (Krewinkel and Winkler, 2017). However, the learning curve and complexity of LaTeX can be a barrier for authors who write outside it day to day.
 MyST Markdown bridges this gap by providing:
 1. A familiar Markdown syntax based on CommonMark (Gruber, 2004)
@@ -69,7 +72,6 @@ Had ’em.
 —Strickland Gillilan
 2.3. Quotations
 Block quotes are useful for highlighting important passages:
-
 2
 
 We know what we are, but know not what we may be.

@@ -32,13 +32,16 @@ JEL: D14; C61; G11
 This article demonstrates MyST Markdown integration with Elsevier’s CAS and
 elsarticle classes, covering typography, math, cross-references, admonitions, proofs,
 tables, figures, and code blocks.
-Summary. One Markdown source produces both Elsevier layouts and a website.
 
+Summary
+One Markdown source produces both Elsevier layouts and a website.
+
+Dedication
 To everyone who has fought a LaTeX class file at
 midnight.
-Beware of bugs in the above code; I have
-only proved it correct, not tried it.
-Donald E. Knuth
+Beware of bugs in the above code; I have only
+proved it correct, not tried it.
+— Donald E. Knuth
 
 1. Introduction
 This document demonstrates the full integration of
@@ -53,9 +56,6 @@ pipelines.
 1.1. Background
 Scientific publishing has traditionally relied on LaTeX for high-quality typesetting (Krewinkel and Winkler, 2017). However, the learning curve and complexity
 of LaTeX can be a barrier for authors who write outside
-it day to day. MyST Markdown bridges this gap by
-providing:
-1. A familiar Markdown syntax based on CommonMark (Gruber, 2004)
 ⋆
 
 Prepared as a demonstration of the elsarticle-myst template.
@@ -71,6 +71,9 @@ orcid(s): 0000-0002-5289-7054 (A.E. Lujan);
 
 Lujan, Carroll, White: Preprint submitted to Elsevier
 
+it day to day. MyST Markdown bridges this gap by
+providing:
+1. A familiar Markdown syntax based on CommonMark (Gruber, 2004)
 2. Rich scientific features (equations, citations, crossreferences)
 3. Export to multiple formats including PDF via
 LaTeX
@@ -94,10 +97,6 @@ text and underlined text for special emphasis.
 For chemical formulas, use subscripts: H2 O, CO2 ,
 C6 H12 O6 . For ordinals and exponents, use superscripts:
 the 4th of July, 1st place, x2 + y2 = r2 .
-
-2.2. Line Breaks
-The world’s shortest poem demonstrates line breaks:
-Fleas
 Page 1 of 6
 
 MyST and Elsevier Guide
@@ -121,6 +120,9 @@ and Cov(X, Y ) = E[XY ] − E[X] E[Y ].
 3.2. Display Equations
 The quadratic formula:
 
+2.2. Line Breaks
+The world’s shortest poem demonstrates line breaks:
+Fleas
 Adam
 Had ’em.
 —Strickland Gillilan
@@ -135,23 +137,15 @@ explanations:
 MyST Markedly Structured Text, a markdown flavor
 for scientific writing
 LaTeX A document preparation system for highquality typesetting
+jtex A Jinja-based templating system for LaTeX documents
+CAS Complex Article Service, the Elsevier workflow
+the cas-sc and cas-dc classes target
 
 x=
 
 −b ±
 
-2.5. Footnotes
-MyST supports footnotes1 which are automatically
-numbered and placed at the end of the document. You
-can have multiple footnotes2 throughout your text.
-
-2.6. Task Lists
-Task lists can track progress (rendered as bullet
-points in LaTeX):
-■ Create template structure
-■ Add typography examples
-■ Add math demonstrations
-■ Add proof environments
+√
 
 b2 − 4ac
 2a
@@ -177,13 +171,6 @@ The Bellman equation for dynamic programming,
 where the policy is P
 the maximizing action a⋆ (s) =
 argmaxa {R(s, a) + γ s′ P (s′ |s, a)V (s′ )}:
-
-jtex A Jinja-based templating system for LaTeX documents
-CAS Complex Article Service, the Elsevier workflow
-the cas-sc and cas-dc classes target
-
-√
-
 (
 V (s) = max R(s, a) + γ
 a
@@ -204,11 +191,28 @@ s′
 Equations can be cross-referenced: see (1) for the
 quadratic formula and (2) for Maxwell’s equations.
 
+2.5. Footnotes
+MyST supports footnotes1 which are automatically
+numbered and placed at the end of the document. You
+can have multiple footnotes2 throughout your text.
+
 4. Proofs and Theorems
+
+2.6. Task Lists
+
 MyST supports formal mathematical environments
 using proof directives. These are essential for mathematical and theoretical papers.
 
+Task lists can track progress (rendered as bullet
+points in LaTeX):
+
 4.1. Definitions
+
+■ Create template structure
+■ Add typography examples
+■ Add math demonstrations
+■ Add proof environments
+
 Definition 4.1 (Convergent Sequence). A sequence
 (an ) in R is said to be convergent if there exists a
 number L ∈ R such that for every ε > 0, there exists

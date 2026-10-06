@@ -77,15 +77,17 @@ check_absent() {
   ok "$label"
 }
 
-# Run check $2 on both classes' output. $1 labels the fixture.
-both_classes() {
-  local fixture=$1 cls f
-  shift
+# Build a fixture against template $1 and run check $5 on both classes' output.
+# $2 labels the fixture, $3 and $4 are its frontmatter lines and its body.
+run_fixture() {
+  local root=$1 label=$2 front=$3 body=$4 check=$5 cls f
+  if ! build_fixture "$root" "$front" "$body"; then bad "$label: the template render aborted"; return; fi
   for cls in cas els; do
     f="$WORK/out/$cls.tex"
-    if [ ! -s "$f" ]; then bad "$fixture ($cls): produced no .tex"; continue; fi
-    "$@" "$f" "$cls"
+    if [ ! -s "$f" ]; then bad "$label ($cls): produced no .tex"; continue; fi
+    "$check" "$f" "$cls"
   done
+  rm -rf "$WORK"
 }
 
 # Every part written in the frontmatter, as top-level keys where MyST takes
@@ -94,7 +96,10 @@ both_classes() {
 FRONT_ALL='abstract: ABSTRACTMARK opens the abstract.
 summary: SUMMARYMARK says it plainly.
 dedication: DEDICATIONMARK to a reader.
-epigraph: EPIGRAPHMARK is a quotation. Someone
+epigraph: |
+  EPIGRAPHMARK is a quotation.
+
+  --- CITEMARK
 data_availability: DATAMARK is available on request.
 acknowledgments: ACKMARK thanks a reviewer.
 keypoints:
@@ -118,22 +123,19 @@ Einstein
 all_parts_checks() {
   local f=$1 cls=$2 front_end=$'\\end{frontmatter}' after_body=(DIRECTIVEQUOTE)
   if [ "$cls" = cas ]; then front_end=$'\\maketitle'; after_body+=($'\\printcredits'); fi
-  check_order "$f" "summary runs in after the abstract ($cls)" \
-    '\begin{abstract}' ABSTRACTMARK '\textbf{Summary.} SUMMARYMARK' '\end{abstract}'
+  check_order "$f" "abstract in its block ($cls)" '\begin{abstract}' ABSTRACTMARK '\end{abstract}'
   check_order "$f" "acknowledgments as a first-page note ($cls)" '\nonumnote{ACKMARK' "$front_end"
-  check_order "$f" "dedication and epigraph precede the first heading; the body epigraph stays ($cls)" \
-    "$front_end" '\begin{center}\itshape' DEDICATIONMARK '\begin{flushright}' EPIGRAPHMARK \
-    '\section{Body' DIRECTIVEQUOTE
+  check_order "$f" "summary, dedication, epigraph open the body as plain sections and a quote; the body epigraph stays ($cls)" \
+    "$front_end" '\section*{Summary}' SUMMARYMARK '\section*{Dedication}' DEDICATIONMARK \
+    '\begin{quote}' EPIGRAPHMARK '\end{quote}' '\section{Body' DIRECTIVEQUOTE
+  check_order "$f" "the epigraph's citation is set apart, flush right ($cls)" \
+    '\itshape EPIGRAPHMARK' '{\raggedleft\upshape --- CITEMARK\par}' '\end{quote}'
   check_order "$f" "declarations, then data availability, after the body and before the references ($cls)" \
     "${after_body[@]}" '\section*{Declarations}' DECLMARK '\section*{Data Availability}' DATAMARK '\bibliographystyle'
   check_keypoints "$f" "keypoints as a YAML list ($cls)" Yamlpointone Yamlpointtwo Yamlpointthree
 }
 
-check_all() {
-  if ! build_fixture "$1" "$FRONT_ALL" "$BODY_ALL"; then bad 'all parts: the template render aborted'; return; fi
-  both_classes 'all parts' all_parts_checks
-  rm -rf "$WORK"
-}
+check_all() { run_fixture "$1" 'all parts' "$FRONT_ALL" "$BODY_ALL" all_parts_checks; }
 
 # Keypoints written as a bullet list in a part block. Before `as_list`, the
 # template split the rendered list on newlines and emitted broken LaTeX.
@@ -153,11 +155,7 @@ block_checks() {
   check_keypoints "$1" "keypoints as a bullet list in a part block ($2)" Blockpointone Blockpointtwo Blockpointthree
 }
 
-check_block() {
-  if ! build_fixture "$1" '' "$BODY_BLOCK"; then bad 'keypoints block: the template render aborted'; return; fi
-  both_classes 'keypoints block' block_checks
-  rm -rf "$WORK"
-}
+check_block() { run_fixture "$1" 'keypoints block' '' "$BODY_BLOCK" block_checks; }
 
 # parts.highlights takes precedence over keypoints.
 BODY_PRECEDENCE='+++ {"part": "highlights"}
@@ -178,43 +176,64 @@ precedence_checks() {
 }
 
 check_precedence() {
-  if ! build_fixture "$1" $'keypoints:\n  - Losingpoint must not print.' "$BODY_PRECEDENCE"; then
-    bad 'highlights precedence: the template render aborted'; return
-  fi
-  both_classes 'highlights precedence' precedence_checks
-  rm -rf "$WORK"
+  run_fixture "$1" 'highlights precedence' $'keypoints:\n  - Losingpoint must not print.' \
+    "$BODY_PRECEDENCE" precedence_checks
 }
 
 # No part supplied: nothing may print, not even a heading or an empty block.
 none_checks() {
-  check_absent "$1" "no parts, no furniture ($2)" '\begin{abstract}' '\textbf{Summary.}' \
-    '\begin{highlights}' '\begin{center}\itshape' '\begin{flushright}' \
+  check_absent "$1" "no parts, no furniture ($2)" '\begin{abstract}' '\begin{highlights}' \
+    '\section*{Summary}' '\section*{Dedication}' '\begin{quote}' \
     '\section*{Declarations}' '\section*{Data Availability}'
 }
 
-check_none() {
-  if ! build_fixture "$1" '' $'# Body\n\nText.'; then bad 'no parts: the template render aborted'; return; fi
-  both_classes 'no parts' none_checks
-  rm -rf "$WORK"
-}
+check_none() { run_fixture "$1" 'no parts' '' $'# Body\n\nText.' none_checks; }
 
 # Pins MyST behaviour that README "Document Parts" warns about: with no explicit
-# summary, a body section titled exactly "Summary" moves into the abstract.
+# summary, a closing body section titled "Summary" moves to the front.
 implicit_checks() {
-  check_order "$1" "a body section titled Summary moves into the abstract ($2)" \
-    '\begin{abstract}' IMPLICITSUMMARY '\end{abstract}' '\section{Introduction'
+  check_order "$1" "a body section titled Summary moves to the front ($2)" \
+    '\section*{Summary}' IMPLICITSUMMARY '\section{Introduction'
 }
 
 check_implicit() {
-  if ! build_fixture "$1" '' $'# Introduction\n\nText.\n\n# Summary\n\nIMPLICITSUMMARY closes the paper.'; then
-    bad 'implicit summary: the template render aborted'; return
-  fi
-  both_classes 'implicit summary' implicit_checks
-  rm -rf "$WORK"
+  run_fixture "$1" 'implicit summary' '' \
+    $'# Introduction\n\nText.\n\n# Summary\n\nIMPLICITSUMMARY closes the paper.' implicit_checks
 }
+
+# An epigraph written as a blockquote in a part block: MyST sets it as a figure
+# holding a quote and a \caption* citation. Wrapping that figure in a second
+# quote is a fatal "Not in outer par mode".
+BODY_EPIGRAPH_BLOCK='+++ {"part": "epigraph"}
+
+> BLOCKQUOTEMARK is quoted.
+>
+> -- BLOCKBYLINE
+
++++
+
+# Body
+
+Text.'
+
+epigraph_block_checks() {
+  local flat
+  check_order "$1" "a blockquote epigraph keeps its citation, before the first heading ($2)" \
+    BLOCKQUOTEMARK '\caption*{BLOCKBYLINE}' '\section{Body'
+  flat=$(strip_comments "$1" | tr '\n' ' ')
+  # A figure opened while a quote is still open, whatever sits between them.
+  if grep -qP '\\begin\{quote\}(?:(?!\\end\{quote\}).)*\\begin\{figure\}' <<<"$flat"; then
+    bad "a blockquote epigraph is wrapped in a second quote ($2)"
+  else
+    ok "a blockquote epigraph is not wrapped twice ($2)"
+  fi
+}
+
+check_epigraph_block() { run_fixture "$1" 'epigraph block' '' "$BODY_EPIGRAPH_BLOCK" epigraph_block_checks; }
 
 run_checks() {
   check_all "$1"
+  check_epigraph_block "$1"
   check_block "$1"
   check_precedence "$1"
   check_none "$1"
@@ -245,14 +264,18 @@ do_self_test() {
     perl -0pi -e 's/\Q[# for point in parts.keypoints #]\E\n\Q\item [-point-]\E\n\Q[# endfor #]\E/\\item [-parts.keypoints | join(" ")-]/'
   seed_defect 'keypoints without as_list' 'item line' check_block template.yml \
     perl -0pi -e 's/\n    as_list: true//'
-  seed_defect 'an undeclared part is dropped' 'dedication and epigraph precede' check_all template.yml \
+  seed_defect 'an undeclared part is dropped' 'open the body as plain sections' check_all template.yml \
     perl -0pi -e 's/^  - id: epigraph\n(?:    .*\n)+//m'
-  seed_defect 'a declared part never printed' 'SUMMARYMARK' check_all template.tex \
+  seed_defect 'a declared part never printed' 'missing: \\section\*{Summary}' check_all template.tex \
     perl -0pi -e 's/\Q[# if parts.summary #]\E/[# if false #]/'
   seed_defect 'the Declarations heading dropped' 'Declarations' check_all template.tex \
     perl -0pi -e 's/\Q\section*{Declarations}\E\n//'
   seed_defect 'a heading printed with no content' 'Data Availability' check_none template.tex \
     perl -0pi -e 's/\Q[# if parts.data_availability #]\E\n(\Q\section*{Data Availability}\E\n)/$1\[# if parts.data_availability #]\n/'
+  seed_defect 'a blockquote epigraph wrapped twice' 'wrapped in a second quote' check_epigraph_block template.tex \
+    perl -0pi -e 's/\Q[# if parts.epigraph and '"'"'\\begin{quote}'"'"' in parts.epigraph #]\E/[# if false #]/'
+  seed_defect 'the epigraph citation left inside the quotation' 'citation is set apart' check_all template.tex \
+    perl -0pi -e 's/\Qepi_cite.startsWith("--")\E/false/'
   seed_defect 'highlights no longer win' 'Losingpoint' check_precedence template.tex \
     perl -0pi -e 's/\Q[# if parts.highlights #]\E/[# if false #]/'
   # elsarticle has no \printcredits to order against, so the body itself must

@@ -32,11 +32,14 @@ JEL: D14; C61; G11
 This article demonstrates MyST Markdown integration with Elsevier’s CAS and
 elsarticle classes, covering typography, math, cross-references, admonitions, proofs,
 tables, figures, and code blocks.
-Summary. One Markdown source produces both Elsevier layouts and a website.
 
+Summary
+One Markdown source produces both Elsevier layouts and a website.
+
+Dedication
 To everyone who has fought a LaTeX class file at midnight.
 Beware of bugs in the above code; I have only proved it correct, not tried it.
-Donald E. Knuth
+— Donald E. Knuth
 
 1. Introduction
 This document demonstrates the full integration of MyST Markdown [1] with Elsevier’s CAS templates.
@@ -53,10 +56,6 @@ Markdown bridges this gap by providing:
 3. Export to multiple formats including PDF via LaTeX
 Reproducible research workflows have become increasingly important, with tools like Jupyter Notebooks
 [3] enabling literate programming approaches.
-Note
-About this document: This article is both a feature reference and a test file for the Elsevier MyST
-template. Every feature shown here should render correctly in the web preview and in all six PDF
-exports, under CAS and elsarticle alike.
 ⋆
 
 Prepared as a demonstration of the elsarticle-myst template.
@@ -77,6 +76,11 @@ Figure 0: William Shakespeare, Hamlet
 The important thing is not to stop questioning. Curiosity has its own reason for existing.
 In the middle of diﬀiculty lies opportunity.
 Figure 0: Albert Einstein
+
+Note
+About this document: This article is both a feature reference and a test file for the Elsevier MyST
+template. Every feature shown here should render correctly in the web preview and in all six PDF
+exports, under CAS and elsarticle alike.
 
 2. Typography Features
 This section demonstrates MyST Markdown typography features and how they render in the PDF output.
@@ -107,12 +111,6 @@ CAS Complex Article Service, the Elsevier workflow the cas-sc and cas-dc classes
 2.5. Footnotes
 MyST supports footnotes1 which are automatically numbered and placed at the end of the document.
 You can have multiple footnotes2 throughout your text.
-
-2.6. Task Lists
-Task lists can track progress (rendered as bullet points in LaTeX):
-■ Create template structure
-■ Add typography examples
-■ Add math demonstrations
 1 This is a footnote demonstrating the feature. Footnotes can contain formatted text and even code.
 2 Another footnote with additional information. Footnotes are essential for academic writing.
 
@@ -122,6 +120,11 @@ Page 2 of 10
 
 MyST and Elsevier Guide
 
+2.6. Task Lists
+Task lists can track progress (rendered as bullet points in LaTeX):
+■ Create template structure
+■ Add typography examples
+■ Add math demonstrations
 ■ Add proof environments
 □ Submit to journal
 □ Celebrate publication!
@@ -189,6 +192,12 @@ Equations can be cross-referenced: see (1) for the quadratic formula and (2) for
 MyST supports formal mathematical environments using proof directives. These are essential for
 mathematical and theoretical papers.
 
+Lujan, Carroll, White: Preprint submitted to Elsevier
+
+Page 3 of 10
+
+MyST and Elsevier Guide
+
 4.1. Definitions
 Definition 4.1 (Convergent Sequence). A sequence (an ) in R is said to be convergent if there exists a
 number L ∈ R such that for every ε > 0, there exists N ∈ N such that for all n > N :
@@ -200,12 +209,8 @@ We write limn→∞ an = L.
 Definition 4.2 (Continuous Function). A function f : R → R is continuous at a point c if for every ε > 0,
 there exists δ > 0 such that:
 |x − c| < δ =⇒ |f (x) − f (c)| < ε
-Lujan, Carroll, White: Preprint submitted to Elsevier
 
 (5)
-Page 3 of 10
-
-MyST and Elsevier Guide
 
 4.2. Theorems
 Theorem 4.1 (Squeeze Theorem). Let (an ), (bn ), and (cn ) be sequences such that an ≤ bn ≤ cn for all
@@ -256,20 +261,18 @@ Then for n > N :
 n
 n
 N
+Lujan, Carroll, White: Preprint submitted to Elsevier
 
 (8)
+Page 4 of 10
+
+MyST and Elsevier Guide
 
 5. Admonitions
 Admonitions (callouts) are useful for highlighting important information. MyST supports many types:
 Note
 This is a note admonition. Use it to highlight supplementary information that readers should be aware
 of.
-
-Lujan, Carroll, White: Preprint submitted to Elsevier
-
-Page 4 of 10
-
-MyST and Elsevier Guide
 
 Warning
 Use a warning to alert readers about pitfalls or caveats in your methodology.
@@ -303,11 +306,6 @@ For more information on MyST Markdown features, visit the MyST documentation.
 Code blocks with syntax highlighting are supported:
 As shown in Program 1, code can be captioned, numbered, and cross-referenced.
 Multiple languages are supported:
-
-7. Algorithms
-For algorithm pseudocode, use raw LaTeX blocks with the algorithm and algorithmic environments:
-The algorithm environment provides a float with caption and label for cross-referencing.
-
 Lujan, Carroll, White: Preprint submitted to Elsevier
 
 Page 5 of 10
@@ -335,6 +333,8 @@ return x1, x2
 end
 Figure 2: Julia implementation
 
+7. Algorithms
+For algorithm pseudocode, use raw LaTeX blocks with the algorithm and algorithmic environments:
 Algorithm 1 Binary Search
 Require: Sorted array A[1..n], target value x
 Ensure: Index i such that A[i] = x, or −1 if not found
@@ -359,14 +359,7 @@ high ← mid − 1
 end if
 12: end while
 13: return −1
-
-8. Tables
-8.1. Markdown Tables
-MyST tables convert cleanly to LaTeX:
-Results are summarized in Table 1.
-
-8.2. List Tables
-List tables provide an alternative syntax useful for complex content:
+The algorithm environment provides a float with caption and label for cross-referencing.
 
 Lujan, Carroll, White: Preprint submitted to Elsevier
 
@@ -458,6 +451,14 @@ Random Forest
 Neural Network
 Transformer
 
+8. Tables
+8.1. Markdown Tables
+MyST tables convert cleanly to LaTeX:
+Results are summarized in Table 1.
+
+8.2. List Tables
+List tables provide an alternative syntax useful for complex content:
+
 8.3. CSV Tables
 8.4. Raw LaTeX Tables
 For complex tables requiring advanced features, use raw LaTeX blocks. The CAS templates include
@@ -513,21 +514,21 @@ Yes
 
 Features: booktabs rules, multirow row spanning, makecell line breaks, dcolumn decimal alignment, array column
 formatting.
-
-9. Figures and Images
-As shown in Figure 3, the template properly handles figure placement and captions.
-
-10. Cross-References Summary
-This document demonstrates various cross-reference capabilities:
 Lujan, Carroll, White: Preprint submitted to Elsevier
 
 Page 7 of 10
 
 MyST and Elsevier Guide
 
+9. Figures and Images
+
 Figure 3: A sample figure demonstrating image support in the template. This figure shows a placeholder image that would
 typically contain research results or visualizations. Figures are automatically numbered and can be cross-referenced.
 
+As shown in Figure 3, the template properly handles figure placement and captions.
+
+10. Cross-References Summary
+This document demonstrates various cross-reference capabilities:
 • Equations: (1), (2), (3)
 • Figures: Figure 3
 • Tables: Table 1, Table 2, Table 3
@@ -539,31 +540,15 @@ typically contain research results or visualizations. Figures are automatically 
 • Corollaries: Corollary 4.3.1
 • Examples: Example 4.1
 • Sections: Introduction, Typography
-
-11. Discussion
-This approach enables researchers to write in MyST Markdown while producing publication-ready
-documents that meet Elsevier’s submission requirements.
-
 Lujan, Carroll, White: Preprint submitted to Elsevier
 
 Page 8 of 10
 
 MyST and Elsevier Guide
-Table 5
-Supplementary parameters
-Parameter
-Alpha
-Beta
-Gamma
 
-Value
-0.05
-1.23
-456
-
-Unit
-m/s
-kg
+11. Discussion
+This approach enables researchers to write in MyST Markdown while producing publication-ready
+documents that meet Elsevier’s submission requirements.
 
 11.1. Advantages
 1. Reproducibility: Source files are plain text and version-controllable
@@ -597,16 +582,31 @@ The data was processed using standard procedures as described in the literature.
 This paragraph cites [6], a work no other section cites. It is here to keep the appendix on the bibliographyharvesting path: while this file was pulled in through parts.appendix, a citation made here reached the
 .tex and never the .bib, and no build step reported anything.
 
+B. Additional Tables
+
+CRediT authorship contribution statement
+Alan E. Lujan: Conceptualization, Methodology, Software, Writing – original draft. Christopher D.
+Carroll: Supervision, Writing – review & editing. Matthew N. White: Methodology, Software.
 Lujan, Carroll, White: Preprint submitted to Elsevier
 
 Page 9 of 10
 
 MyST and Elsevier Guide
+Table 5
+Supplementary parameters
+Parameter
+Alpha
+Beta
+Gamma
 
-B. Additional Tables
-CRediT authorship contribution statement
-Alan E. Lujan: Conceptualization, Methodology, Software, Writing – original draft. Christopher D.
-Carroll: Supervision, Writing – review & editing. Matthew N. White: Methodology, Software.
+Value
+0.05
+1.23
+456
+
+Unit
+m/s
+kg
 
 Declarations
 The authors declare no competing interests and did not use generative AI or AI-assisted technologies

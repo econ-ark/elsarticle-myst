@@ -237,21 +237,21 @@ Supported roles (per [CRediT taxonomy](https://credit.niso.org/)):
 
 ### Document Parts
 
-The template declares the seven parts MyST knows (`abstract`, `summary`, `keypoints`, `dedication`, `epigraph`, `acknowledgments`, `data_availability`), `declaration`, and five Elsevier parts (`highlights`, `graphical_abstract`, `title_note`, `note`, `biography`). The [econ-ark-myst](https://github.com/econ-ark/econ-ark-myst) template declares the same first eight, so one paper exports to both with nothing lost. MyST hands a template only the parts it declares. It drops an undeclared part written in the frontmatter without a warning, and leaves an undeclared `+++` part block in the body as plain paragraphs.
+The template declares the seven parts MyST knows (`abstract`, `summary`, `keypoints`, `dedication`, `epigraph`, `acknowledgments`, `data_availability`), `declaration`, and five Elsevier parts (`highlights`, `graphical_abstract`, `title_note`, `note`, `biography`). The [econ-ark-myst](https://github.com/econ-ark/econ-ark-myst) template declares the same first eight, so one paper exports to both with nothing lost. Printing stays within what Elsevier's classes provide: a part with an Elsevier slot (abstract, highlights, graphical abstract, notes, biography) goes there, and every other part goes in the body as ordinary content: a plain unnumbered section, or a quote for the epigraph. MyST hands a template only the parts it declares. It drops an undeclared part written in the frontmatter without a warning, and leaves an undeclared `+++` part block in the body as plain paragraphs.
 
-Declaring a part has a side effect in the body. When a paper does not supply a part explicitly, MyST moves any body section whose heading matches that part's name, ignoring case, into the part. A closing section titled "Summary" leaves the body and prints inside the abstract block, while its subsections stay behind under the preceding section. Sections titled "Abstract", "Dedication", "Epigraph", "Declaration", "Keypoints" or "Acknowledgments" (also spelled "Acknowledgements") move too. "Data Availability" and the plural "Declarations" stay in the body (measured on mystmd 1.11.0). To keep such a section in place, retitle it ("Summary and Conclusions") or supply the part in the frontmatter.
+Declaring a part has a side effect in the body. When a paper does not supply a part explicitly, MyST moves any body section whose heading matches that part's name, ignoring case, into the part. A closing section titled "Summary" leaves the end of the paper and prints before the first heading, while its subsections stay behind under the preceding section. Sections titled "Abstract", "Dedication", "Epigraph", "Declaration", "Keypoints" or "Acknowledgments" (also spelled "Acknowledgements") move too. "Data Availability" and the plural "Declarations" stay in the body (measured on mystmd 1.11.0). To keep such a section in place, retitle it ("Summary and Conclusions") or supply the part in the frontmatter.
 
 | Part | Where it prints |
 |---|---|
 | `abstract` | The abstract block |
-| `summary` | Inside the abstract block, after the abstract, as a run-in paragraph headed "Summary." |
+| `summary` | An unnumbered section "Summary" after the front matter, before the first heading |
 | `keypoints` | The highlights, one `\item` per point; ignored when `highlights` is set |
 | `highlights` | The highlights, as raw LaTeX `\item` entries |
 | `graphical_abstract` | The graphical abstract, as raw LaTeX; the `graphical_abstract` option takes an image path instead |
 | `title_note` | A footnote on the title |
 | `note`, `acknowledgments` | Unnumbered first-page footnotes |
-| `dedication` | Centred in italics after the front matter, before the first heading |
-| `epigraph` | In italics, set in from the right, after the dedication; write the attribution into the text |
+| `dedication` | An unnumbered section "Dedication" after the summary |
+| `epigraph` | A quote after the dedication, before the first heading: the quotation small and italic, its citation upright and flush right. End it with the citation as its own paragraph opening with `---` (`--- Donald E. Knuth`). A `+++` block written as a blockquote keeps MyST's own quote-and-citation setting |
 | `declaration` | An unnumbered section "Declarations" after the CRediT statement, before the references |
 | `data_availability` | An unnumbered section "Data Availability" after the declarations |
 | `biography` | After the references, as raw LaTeX `\bio{}` ... `\endbio` |

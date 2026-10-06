@@ -7,7 +7,7 @@ description: >
   preprint and 1p/3p/5p production layouts. Both support author-year or
   numeric citations, ORCID identifiers, research highlights, graphical
   abstracts, and keywords.
-version: 1.4.0
+version: 1.4.1
 license: LPPL-1.3c
 source: https://www.elsevier.com/authors/policies-and-guidelines/latex-instructions
 thumbnail: ./thumbnail.png
@@ -27,8 +27,8 @@ tags:
   - cas
   - elsarticle
 # MyST's seven known parts plus `declaration`, the same set as econ-ark-myst.
-# An undeclared frontmatter part is dropped, and an undeclared +++ part block
-# stays in the body as plain text. See README.md "Document Parts".
+# A part with no Elsevier slot goes in the body as ordinary content.
+# See README.md "Document Parts".
 parts:
   - id: abstract
     description: >
@@ -41,8 +41,8 @@ parts:
       renders as `?` at exit 0. Upstream jupyter-book/mystmd#3032.
   - id: summary
     description: >
-      Non-technical summary, printed inside the abstract block after the
-      abstract as a run-in paragraph headed "Summary".
+      Non-technical summary, printed as an unnumbered section headed "Summary"
+      after the front matter and before the first heading.
   - id: keypoints
     description: >
       Research highlights (3-5 items), each printed as one \\item. Write them
@@ -72,12 +72,13 @@ parts:
       for disclaimers or additional context.
   - id: dedication
     description: >
-      Dedication, centred in italics after the front matter and before the
-      first heading.
+      Dedication, printed as an unnumbered section headed "Dedication" after the
+      summary and before the first heading.
   - id: epigraph
     description: >
-      Epigraph, set in italics from the right after the dedication and before
-      the first heading; write the attribution into the text.
+      Epigraph, printed as a quote after the dedication and before the first
+      heading, the quotation in small italics. End it with the citation as its
+      own paragraph opening with `---`; that line is set upright, flush right.
   - id: biography
     description: >
       Author biographies as raw LaTeX. Use \\bio{} and \\endbio commands. For

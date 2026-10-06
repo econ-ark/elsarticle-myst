@@ -88,7 +88,7 @@ dedication: To everyone who has fought a LaTeX class file at midnight.
 epigraph: |
   Beware of bugs in the above code; I have only proved it correct, not tried it.
 
-  Donald E. Knuth
+  --- Donald E. Knuth
 math:
   '\R': '\mathbb{R}'
   '\N': '\mathbb{N}'

@@ -222,16 +222,10 @@
 [# endif #]
 
 %% A frontmatter `abstract:` reaches the template as parts.abstract; doc.abstract
-%% is never set. The summary rides inside the abstract block, the one front
-%% slot both classes typeset in place.
-[# if parts.abstract or parts.summary #]
-\begin{abstract}
+%% is never set.
 [# if parts.abstract #]
+\begin{abstract}
 [-parts.abstract-]
-[# endif #]
-[# if parts.summary #]
-[# if parts.abstract #]\par\medskip[# endif #]\noindent\textbf{Summary.} [-parts.summary-]
-[# endif #]
 \end{abstract}
 [# endif #]
 
@@ -285,20 +279,32 @@
 \maketitle
 [# endif #]
 
-%% Once declared, these two leave the body, so they must be printed here or
-%% vanish. Placement matches econ-ark-myst: after the front matter, before the
-%% first heading.
-[# if parts.dedication #]
-\begin{center}\itshape
-[-parts.dedication-]
-\end{center}
+%% Neither class has a slot for these, so they go in the body before the first
+%% heading, as econ-ark-myst places them: plain unnumbered sections, and the
+%% epigraph as an ordinary quote.
+[# if parts.summary #]
+\section*{Summary}
+[-parts.summary-]
 [# endif #]
-[# if parts.epigraph #]
-\begin{flushright}
-\begin{minipage}{0.72\linewidth}\raggedright\small\itshape
+[# if parts.dedication #]
+\section*{Dedication}
+[-parts.dedication-]
+[# endif #]
+%% A quote, then its citation: italic quotation a size smaller, upright citation
+%% flush right. A last paragraph opening with -- or --- is the citation. Written as a
+%% blockquote, MyST has already set both, and a second quote around it is fatal.
+[# if parts.epigraph and '\\begin{quote}' in parts.epigraph #]
 [-parts.epigraph-]
-\end{minipage}
-\end{flushright}
+[# elif parts.epigraph #]
+[# set epi_paras = (parts.epigraph | trim).split("\n\n") #]
+[# set epi_cite = epi_paras | last #]
+[# set has_cite = epi_paras | length > 1 and epi_cite.startsWith("--") #]
+\begin{quote}\small
+\itshape [- (epi_paras.slice(0, -1) | join("\n\n")) if has_cite else (parts.epigraph | trim) -]\par
+[# if has_cite #]
+{\raggedleft\upshape [-epi_cite-]\par}
+[# endif #]
+\end{quote}
 [# endif #]
 
 [-CONTENT-]
