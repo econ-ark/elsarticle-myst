@@ -334,7 +334,12 @@ do_self_test() {
   expect_fail "drift in unpatched .bst"    C bash -c 'printf "%% x\n" >> cas-model2-names.bst'
   expect_fail "undocumented edit to .cls"  D bash -c 'printf "%% x\n" >> cas-sc.cls'
   expect_fail "deleted patch record"       D rm -f original/patches/cas-common.sty.patch
-  expect_fail "edited generated elsarticle" F bash -c 'printf "%% x\n" >> elsarticle.cls'
+  # F regenerates elsarticle.cls with latex. Its seed runs only where F does.
+  if command -v latex >/dev/null 2>&1; then
+    expect_fail "edited generated elsarticle" F bash -c 'printf "%% x\n" >> elsarticle.cls'
+  else
+    echo 'skip  rejection test: edited generated elsarticle (F needs latex)'
+  fi
   # G: an unclaimed root file used to be silently unverified, printing nothing.
   expect_fail "unclaimed root .sty"        G bash -c 'printf "%% x\n" > orphan.sty'
 
