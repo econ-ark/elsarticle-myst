@@ -295,12 +295,8 @@ do_verify() {
   check_generated
   check_closure
   [ "$ONLINE" = 1 ] && check_online
-  if [ "$fail" -eq 0 ]; then
-    echo "PASS: original/ is pristine and every root file matches its recorded state."
-  else
-    echo "FAIL: see above. Do not re-extract the zip over the root; that reverts the patches."
-  fi
-  return "$fail"
+  verdict "$fail" 'original/ is pristine and every root file matches its recorded state.' \
+    'see above. Do not re-extract the zip over the root; that reverts the patches.'
 }
 
 # Rejection test. A verifier that never fails proves nothing, so mutate a
@@ -365,12 +361,8 @@ do_self_test() {
                   *elsarticle.zip) cp '"$ROOT"'/original/els-cas-templates.zip "$o";; esac
      echo 200'
 
-  if [ "$rc" -eq 0 ]; then
-    echo "PASS: the verifier rejects every seeded defect."
-  else
-    echo "FAIL: the verifier missed a seeded defect; its PASS verdict is worthless."
-  fi
-  return "$rc"
+  verdict "$rc" 'the verifier rejects every seeded defect.' \
+    'the verifier missed a seeded defect; its PASS verdict is worthless.'
 }
 
 ONLINE=0

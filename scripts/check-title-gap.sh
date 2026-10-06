@@ -91,14 +91,10 @@ run_checks() {
 }
 
 do_check() {
-  command -v pdftotext >/dev/null || { bad 'pdftotext is not installed'; return 1; }
+  require_pdftotext || return 1
   run_checks "$ROOT"
-  if [ "$fail" -eq 0 ]; then
-    echo 'PASS: the CAS title block leaves the same space whatever the abstract length.'
-  else
-    echo 'FAIL: see above. Check the Abstract environment in cas-common.sty.'
-  fi
-  return "$fail"
+  verdict "$fail" 'the CAS title block leaves the same space whatever the abstract length.' \
+    'see above. Check the Abstract environment in cas-common.sty.'
 }
 
 do_self_test() {
@@ -111,12 +107,8 @@ do_self_test() {
   # Upstream does not skip at all. A short abstract then lets the keywords overrun.
   seed_defect 'no skip past a longer keyword column' 'crowds the rule' run_checks cas-common.sty \
     sd -F -- '{ \skip_vertical:n { \g_stm_keybox_ht_dim - \l_tmpb_dim } }' '{ }'
-  if [ "$rc" -eq 0 ]; then
-    echo 'PASS: the title-gap checker rejects every seeded defect and accepts the untouched template.'
-  else
-    echo 'FAIL: the title-gap checker missed a seeded defect; its PASS verdict is worthless.'
-  fi
-  return "$rc"
+  verdict "$rc" 'the title-gap checker rejects every seeded defect and accepts the untouched template.' \
+    'the title-gap checker missed a seeded defect; its PASS verdict is worthless.'
 }
 
 case "${1:-}" in

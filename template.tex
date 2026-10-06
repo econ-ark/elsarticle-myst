@@ -87,6 +87,16 @@
 %% `---` behave alike, and without it neither does. Unshimmed: "Figure N: *".
 \usepackage{caption}
 
+%% MyST passes math through verbatim but loads only amsmath/amssymb, so without
+%% these \coloneqq and \llbracket, \rrbracket are undefined and vanish from the PDF
+%% at exit 0. stix (CAS, when installed) has its own brackets; plain ones as a last resort.
+\usepackage{mathtools}
+\makeatletter
+\@ifundefined{llbracket}{\IfFileExists{stmaryrd.sty}
+  {\usepackage[only,llbracket,rrbracket]{stmaryrd}}
+  {\newcommand\llbracket{\mathopen{[\mkern-3mu[}}\newcommand\rrbracket{\mathclose{]\mkern-3mu]}}}}{}
+\makeatother
+
 %% A two-column measure is narrow. Let TeX widen interword space before it lets
 %% a line run into the gutter, and wrap a code line wider than the column at a
 %% space, with a continuation mark, where verbatim would overprint the next column.

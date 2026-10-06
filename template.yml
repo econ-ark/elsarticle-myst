@@ -298,12 +298,14 @@ packages:
   - inconsolata
   - l3regex
   - makecell
+  - mathtools
   - moreverb
   - multirow
   - natbib
   - setspace
   - stfloats
   - stix
+  - stmaryrd
   - times
   - txfonts
   - wrapfig

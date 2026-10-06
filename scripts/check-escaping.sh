@@ -321,12 +321,8 @@ do_check() {
   check_tex "$work/out/cas.tex" "$work/out/els.tex"
   rm -rf "$work"
   check_absent_fields
-  if [ "$fail" -eq 0 ]; then
-    echo 'PASS: every raw frontmatter string is escaped and nothing is escaped twice.'
-  else
-    echo 'FAIL: see above. Check the esc() macro and its call sites in template.tex.'
-  fi
-  return "$fail"
+  verdict "$fail" 'every raw frontmatter string is escaped and nothing is escaped twice.' \
+    'see above. Check the esc() macro and its call sites in template.tex.'
 }
 
 # Rejection test, with FOUR seeded defects. Raw input exercises the positive
@@ -420,12 +416,8 @@ RAW
   seed_defect 'an orphan separator' 'empty macro or orphan separator' \
     check_absent_fields template.tex \
     perl -0pi -e 's/\Qfor author in named_authors\E/for author in doc.authors/; s/\Qesc(author.name.split(" ") | last)\E/esc((author.name | default("")).split(" ") | last)/'
-  if [ "$rc" -eq 0 ]; then
-    echo 'PASS: the escaping checker rejects unescaped input.'
-  else
-    echo 'FAIL: the escaping checker missed unescaped input; its PASS is worthless.'
-  fi
-  return "$rc"
+  verdict "$rc" 'the escaping checker rejects unescaped input.' \
+    'the escaping checker missed unescaped input; its PASS is worthless.'
 }
 
 case "${1:-}" in

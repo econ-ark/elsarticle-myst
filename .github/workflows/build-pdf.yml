@@ -202,6 +202,14 @@ jobs:
           ./scripts/check-title-gap.sh --self-test
           ./scripts/check-title-gap.sh
 
+      # MyST passes math through verbatim and loads no package for \coloneqq or
+      # \llbracket; undefined, they vanish from the PDF at exit 0.
+      - name: Check passed-through math macros
+        run: |
+          set -eo pipefail
+          ./scripts/check-math-macros.sh --self-test
+          ./scripts/check-math-macros.sh
+
       - name: Verify all six exports produced PDFs
         run: |
           set -e

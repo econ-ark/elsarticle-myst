@@ -197,12 +197,8 @@ do_check() {
   local n
   for n in "${PDFS[@]}"; do compare_one "$n"; done
   check_closure
-  if [ "$fail" -eq 0 ]; then
-    echo 'PASS: every export matches its committed snapshot.'
-  else
-    echo 'FAIL: see above. If the change was intended, re-record with --update.'
-  fi
-  return "$fail"
+  verdict "$fail" 'every export matches its committed snapshot.' \
+    'see above. If the change was intended, re-record with --update.'
 }
 
 # Rejection test. Each seeded defect targets ONE assertion; a checker whose
@@ -295,12 +291,8 @@ do_self_test() {
     rc=1
   fi
 
-  if [ "$rc" -eq 0 ]; then
-    echo 'PASS: the content checker rejects every seeded defect and accepts a clean tree.'
-  else
-    echo 'FAIL: the content checker missed a seeded defect; its PASS verdict is worthless.'
-  fi
-  return "$rc"
+  verdict "$rc" 'the content checker rejects every seeded defect and accepts a clean tree.' \
+    'the content checker missed a seeded defect; its PASS verdict is worthless.'
 }
 
 case "${1:-}" in

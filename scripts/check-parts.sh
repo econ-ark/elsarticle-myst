@@ -247,12 +247,8 @@ run_checks() {
 
 do_check() {
   run_checks "$ROOT"
-  if [ "$fail" -eq 0 ]; then
-    echo 'PASS: every declared part reaches the .tex where it belongs.'
-  else
-    echo 'FAIL: see above. Check parts: in template.yml and where template.tex prints each one.'
-  fi
-  return "$fail"
+  verdict "$fail" 'every declared part reaches the .tex where it belongs.' \
+    'see above. Check parts: in template.yml and where template.tex prints each one.'
 }
 
 do_self_test() {
@@ -284,12 +280,8 @@ do_self_test() {
   # anchor its declarations. The seed misplaces them for elsarticle alone.
   seed_defect 'elsarticle declarations printed before the body' 'before the references (els)' check_all template.tex \
     perl -0pi -e 's/\Q[# if parts.declaration #]\E/[# if parts.declaration and options.document_class != "elsarticle" #]/; s/(\Q[-CONTENT-]\E)/[# if parts.declaration and options.document_class == "elsarticle" #]\n\\section*{Declarations}\n[-parts.declaration-]\n[# endif #]\n$1/'
-  if [ "$rc" -eq 0 ]; then
-    echo 'PASS: the parts checker rejects every seeded defect and accepts the untouched template.'
-  else
-    echo "FAIL: the parts checker missed a seeded defect; its PASS verdict is worthless."
-  fi
-  return "$rc"
+  verdict "$rc" 'the parts checker rejects every seeded defect and accepts the untouched template.' \
+    'the parts checker missed a seeded defect; its PASS verdict is worthless.'
 }
 
 case "${1:-}" in

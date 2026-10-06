@@ -33,6 +33,13 @@ expect_caught() {
   fi
 }
 
+# PDF-reading checkers: a missing pdftotext must fail, never read as empty text.
+require_pdftotext() { command -v pdftotext >/dev/null || { bad 'pdftotext is not installed'; return 1; }; }
+
+# Final verdict line: flag $1 (a check's fail, a self-test's rc) of 0 prints PASS
+# $2, anything else FAIL $3. Returns the flag.
+verdict() { if [ "$1" -eq 0 ]; then echo "PASS: $2"; else echo "FAIL: $3"; fi; return "$1"; }
+
 # Self-test control: the caller's run_checks must pass on the untouched template
 # at ROOT, or no seeded defect proves anything. A failure sets rc.
 expect_control_passes() {
