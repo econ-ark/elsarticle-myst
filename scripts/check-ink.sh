@@ -71,20 +71,47 @@ check() {
   fi
 }
 
+# Write a one-page letter-size PDF to $1 whose page content stream is $2, with
+# Times-Roman as /F1. Hand-built so the self-test needs no TeX: CI has none.
+mkpdf() {
+  local LC_ALL=C pdf='' off=() i obj
+  local objs=(
+    '<< /Type /Catalog /Pages 2 0 R >>'
+    '<< /Type /Pages /Kids [3 0 R] /Count 1 >>'
+    '<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Contents 4 0 R /Resources << /Font << /F1 5 0 R >> >> >>'
+    "<< /Length ${#2} >>"$'\nstream\n'"$2"$'\nendstream'
+    '<< /Type /Font /Subtype /Type1 /BaseFont /Times-Roman >>'
+  )
+  pdf=$'%PDF-1.4\n'
+  for i in "${!objs[@]}"; do
+    off+=("${#pdf}")
+    pdf+="$((i + 1)) 0 obj"$'\n'"${objs[$i]}"$'\nendobj\n'
+  done
+  obj=${#pdf}
+  pdf+=$'xref\n0 6\n0000000000 65535 f \n'
+  for i in "${off[@]}"; do pdf+=$(printf '%010d 00000 n \n' "$i")$'\n'; done
+  pdf+=$'trailer\n<< /Size 6 /Root 1 0 R >>\nstartxref\n'"$obj"$'\n%%EOF\n'
+  printf '%s' "$pdf" > "$1"
+}
+
 # A threshold checker that never rejects is worthless, so prove it rejects a
-# genuinely blank page before any real verdict is trusted.
+# blank page before any real verdict is trusted.
 self_test() {
-  local dir rc=0
+  local dir rc=0 t
   dir=$(mktemp -d)
-  printf '\\documentclass{article}\\begin{document}\\thispagestyle{empty}\\mbox{}\\end{document}\n' > "$dir/blank.tex"
-  printf '\\documentclass{article}\\begin{document}\\thispagestyle{empty}\\rule{5in}{4in}\\end{document}\n' > "$dir/inked.tex"
+  mkpdf "$dir/blank.pdf" ''
+  # A 5in x 4in black block, the size of a real graphical abstract.
+  mkpdf "$dir/inked.pdf" '0 g 72 288 360 288 re f'
   # The fixture that matters: heading + title + authors and NO image, i.e. the
   # actual shape of the regression. Without it the threshold could drift up to
   # ~0.996 and still pass the two synthetic extremes while catching nothing.
-  printf '\\documentclass{article}\\begin{document}\\thispagestyle{empty}\n\\noindent{\\Large Graphical Abstract}\\par\\medskip\n\\noindent\\textbf{A Representative Title That Wraps Onto Two Lines In The Real Document}\\par\\medskip\n\\noindent A N Author, A N Other, A Third Person\\par\n\\end{document}\n' > "$dir/textonly.tex"
-  ( cd "$dir" && for t in blank inked textonly; do
-                   pdflatex -interaction=nonstopmode "$t.tex" >/dev/null 2>&1
-                 done )
+  mkpdf "$dir/textonly.pdf" 'BT /F1 17 Tf 72 700 Td (Graphical Abstract) Tj ET BT /F1 12 Tf 72 676 Td (A Representative Title That Wraps Onto Two Lines In The Real Document) Tj ET BT /F1 10 Tf 72 656 Td (A N Author, A N Other, A Third Person) Tj ET'
+  # A missing fixture would make both rejections below pass vacuously.
+  for t in blank inked textonly; do
+    if [ ! -s "$dir/$t.pdf" ] || ! pdftoppm -f 1 -l 1 -r 10 -png "$dir/$t.pdf" "$dir/probe-$t" >/dev/null 2>&1; then
+      echo "FAIL  self-test: fixture $t.pdf was not produced or does not render"; rc=1
+    fi
+  done
   if check "$dir/blank.pdf" 1 0.8 >/dev/null 2>&1; then
     echo "FAIL  self-test: a blank page was accepted"; rc=1
   else
