@@ -87,6 +87,16 @@
 %% `---` behave alike, and without it neither does. Unshimmed: "Figure N: *".
 \usepackage{caption}
 
+%% A two-column measure is narrow. Let TeX widen interword space before it lets
+%% a line run into the gutter, and wrap a code line wider than the column at a
+%% space, with a continuation mark, where verbatim would overprint the next column.
+\setlength{\emergencystretch}{3em}
+\usepackage{fvextra}
+%% A plain arrow as the continuation mark: fvextra's default hook is drawn from a
+%% math font glyph with no Unicode mapping, which costs that whole font its text
+%% layer, title-note stars included.
+\RecustomVerbatimEnvironment{verbatim}{Verbatim}{breaklines,breaksymbolleft={\tiny\ensuremath{\rightarrow}}}
+
 [- IMPORTS -]
 
 \begin{document}
@@ -114,10 +124,13 @@
 [# set tnp = 'tn' if options.document_class == 'elsarticle' else '' #]
 [# set corp = 'cor' if options.document_class == 'elsarticle' else '' #]
 [# set fnp = 'fn' if options.document_class == 'elsarticle' else '' #]
-%% Title notes: title_note first, then the dedication, which Elsevier journals
-%% print as a footnote to the title. Both classes take a comma-separated list.
-[# set ded_n = 2 if parts.title_note else 1 #]
-[# set tmarks = ((tnp ~ '1') if parts.title_note else '') ~ (',' if parts.title_note and parts.dedication else '') ~ ((tnp ~ ded_n) if parts.dedication else '') #]
+%% Title notes, from MyST built-ins: the funding statement first, then the
+%% dedication, both footnotes to the title as Elsevier journals print them.
+%% An empty list is truthy in nunjucks, so test the count, never the list.
+[# set funds = doc.funding | selectattr("statement") | list if doc.funding else [] #]
+[# set has_funds = funds | length > 0 #]
+[# set ded_n = 2 if has_funds else 1 #]
+[# set tmarks = ((tnp ~ '1') if has_funds else '') ~ (',' if has_funds and parts.dedication else '') ~ ((tnp ~ ded_n) if parts.dedication else '') #]
 
 [# if options.document_class != 'elsarticle' #]
 %% \shorttitle and \shortauthors are CAS-only; elsarticle has neither.
@@ -131,7 +144,7 @@
 %% WARNS on an author with no name, so a nameless author reaches here: filter the
 %% list FIRST, or the separator is emitted for an entry that prints nothing.
 [# set named_authors = doc.authors | selectattr("name") | list if doc.authors else [] #]
-[# if named_authors #]
+[# if named_authors | length #]
 \shortauthors{[# for author in named_authors #][- esc(author.name.split(" ") | last) -][# if not loop.last #], [# endif #][# endfor #]}
 [# endif #]
 [# endif #]
@@ -151,8 +164,8 @@
 [# if tmarks and options.document_class != 'elsarticle' #]
 \tnotemark[[-tmarks-]]
 [# endif #]
-[# if parts.title_note #]
-\tnotetext[[-tnp-]1]{[-parts.title_note-]}
+[# if has_funds #]
+\tnotetext[[-tnp-]1]{[# for f in funds #][- esc(f.statement) -][# if not loop.last #] [# endif #][# endfor #]}
 [# endif #]
 [# if parts.dedication #]
 \tnotetext[[-tnp-][-ded_n-]]{[-parts.dedication-]}
@@ -224,10 +237,6 @@
 \nonumnote{[-parts.acknowledgments-]}
 [# endif #]
 
-[# if parts.note #]
-\nonumnote{[-parts.note-]}
-[# endif #]
-
 %% A frontmatter `abstract:` reaches the template as parts.abstract; doc.abstract
 %% is never set.
 [# if parts.abstract #]
@@ -249,12 +258,9 @@
 \end{graphicalabstract}
 [# endif #]
 
-[# if parts.highlights #]
-\begin{highlights}
-[-parts.highlights-]
-\end{highlights}
-[# elif parts.keypoints #]
-%% as_list hands over one entry per point, from a YAML list or a bullet list alike.
+%% MyST's keypoints are Elsevier's highlights. as_list hands over one entry per
+%% point, from a YAML list or a bullet list alike.
+[# if parts.keypoints #]
 \begin{highlights}
 [# for point in parts.keypoints #]
 \item [-point-]
@@ -293,18 +299,23 @@
 \section*{Summary}
 [-parts.summary-]
 [# endif #]
-%% A quote, then its citation: italic quotation a size smaller, upright citation
-%% flush right. A last paragraph opening with -- or --- is the citation. Written as a
-%% blockquote, MyST has already set both, and a second quote around it is fatal.
-[# if parts.epigraph and '\\begin{quote}' in parts.epigraph #]
-[-parts.epigraph-]
-[# elif parts.epigraph #]
+%% Small italic quotation, upright citation flush right. MyST sets a blockquote's
+%% "-- Name" line as a floating figure's \caption*, so text and name are lifted out
+%% to keep the epigraph in place. In plain paragraphs, a last "--"/"---" one cites.
+[# if parts.epigraph #]
+[# if '\\begin{quote}' in parts.epigraph #]
+[# set epi_body = parts.epigraph | replace(r/^[\s\S]*?\\begin\{quote\}\s*/, "") | replace(r/\s*\\end\{quote\}[\s\S]*$/, "") #]
+[# set epi_name = (parts.epigraph | replace(r/^[\s\S]*\\caption\*\{/, "") | replace(r/\}\s*\\end\{figure\}[\s\S]*$/, "")) if '\\caption*{' in parts.epigraph else '' #]
+[# set epi_cite = ('--- ' ~ epi_name) if epi_name else '' #]
+[# else #]
 [# set epi_paras = (parts.epigraph | trim).split("\n\n") #]
-[# set epi_cite = epi_paras | last #]
-[# set has_cite = epi_paras | length > 1 and epi_cite.startsWith("--") #]
+[# set has_cite = epi_paras | length > 1 and (epi_paras | last).startsWith("--") #]
+[# set epi_body = (epi_paras.slice(0, -1) | join("\n\n")) if has_cite else (parts.epigraph | trim) #]
+[# set epi_cite = (epi_paras | last) if has_cite else '' #]
+[# endif #]
 \begin{quote}\small
-\itshape [- (epi_paras.slice(0, -1) | join("\n\n")) if has_cite else (parts.epigraph | trim) -]\par
-[# if has_cite #]
+\itshape [-epi_body-]\par
+[# if epi_cite #]
 {\raggedleft\upshape [-epi_cite-]\par}
 [# endif #]
 \end{quote}

@@ -32,10 +32,9 @@ it.
 
 1. Introduction
 This document demonstrates the full integration of MyST Markdown (Cockett et al., 2024) with Elsevier’s CAS templates. MyST provides a powerful authoring experience while maintaining compatibility with traditional LaTeX journal requirements (Lamport, 1994). The template renders to PDF for cameraready submission and to HTML for the project website; author identifiers (ORCID) and persistent links (DOI) propagate through both pipelines.
-⋆ Prepared as a demonstration of the elsarticle-myst template.
+⋆ This research did not receive any specific grant from funding agencies in the public, commercial, or not-for-profit sectors.
 ⋆⋆ To everyone who has fought a LaTeX class file at midnight.
 ∗ Corresponding author
-
 Email addresses: alujan@jhu.edu (Alan E. Lujan), ccarroll@jhu.edu (Christopher D.
 Carroll)
 URL: https://econ-ark.org (Alan E. Lujan), https://econ.jhu.edu/people/ccarroll
@@ -275,7 +274,9 @@ For more information on MyST Markdown features, visit the MyST documentation.
 Code blocks with syntax highlighting are supported:
 import numpy as np
 from typing import Tuple
-def quadratic_formula(a: float, b: float, c: float) -> Tuple[float, float]:
+def quadratic_formula(a: float, b: float, c: float) ->
+→
+Tuple[float, float]:
 """Solve ax^2 + bx + c = 0 using the quadratic formula."""
 discriminant = b**2 - 4*a*c
 if discriminant < 0:
@@ -290,7 +291,6 @@ Figure 1: Example Python implementation of the quadratic formula
 
 As shown in Program 1, code can be captioned, numbered, and crossreferenced.
 Multiple languages are supported:
-
 7
 
 function quadratic_formula(a, b, c)

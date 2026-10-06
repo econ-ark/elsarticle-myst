@@ -57,7 +57,7 @@ Reproducible research workflows have become increasingly important, with tools l
 Abdalla, Willing and Jupyter Development Team, 2016) enabling literate programming approaches.
 ⋆
 
-Prepared as a demonstration of the elsarticle-myst template.
+This research did not receive any specific grant from funding agencies in the public, commercial, or not-for-profit sectors.
 To everyone who has fought a LaTeX class file at midnight.
 ∗ Corresponding author
 alujan@jhu.edu (A.E. Lujan); ccarroll@jhu.edu (C.D. Carroll)
@@ -361,6 +361,9 @@ end if
 13: return −1
 The algorithm environment provides a float with caption and label for cross-referencing.
 
+8. Tables
+8.1. Markdown Tables
+MyST tables convert cleanly to LaTeX:
 Lujan, Carroll, White: Preprint submitted to Elsevier
 
 Page 6 of 10
@@ -451,9 +454,6 @@ Random Forest
 Neural Network
 Transformer
 
-8. Tables
-8.1. Markdown Tables
-MyST tables convert cleanly to LaTeX:
 Results are summarized in Table 1.
 
 8.2. List Tables
@@ -514,18 +514,17 @@ Yes
 
 Features: booktabs rules, multirow row spanning, makecell line breaks, dcolumn decimal alignment, array column
 formatting.
+
+9. Figures and Images
+As shown in Figure 3, the template properly handles figure placement and captions.
 Lujan, Carroll, White: Preprint submitted to Elsevier
 
 Page 7 of 10
 
 MyST and Elsevier Guide
 
-9. Figures and Images
-
 Figure 3: A sample figure demonstrating image support in the template. This figure shows a placeholder image that would
 typically contain research results or visualizations. Figures are automatically numbered and can be cross-referenced.
-
-As shown in Figure 3, the template properly handles figure placement and captions.
 
 10. Cross-References Summary
 This document demonstrates various cross-reference capabilities:
@@ -540,15 +539,30 @@ This document demonstrates various cross-reference capabilities:
 • Corollaries: Corollary 4.3.1
 • Examples: Example 4.1
 • Sections: Introduction, Typography
+
+11. Discussion
+This approach enables researchers to write in MyST Markdown while producing publication-ready
+documents that meet Elsevier’s submission requirements.
 Lujan, Carroll, White: Preprint submitted to Elsevier
 
 Page 8 of 10
 
 MyST and Elsevier Guide
+Table 5
+Supplementary parameters
+Parameter
+Alpha
+Beta
+Gamma
 
-11. Discussion
-This approach enables researchers to write in MyST Markdown while producing publication-ready
-documents that meet Elsevier’s submission requirements.
+Value
+0.05
+1.23
+456
+
+Unit
+m/s
+kg
 
 11.1. Advantages
 1. Reproducibility: Source files are plain text and version-controllable
@@ -583,31 +597,16 @@ This paragraph cites Mittelbach and Goossens (2004), a work no other section cit
 the appendix on the bibliography-harvesting path: while this file was pulled in through parts.appendix, a
 citation made here reached the .tex and never the .bib, and no build step reported anything.
 
-B. Additional Tables
-
-CRediT authorship contribution statement
-Alan E. Lujan: Conceptualization, Methodology, Software, Writing – original draft. Christopher D.
-Carroll: Supervision, Writing – review & editing. Matthew N. White: Methodology, Software.
 Lujan, Carroll, White: Preprint submitted to Elsevier
 
 Page 9 of 10
 
 MyST and Elsevier Guide
-Table 5
-Supplementary parameters
-Parameter
-Alpha
-Beta
-Gamma
 
-Value
-0.05
-1.23
-456
-
-Unit
-m/s
-kg
+B. Additional Tables
+CRediT authorship contribution statement
+Alan E. Lujan: Conceptualization, Methodology, Software, Writing – original draft. Christopher D.
+Carroll: Supervision, Writing – review & editing. Matthew N. White: Methodology, Software.
 
 Declarations
 The authors declare no competing interests and did not use generative AI or AI-assisted technologies

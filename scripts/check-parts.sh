@@ -97,9 +97,11 @@ FRONT_ALL='abstract: ABSTRACTMARK opens the abstract.
 summary: SUMMARYMARK says it plainly.
 dedication: DEDICATIONMARK to a reader.
 epigraph: |
-  EPIGRAPHMARK is a quotation.
-
-  --- CITEMARK
+  > EPIGRAPHMARK is a quotation.
+  >
+  > -- CITEMARK
+funding:
+  - statement: FUNDMARK funds the work.
 data_availability: DATAMARK is available on request.
 acknowledgments: ACKMARK thanks a reviewer.
 keypoints:
@@ -107,7 +109,6 @@ keypoints:
   - Yamlpointtwo holds the second point.
   - Yamlpointthree holds the third point.
 parts:
-  title_note: TITLENOTEMARK funds the work.
   declaration: DECLMARK declares no competing interests.'
 BODY_ALL='# Body
 
@@ -127,11 +128,11 @@ all_parts_checks() {
   check_order "$f" "abstract in its block ($cls)" '\begin{abstract}' ABSTRACTMARK '\end{abstract}'
   check_order "$f" "acknowledgments as a first-page note ($cls)" '\nonumnote{ACKMARK' "$front_end"
   if [ "$cls" = cas ]; then
-    check_order "$f" "title note, then dedication, as title footnotes ($cls)" \
-      '\tnotemark[1,2]' '\tnotetext[1]{TITLENOTEMARK' '\tnotetext[2]{DEDICATIONMARK' "$front_end"
+    check_order "$f" "funding statement, then dedication, as title footnotes ($cls)" \
+      '\tnotemark[1,2]' '\tnotetext[1]{FUNDMARK' '\tnotetext[2]{DEDICATIONMARK' "$front_end"
   else
-    check_order "$f" "title note, then dedication, as title footnotes ($cls)" \
-      '\tnoteref{tn1,tn2}' '\tnotetext[tn1]{TITLENOTEMARK' '\tnotetext[tn2]{DEDICATIONMARK' "$front_end"
+    check_order "$f" "funding statement, then dedication, as title footnotes ($cls)" \
+      '\tnoteref{tn1,tn2}' '\tnotetext[tn1]{FUNDMARK' '\tnotetext[tn2]{DEDICATIONMARK' "$front_end"
   fi
   check_order "$f" "summary and epigraph open the body as a plain section and a quote; the body epigraph stays ($cls)" \
     "$front_end" '\section*{Summary}' SUMMARYMARK \
@@ -164,29 +165,6 @@ block_checks() {
 }
 
 check_block() { run_fixture "$1" 'keypoints block' '' "$BODY_BLOCK" block_checks; }
-
-# parts.highlights takes precedence over keypoints.
-BODY_PRECEDENCE='+++ {"part": "highlights"}
-
-:::{raw:latex}
-\item Winningpoint is raw LaTeX.
-:::
-
-+++
-
-# Body
-
-Text.'
-
-precedence_checks() {
-  check_keypoints "$1" "highlights wins over keypoints ($2)" Winningpoint
-  check_absent "$1" "keypoints yield to highlights ($2)" Losingpoint
-}
-
-check_precedence() {
-  run_fixture "$1" 'highlights precedence' $'keypoints:\n  - Losingpoint must not print.' \
-    "$BODY_PRECEDENCE" precedence_checks
-}
 
 # No part supplied: nothing may print, not even a heading or an empty block.
 none_checks() {
@@ -222,9 +200,9 @@ check_implicit() {
     $'# Introduction\n\nText.\n\n# Summary\n\nIMPLICITSUMMARY closes the paper.' implicit_checks
 }
 
-# An epigraph written as a blockquote in a part block: MyST sets it as a figure
-# holding a quote and a \caption* citation. Wrapping that figure in a second
-# quote is a fatal "Not in outer par mode".
+# An epigraph written as a blockquote in a part block: MyST sets it as a floating
+# figure with a \caption* citation. The template must lift quote and citation
+# out of it, never wrap the figure (fatal "Not in outer par mode") or let it float.
 BODY_EPIGRAPH_BLOCK='+++ {"part": "epigraph"}
 
 > BLOCKQUOTEMARK is quoted.
@@ -238,25 +216,30 @@ BODY_EPIGRAPH_BLOCK='+++ {"part": "epigraph"}
 Text.'
 
 epigraph_block_checks() {
-  local flat
-  check_order "$1" "a blockquote epigraph keeps its citation, before the first heading ($2)" \
-    BLOCKQUOTEMARK '\caption*{BLOCKBYLINE}' '\section{Body'
-  flat=$(strip_comments "$1" | tr '\n' ' ')
-  # A figure opened while a quote is still open, whatever sits between them.
-  if grep -qP '\\begin\{quote\}(?:(?!\\end\{quote\}).)*\\begin\{figure\}' <<<"$flat"; then
-    bad "a blockquote epigraph is wrapped in a second quote ($2)"
-  else
-    ok "a blockquote epigraph is not wrapped twice ($2)"
-  fi
+  check_order "$1" "a blockquote epigraph is set in place with its citation flush right ($2)" \
+    '\begin{quote}\small' '\itshape BLOCKQUOTEMARK' '{\raggedleft\upshape --- BLOCKBYLINE\par}' \
+    '\end{quote}' '\section{Body'
+  check_absent "$1" "a blockquote epigraph leaves no float behind ($2)" '\begin{figure}' '\caption*{BLOCKBYLINE}'
 }
 
 check_epigraph_block() { run_fixture "$1" 'epigraph block' '' "$BODY_EPIGRAPH_BLOCK" epigraph_block_checks; }
 
+# Written as plain paragraphs, the last opening with --- is the citation.
+epigraph_plain_checks() {
+  check_order "$1" "a plain epigraph's last --- paragraph is its citation ($2)" \
+    '\itshape PLAINQUOTEMARK' '{\raggedleft\upshape --- PLAINCITE\par}' '\end{quote}'
+}
+
+check_epigraph_plain() {
+  run_fixture "$1" 'epigraph plain' $'epigraph: |\n  PLAINQUOTEMARK is quoted.\n\n  --- PLAINCITE' \
+    $'# Body\n\nText.' epigraph_plain_checks
+}
+
 run_checks() {
   check_all "$1"
   check_epigraph_block "$1"
+  check_epigraph_plain "$1"
   check_block "$1"
-  check_precedence "$1"
   check_none "$1"
   check_dedication_only "$1"
   check_implicit "$1"
@@ -294,14 +277,14 @@ do_self_test() {
     perl -0pi -e 's/\Q\section*{Declarations}\E\n//'
   seed_defect 'a heading printed with no content' 'Data Availability' check_none template.tex \
     perl -0pi -e 's/\Q[# if parts.data_availability #]\E\n(\Q\section*{Data Availability}\E\n)/$1\[# if parts.data_availability #]\n/'
-  seed_defect 'a blockquote epigraph wrapped twice' 'wrapped in a second quote' check_epigraph_block template.tex \
-    perl -0pi -e 's/\Q[# if parts.epigraph and '"'"'\\begin{quote}'"'"' in parts.epigraph #]\E/[# if false #]/'
-  seed_defect 'the epigraph citation left inside the quotation' 'citation is set apart' check_all template.tex \
-    perl -0pi -e 's/\Qepi_cite.startsWith("--")\E/false/'
-  seed_defect 'a lone dedication numbered as if a title note preceded it' 'a lone dedication is title note 1' check_dedication_only template.tex \
-    perl -0pi -e 's/\Qset ded_n = 2 if parts.title_note else 1\E/set ded_n = 2/'
-  seed_defect 'highlights no longer win' 'Losingpoint' check_precedence template.tex \
-    perl -0pi -e 's/\Q[# if parts.highlights #]\E/[# if false #]/'
+  seed_defect 'a blockquote epigraph left as a float' 'leaves no float behind' check_epigraph_block template.tex \
+    perl -0pi -e 's/\Q[# if '"'"'\\begin{quote}'"'"' in parts.epigraph #]\E/[# if false #]/'
+  seed_defect 'a plain epigraph citation left inside the quotation' 'paragraph is its citation' check_epigraph_plain template.tex \
+    perl -0pi -e 's/\Q(epi_paras | last).startsWith("--")\E/false/'
+  seed_defect 'a lone dedication numbered as if a funding note preceded it' 'a lone dedication is title note 1' check_dedication_only template.tex \
+    perl -0pi -e 's/\Qset ded_n = 2 if has_funds else 1\E/set ded_n = 2/'
+  seed_defect 'an empty funding list still printing a title note' 'no furniture' check_none template.tex \
+    perl -0pi -e 's/\Qset has_funds = funds | length > 0\E/set has_funds = true/'
   # elsarticle has no \printcredits to order against, so the body itself must
   # anchor its declarations. The seed misplaces them for elsarticle alone.
   seed_defect 'elsarticle declarations printed before the body' 'before the references (els)' check_all template.tex \

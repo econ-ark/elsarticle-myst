@@ -7,7 +7,7 @@ description: >
   preprint and 1p/3p/5p production layouts. Both support author-year or
   numeric citations, ORCID identifiers, research highlights, graphical
   abstracts, and keywords.
-version: 1.4.1
+version: 1.5.0
 license: LPPL-1.3c
 source: https://www.elsevier.com/authors/policies-and-guidelines/latex-instructions
 thumbnail: ./thumbnail.png
@@ -45,35 +45,21 @@ parts:
       after the front matter and before the first heading.
   - id: keypoints
     description: >
-      Research highlights (3-5 items), each printed as one \\item. Write them
-      as a YAML list under keypoints in the frontmatter or as a bullet list in
-      a +++ keypoints block; each item is one point. Ignored if
-      parts.highlights is also set.
+      Research highlights (3-5 items), printed in Elsevier's highlights
+      environment, one \\item per point. Write them as a YAML list under
+      keypoints in the frontmatter or as a bullet list in a +++ keypoints
+      block; each item is one point.
     as_list: true
-  - id: highlights
-    description: >
-      Research highlights as raw LaTeX \\item entries (3-5 items). Use when you
-      need raw LaTeX control. Define with +++ block syntax. If both parts.highlights
-      and parts.keypoints are provided, parts.highlights wins (parts.keypoints
-      is ignored).
   - id: graphical_abstract
     description: >
       A graphical abstract as raw LaTeX content. Alternatively, use the
       graphical_abstract option with a file path. If both are provided,
       parts.graphical_abstract wins.
-  - id: title_note
-    description: >
-      A footnote attached to the title, e.g., funding acknowledgment or
-      conference presentation note. This is a `parts:` entry, so MyST renders it
-      to LaTeX and escapes special characters before the template ever sees it.
-  - id: note
-    description: >
-      A general note without a number that appears in the frontmatter. Useful
-      for disclaimers or additional context.
   - id: dedication
     description: >
       Dedication, printed as a footnote to the title (a title note), the way
-      Elsevier journals print one. It follows parts.title_note when both are set.
+      Elsevier journals print one. It follows the funding statement when both
+      are set.
   - id: epigraph
     description: >
       Epigraph, printed as a quote after the dedication and before the first
@@ -163,6 +149,12 @@ doc:
   - id: bibliography
     description: |
       Path(s) to BibTeX bibliography files.
+  - id: funding
+    description: >
+      MyST's built-in funding list. Each entry's `statement` is printed as the
+      first title note, a footnote to the title, as Elsevier's own template
+      shows a funding line; several statements join into one note. The
+      statement is a raw string, so every LaTeX special in it is escaped.
 options:
   - id: document_class
     type: choice
@@ -294,9 +286,11 @@ packages:
   - endfloat
   - etoolbox
   - expl3
+  - fancyvrb
   - fontenc
   - fontspec
   - footmisc
+  - fvextra
   - geometry
   - graphicx
   - hyperref

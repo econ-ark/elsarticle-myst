@@ -201,9 +201,9 @@ keypoints:                               # Research highlights (3-5 items), one 
   - First key finding
   - Second key finding
 data_availability: No data were used.    # unnumbered "Data Availability" section
+funding:                                 # MyST built-in; each statement is a title note
+  - statement: Supported by grant XYZ.
 parts:
-  title_note: Funding acknowledgment.    # footnote on the title
-  note: General disclaimer.              # first-page \nonumnote
   acknowledgments: Thanks to reviewers.  # first-page \nonumnote
   declaration: No competing interests.   # unnumbered "Declarations" section
   # biography goes in a +++ block in the body, and appendices go in the body
@@ -237,7 +237,7 @@ Supported roles (per [CRediT taxonomy](https://credit.niso.org/)):
 
 ### Document Parts
 
-The template declares the seven parts MyST knows (`abstract`, `summary`, `keypoints`, `dedication`, `epigraph`, `acknowledgments`, `data_availability`), `declaration`, and five Elsevier parts (`highlights`, `graphical_abstract`, `title_note`, `note`, `biography`). The [econ-ark-myst](https://github.com/econ-ark/econ-ark-myst) template declares the same first eight, so one paper exports to both with nothing lost. Printing stays within what Elsevier's classes provide: a part with an Elsevier slot (abstract, highlights, graphical abstract, title notes including the dedication, notes, biography) goes there, and every other part goes in the body as ordinary content: a plain unnumbered section, or a quote for the epigraph. MyST hands a template only the parts it declares. It drops an undeclared part written in the frontmatter without a warning, and leaves an undeclared `+++` part block in the body as plain paragraphs.
+The template declares the seven parts MyST knows (`abstract`, `summary`, `keypoints`, `dedication`, `epigraph`, `acknowledgments`, `data_availability`), `declaration`, and two Elsevier parts (`graphical_abstract`, `biography`). A custom key or part exists only for what MyST has no native key for: MyST's `keypoints` are Elsevier's highlights, and the title footnotes come from MyST's `funding` and `dedication`. [econ-ark-myst](https://github.com/econ-ark/econ-ark-myst) declares the same first eight, so one paper exports to both with nothing lost. Printing stays within what Elsevier's classes provide: a part with an Elsevier slot (abstract, highlights, graphical abstract, the title notes for funding and dedication, the first-page note for acknowledgments, biography) goes there, and every other part goes in the body as ordinary content: a plain unnumbered section, or a quote for the epigraph. MyST hands a template only the parts it declares. It drops an undeclared part written in the frontmatter without a warning, and leaves an undeclared `+++` part block in the body as plain paragraphs.
 
 Declaring a part has a side effect in the body. When a paper does not supply a part explicitly, MyST moves any body section whose heading matches that part's name, ignoring case, into the part. A closing section titled "Summary" leaves the end of the paper and prints before the first heading, while its subsections stay behind under the preceding section. Sections titled "Abstract", "Dedication", "Epigraph", "Declaration", "Keypoints" or "Acknowledgments" (also spelled "Acknowledgements") move too. "Data Availability" and the plural "Declarations" stay in the body (measured on mystmd 1.11.0). To keep such a section in place, retitle it ("Summary and Conclusions") or supply the part in the frontmatter.
 
@@ -245,18 +245,19 @@ Declaring a part has a side effect in the body. When a paper does not supply a p
 |---|---|
 | `abstract` | The abstract block |
 | `summary` | An unnumbered section "Summary" after the front matter, before the first heading |
-| `keypoints` | The highlights, one `\item` per point; ignored when `highlights` is set |
-| `highlights` | The highlights, as raw LaTeX `\item` entries |
+| `keypoints` | Elsevier's highlights, one `\item` per point |
 | `graphical_abstract` | The graphical abstract, as raw LaTeX; the `graphical_abstract` option takes an image path instead |
-| `title_note` | A footnote on the title |
-| `note`, `acknowledgments` | Unnumbered first-page footnotes |
-| `dedication` | A footnote on the title, after `title_note` when both are set, as Elsevier journals print a dedication |
-| `epigraph` | A quote after the dedication, before the first heading: the quotation small and italic, its citation upright and flush right. End it with the citation as its own paragraph opening with `---` (`--- Donald E. Knuth`). A `+++` block written as a blockquote keeps MyST's own quote-and-citation setting |
+| `acknowledgments` | An unnumbered footnote on the first page |
+| `dedication` | A footnote on the title, after the funding statement when both are set, as Elsevier journals print a dedication |
+| `epigraph` | A quote before the first heading: the quotation small and italic, its citation upright and flush right. Write it as a blockquote whose last line is `-- Name` (below), which MyST also renders with an attribution on the site |
+| `funding` (frontmatter key, not a part) | Each `statement` as the first footnote on the title, as Elsevier's own template shows a funding line |
 | `declaration` | An unnumbered section "Declarations" after the CRediT statement, before the references |
 | `data_availability` | An unnumbered section "Data Availability" after the declarations |
 | `biography` | After the references, as raw LaTeX `\bio{}` ... `\endbio` |
 
 > Version 1.4.0 renamed `ai_declaration` to `declaration`, which now holds every statement a paper has to make: competing interests, generative-AI use and anything else. A paper that still writes `ai_declaration` builds cleanly while the statement goes astray. MyST drops it from the frontmatter, and leaves a `+++` block of that name in the body, where it stands, as an unheaded paragraph. Rename the key.
+
+> Version 1.5.0 removed the custom `highlights`, `title_note` and `note` parts, which MyST built-ins now cover. Write highlights as `keypoints` (a YAML list or a bullet list, which may carry markdown and math), a funding line as `funding: [{statement: ...}]`, and a first-page note as `acknowledgments`. A removed part written in the frontmatter is dropped, and a `+++` block of that name stays in the body as plain content.
 
 Plain-text parts go in the frontmatter, the seven known ones also as top-level keys:
 
@@ -266,11 +267,18 @@ keypoints:
   - First key finding
   - Second key finding
 data_availability: No data were used for the research described in the article.
+epigraph: |
+  > Beware of bugs in the above code; I have only proved it correct, not tried it.
+  >
+  > -- Donald E. Knuth
+funding:
+  - statement: Prepared with support from grant XYZ-12345.
 parts:
-  title_note: Prepared with support from grant XYZ-12345.
   declaration: The authors declare no competing interests.
   acknowledgments: We thank the editor and two reviewers.
 ```
+
+The epigraph's `-- Name` line is what both the PDF and the site set apart as its citation. A plain final paragraph opening with `---` also works in the PDF, but the site shows the hyphens.
 
 Keypoints can also be a bullet list in a `+++` block in the body. Either way each item is one point. Only a list splits: a block of paragraphs, or a multi-line `keypoints: |` scalar, becomes a single highlight.
 
@@ -300,7 +308,7 @@ Author Two is a professor of economics.
 +++
 ```
 
-The same pattern works for `parts.highlights` when you need finer LaTeX control than `keypoints` gives, and for `parts.graphical_abstract` when you want raw LaTeX in place of an image path.
+The same pattern works for `parts.graphical_abstract` when you want raw LaTeX in place of an image path.
 
 > Raw LaTeX needs the body form because MyST renders every part from markdown to LaTeX before handing it to the template. A YAML scalar holding `\bio{}` arrives as `\textbackslash bio\{\}`. A `:::{raw:latex}` block inside a `+++` part passes through verbatim.
 
@@ -375,7 +383,7 @@ The template escapes LaTeX specials in the frontmatter strings it interpolates i
 | Compile-log grep | latexmk's exit code is not enough: mystmd prints "Exported PDF" and copies the file after xelatex exits non-zero. `^!` is TeX's fatal-error convention; undefined references and citations are only warnings but render as `?`. natbib prefixes its warnings `Package natbib Warning:`, not `LaTeX Warning:`, so the pattern matches the bare `Warning: Citation` form. |
 | bibtex gate on `build.stdout.log` | mystmd deletes the `.blg` with the other aux files. A positive control requires `This is BibTeX` in the log, so the gate cannot pass by bibtex never running. |
 | `Template render error` / `TypeError` / `Unhandled TEX conversion` on `build.stdout.log` | A jtex failure happens before LaTeX runs, so no compile log exists to grep. mystmd prints "Exported TeX", *then* the error, then exits 0, leaving the previous PDF on disk with a stale mtime, which every later gate then "verifies". `Unhandled TEX conversion` was originally excluded because it fired 24 times on a healthy build; that turned out to be a real defect rather than noise. See "Raw LaTeX: which fence" below. |
-| `check-parts.sh` + `--self-test` | MyST drops an undeclared frontmatter part without a word. A part declared but never printed vanishes the same way. Fixtures write every part shared with econ-ark-myst, keypoints both as a YAML list and as a bullet-list block, and assert where each one prints in both classes; a page with no parts must omit every heading and block. Before 1.4.0 a bullet-list keypoints block came out as `\item \begin{itemize}`. The self-test seeds eight defects into a copy of the template. |
+| `check-parts.sh` + `--self-test` | MyST drops an undeclared frontmatter part without a word. A part declared but never printed vanishes the same way. Fixtures write every part shared with econ-ark-myst, keypoints both as a YAML list and as a bullet-list block, and assert where each one prints in both classes; a page with no parts must omit every heading and block. Before 1.4.0 a bullet-list keypoints block came out as `\item \begin{itemize}`. The self-test seeds eleven defects into a copy of the template. |
 | `check-escaping.sh` absent-field fixtures | A fixture that supplies every field cannot catch a field being *absent*. MyST only warns on an author with no `name`, so it reaches the template, where a property access on undefined aborts the render and an unfiltered loop emits its separator anyway (`\shortauthors{, Solo}`). Six cases, both classes, including a page that declares nothing and inherits project scope. |
 | `check-content.sh` `??` check | An unresolved cross-reference. Two of the ways it arises raise no LaTeX warning at all (see "Known upstream limitations"), so the compile-log gate is structurally unable to catch them. |
 | `check-content.sh` + `--self-test` | Every other gate asks whether the build *succeeded*; this one asks what it *produced*. It diffs `pdftotext` output against committed snapshots in `example/exports/snapshots/`. Nothing else would have caught the appendix headings printing as `.1. Supplementary Methods` and the appendix table as `Table .5`. A snapshot diff is *expected* to fail when the sample or template changes on purpose; read the diff, then re-record with `--update` in the same commit. |

@@ -59,8 +59,10 @@ tags: ["D&14", "C6%1"]
 venue:
   title: "Journal of R&D 50%"
 bibliography: [refs.bib]
+funding:
+  - statement: "Funded by R&D 50% grant_x"
 parts:
-  title_note: "Funded by R&D 50% grant_x"
+  acknowledgments: "Thanks to R&D 50% grant_y"
 exports:
   - format: tex
     template: $ROOT
@@ -117,6 +119,8 @@ check_tex() {
   expect "$cas" '\JEL{D\&14; C6\%1}' 'D&14' 'JEL codes from tags'
   expect "$els" '\journal{Journal of R\&D 50\%}' \
                 'Journal of R&D 50%' 'venue title (elsarticle)'
+  expect "$cas" '\tnotetext[1]{Funded by R\&D 50\% grant\_x}' \
+                'Funded by R&D 50%' 'funding statement as a title note'
 
   # UNTOUCHED. MyST renders these to LaTeX before jtex sees them, so they arrive
   # escaped. A second pass would emit '\textbackslash{}%' and print literally.
@@ -127,10 +131,10 @@ check_tex() {
   else
     bad 'abstract is not singly-escaped (double-escaping, or MyST changed)'
   fi
-  if grep -qF 'Funded by R\&D 50\% grant\_x' <<<"$body"; then
-    ok 'parts.title_note escaped exactly once by MyST'
+  if grep -qF 'Thanks to R\&D 50\% grant\_y' <<<"$body"; then
+    ok 'parts.acknowledgments escaped exactly once by MyST'
   else
-    bad 'parts.title_note is not singly-escaped'
+    bad 'parts.acknowledgments is not singly-escaped'
   fi
   if grep -qF '\textbackslash{}' <<<"$body"; then
     bad 'a \textbackslash{} appeared; something was escaped twice'
@@ -214,6 +218,21 @@ title: T
 authors:
   - name: A B
     affiliations: [Solo University]
+exports:
+  - {format: tex, template: $ROOT, output: out/c.tex}
+---
+
+# Body
+
+Text."
+
+  # Every author nameless: the filtered list is empty, and an empty list is
+  # truthy in nunjucks, so a bare `if` would still emit \shortauthors{}.
+  build_absent_case 'only a nameless author' \
+"---
+title: T
+authors:
+  - email: nobody@example.org
 exports:
   - {format: tex, template: $ROOT, output: out/c.tex}
 ---
@@ -328,7 +347,8 @@ do_self_test() {
 K&W \sep 50% risk \sep $\alpha$-mixing
 \JEL{D&14; C6%1}
 Costs rose 50% & margins fell; see Cost_Basis.
-Funded by R&D 50% grant_x
+\tnotetext[1]{Funded by R&D 50% grant_x}
+Thanks to R&D 50% grant_y
 RAW
   cp "$work/out/cas.tex" "$work/out/els.tex"
   cat >> "$work/out/els.tex" <<'RAW'
@@ -377,7 +397,7 @@ RAW
     printf '%s\n' '%% mentions \textbackslash{} while discussing the sentinel'
   } > "$cmt"
   out=$( fail=0; check_tex "$cmt" "$cmt"; echo "__fail=$fail" )
-  if grep -qE '^ok    (title|subtitle|short_title|keywords|author|affiliation|credit|JEL|venue|abstract|parts)' <<<"$out"; then
+  if grep -qE '^ok    (title|subtitle|short_title|keywords|author|affiliation|credit|JEL|venue|funding|abstract|parts)' <<<"$out"; then
     printf '%s\n' "$out"
     printf 'FAIL  rejection test: a COMMENT satisfied a presence assertion\n'
     rc=1

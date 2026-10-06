@@ -86,9 +86,13 @@ keypoints:
 summary: One Markdown source produces both Elsevier layouts and a website.
 dedication: To everyone who has fought a LaTeX class file at midnight.
 epigraph: |
-  Beware of bugs in the above code; I have only proved it correct, not tried it.
-
-  --- Donald E. Knuth
+  > Beware of bugs in the above code; I have only proved it correct, not tried it.
+  >
+  > -- Donald E. Knuth
+funding:
+  - statement: >-
+      This research did not receive any specific grant from funding agencies
+      in the public, commercial, or not-for-profit sectors.
 math:
   '\R': '\mathbb{R}'
   '\N': '\mathbb{N}'
@@ -104,7 +108,6 @@ abbreviations:
   PDF: Portable Document Format
 thumbnail: images/thumbnail.png
 parts:
-  title_note: Prepared as a demonstration of the elsarticle-myst template.
   declaration: >-
     The authors declare no competing interests and did not use generative AI
     or AI-assisted technologies to prepare this work. This
