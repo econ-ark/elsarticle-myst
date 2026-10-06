@@ -145,6 +145,10 @@
 [# set ded_n = 2 if has_funds else 1 #]
 [# set tmarks = ((tnp ~ '1') if has_funds else '') ~ (',' if has_funds and parts.dedication else '') ~ ((tnp ~ ded_n) if parts.dedication else '') #]
 
+%% MyST only WARNS on an author with no name, so a nameless author reaches here:
+%% filter the list FIRST, or a separator is emitted for an entry that prints nothing.
+[# set named_authors = doc.authors | selectattr("name") | list if doc.authors else [] #]
+
 [# if options.document_class != 'elsarticle' #]
 %% \shorttitle and \shortauthors are CAS-only; elsarticle has neither.
 [# if doc.short_title #]
@@ -153,10 +157,7 @@
 \shorttitle{[- esctext(doc.title) -]}
 [# endif #]
 
-%% Surname is the last word of the full name (handles middle initials). MyST only
-%% WARNS on an author with no name, so a nameless author reaches here: filter the
-%% list FIRST, or the separator is emitted for an entry that prints nothing.
-[# set named_authors = doc.authors | selectattr("name") | list if doc.authors else [] #]
+%% Surname is the last word of the full name (handles middle initials).
 [# if named_authors | length #]
 \shortauthors{[# for author in named_authors #][- esc(author.name.split(" ") | last) -][# if not loop.last #], [# endif #][# endfor #]}
 [# endif #]
@@ -307,6 +308,16 @@
 [# endif #][# if doc.tags #]\JEL{[# for code in doc.tags #][- esc(code) -][# if not loop.last #]; [# endif #][# endfor #]}
 [# endif #]\end{keywords}
 [# endif #]
+[# endif #]
+
+%% PDF metadata from MyST's title and authors, none named when double-blind. CAS
+%% titles it by its subtitle and corrupts \infoauthors (what its \maketitle uses);
+%% elsarticle's author list ends "; " and refills an empty pdfauthor via \Hy@author.
+\hypersetup{pdftitle={[- esctext(doc.title) -][# if doc.subtitle #]: [- esctext(doc.subtitle) -][# endif #]},pdfauthor={[# if options.blind != 'double' #][# for author in named_authors #][- esc(author.name) -][# if not loop.last #], [# endif #][# endfor #][# endif #]}}
+[# if options.document_class == 'elsarticle' #]
+\makeatletter\gdef\Hy@author{}\makeatother
+[# else #]
+\makeatletter\global\let\infoauthors\@pdfauthor\makeatother
 [# endif #]
 
 [# if options.document_class == 'elsarticle' #]

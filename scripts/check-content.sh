@@ -84,6 +84,30 @@ check_title_marks() {
   fi
 }
 
+# PDF metadata against the sample's own frontmatter: Title is "title: subtitle",
+# Author the names joined ", ", and empty for an export with `blind: double`.
+# CAS once titled every PDF by its subtitle and wrote U+2C20 after the names.
+fm() { yq --front-matter=extract -r "$1" "$ROOT/example/sample-article.md"; }
+check_metadata() {
+  local name=$1 title=$2 author=$3 want_title want_author sub
+  sub=$(fm '.subtitle // ""')
+  want_title="$(fm '.title')${sub:+: $sub}"
+  want_author=$(fm '[.authors[].name] | join(", ")')
+  [ -n "$want_author" ] || { bad "$name: the sample names no authors; the metadata check is vacuous"; return; }
+  if [ "$(fm ".exports[] | select(.output == \"exports/$name.pdf\") | .blind // \"\"")" = double ]; then
+    want_author=''
+  fi
+  if [ "$title" != "$want_title" ]; then
+    bad "$name: PDF Title is '$title', expected '$want_title'"
+  elif [ "$author" != "$want_author" ]; then
+    bad "$name: PDF Author is '$author', expected '$want_author'"
+  elif [ -z "$want_author" ]; then
+    ok "$name: PDF Title matches the frontmatter, and no author is named (double-blind)"
+  else
+    ok "$name: PDF Title and Author match the frontmatter"
+  fi
+}
+
 # A literal '??' is an unresolved cross-reference, and two ways it arises raise
 # NO LaTeX warning, so the compile-log gate cannot see them. See README.md
 # "Known upstream limitations".
@@ -119,6 +143,8 @@ compare_one() {
   check_substance "$name built" "$text"
   check_substance "$name snapshot" "$(cat "$snap")"
   check_no_unresolved_refs "$name" "$text"
+  check_metadata "$name" "$(pdfinfo "$pdf" 2>/dev/null | sed -n 's/^Title: *//p')" \
+    "$(pdfinfo "$pdf" 2>/dev/null | sed -n 's/^Author: *//p')"
   # The double-blind export prints no title-note marks at all.
   [ "$name" = sample-elsarticle-5p ] || check_title_marks "$name" "$text"
   if diff -u --label "snapshot/$name" --label "built/$name" "$snap" "$built" > "$diff_out"; then
@@ -244,6 +270,17 @@ do_self_test() {
     printf 'FAIL  control: the title-mark check fires on a correct layout\n'
     rc=1
   fi
+  # Metadata, at function level: CAS's U+2C20 after the names, the subtitle as
+  # Title, and authors named in the double-blind export.
+  local sub ftitle names
+  sub=$(fm '.subtitle // ""'); ftitle="$(fm '.title')${sub:+: $sub}"
+  names=$(fm '[.authors[].name] | join(", ")')
+  out=$( fail=0; check_metadata sample-sc "$ftitle" "$names"$'Ⱐ' )
+  expect_caught 'U+2C20 after the PDF author names' '^FAIL  sample-sc: PDF Author' "$out"
+  out=$( fail=0; check_metadata sample-sc "$sub" "$names" )
+  expect_caught 'the subtitle as PDF Title' '^FAIL  sample-sc: PDF Title' "$out"
+  out=$( fail=0; check_metadata sample-elsarticle-5p "$ftitle" "$names" )
+  expect_caught 'authors named in the double-blind PDF metadata' '^FAIL  sample-elsarticle-5p: PDF Author' "$out"
   expect_fail "unclaimed export" "closure: orphan.pdf is compared by NOTHING" \
     bash -c 'cp example/exports/sample-sc.pdf example/exports/orphan.pdf'
 
