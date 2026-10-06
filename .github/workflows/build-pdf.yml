@@ -41,7 +41,9 @@ jobs:
             texlive-pictures \
             biber \
             latexmk \
-            lmodern
+            lmodern \
+            poppler-utils \
+            imagemagick
 
       - name: Verify l3kernel is recent enough
         run: |
@@ -203,6 +205,8 @@ jobs:
       - name: Verify class_options actually took effect
         run: |
           set -eo pipefail
+          # Without this, a missing pdftotext reads as "no float markers" below.
+          command -v pdftotext >/dev/null || { echo "::error::pdftotext is not installed"; exit 1; }
           t=$(pdftotext example/exports/sample-elsarticle-5p.pdf - | grep -c 'about here' || true)
           if [ "$t" -lt 1 ]; then
             echo "::error::endfloat produced no float markers; the class option was a no-op"
@@ -232,7 +236,6 @@ jobs:
       # catches the failure.
       - name: Verify the graphical abstract page is not blank
         run: |
-          sudo apt-get install -y --no-install-recommends poppler-utils imagemagick
           ./scripts/check-ink.sh --self-test
           fail=0
           for name in sample-sc sample-dc sample-sc-numbers sample-long sample-elsarticle sample-elsarticle-5p; do
