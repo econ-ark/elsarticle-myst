@@ -53,8 +53,10 @@ judge() {
     bad "$cls: the fixture text is missing from the PDF; the checks below are vacuous"
   elif grep -q 'Undefined control sequence' <<<"$log"; then
     bad "$cls: a math macro is undefined ($(grep -c 'Undefined control sequence' <<<"$log") in the log); it vanishes from the PDF"
-  elif ! grep -qF 'a := b' <<<"$text"; then
-    bad "$cls: glyph missing: \\coloneqq did not print as :="
+  # stix (CAS, when installed) defines \coloneqq as one glyph, U+2254; mathtools
+  # only provides it otherwise, as : and =.
+  elif ! grep -qE 'a (:=|≔) b' <<<"$text"; then
+    bad "$cls: glyph missing: \\coloneqq did not print as := or ≔"
   elif ! grep -qE '(J|\[\[|⟦) ?x ?(K|\]\]|⟧)' <<<"$text"; then
     bad "$cls: glyph missing: \\llbracket x \\rrbracket printed without its brackets"
   else

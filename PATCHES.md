@@ -39,6 +39,7 @@ output. Do not re-extract.
 | `pdfproducer={pdfTeX;}` -> `pdfproducer={}` | MyST renders this template through XeLaTeX, not pdfTeX. The literal `pdfTeX;` string would mislabel the engine in the produced PDF metadata. |
 | `\file_if_exist:nTF { inconsolata }` -> `\file_if_exist:nTF { inconsolata.sty }` | Upstream omits the `.sty` extension; the existence test then always returns false, causing a silent fallback to CMR (`\tex_gdef:D \ttdefault { cmtt }`). With the patch, `inconsolata` loads correctly when available. |
 | Stray `\AtEndDocument{\hypersetup{pdftitle=..., pdfauthor=...}}` block removed (was commented out upstream) | Cosmetic; the commented block was incomplete and confusing. |
+| `stix` loaded only under pdfTeX: the `\file_if_exist:nTF { stix.sty }` test is replaced by a boolean set when the engine is pdfTeX AND `stix.sty` exists | `stix` is the Type1 STIX package for pdfLaTeX. MyST builds with XeLaTeX, where its math encodings come out garbled: minus prints as `*`, `\in` as `Ë`, `\nabla` vanishes. Any TeX installation with `stix` (GitHub's runner, a full TeX Live) loaded it. Under XeLaTeX (measured) the class now takes its existing no-stix branch, the Computer Modern math a TeX without `stix` always got, and the six sample PDFs are byte-identical to that build. `scripts/check-content.sh` fails on a STIX font in any export. |
 
 ### `cas-dc.cls`
 
@@ -49,6 +50,7 @@ output. Do not re-extract.
 | `pdfcreator={LaTeX3; cas-sc.cls; hyperref.sty}` -> `pdfcreator={LaTeX3; cas-dc.cls; hyperref.sty}` | Upstream copy-paste bug; the double-column class names the single-column class in its PDF metadata. |
 | `pdfproducer={pdfTeX;}` -> `pdfproducer={}` | Same as `cas-sc.cls`; the engine is XeLaTeX, not pdfTeX. |
 | Section comment `% Specific to Single Column` -> `% Specific to Double Column` | Upstream copy-paste bug inside the double-column class. |
+| `stix` loaded only under pdfTeX | Same patch and reason as in `cas-sc.cls`. |
 
 ### `cas-common.sty`
 

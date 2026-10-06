@@ -38,3 +38,15 @@
  %
  \ExplSyntaxOn
  
+@@ -141,7 +141,10 @@
+ %
+ \RequirePackage[T1]{fontenc}
+ 
+-\file_if_exist:nTF { stix.sty }
++% patched: stix is a pdfLaTeX font package; under XeLaTeX its math is garbled
++\bool_set_false:N \l_tmpa_bool
++\sys_if_engine_pdftex:T { \file_if_exist:nT { stix.sty } { \bool_set_true:N \l_tmpa_bool } }
++\bool_if:NTF \l_tmpa_bool
+ {
+   \file_if_exist:nTF { charis.sty }
+   {

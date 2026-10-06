@@ -84,6 +84,19 @@ check_title_marks() {
   fi
 }
 
+# A STIX font means CAS loaded the pdfLaTeX-only stix package under XeLaTeX,
+# which garbles math (minus as *, \in as E-umlaut). $2 lists the PDF's fonts.
+check_fonts() {
+  local name=$1 fonts=$2
+  if [ -z "$fonts" ]; then
+    bad "$name: pdffonts lists no fonts; the STIX check is vacuous"
+  elif grep -qi stix <<<"$fonts"; then
+    bad "$name: embeds STIX fonts; stix was loaded under XeLaTeX and garbles math"
+  else
+    ok "$name: no STIX fonts"
+  fi
+}
+
 # PDF metadata against the sample's own frontmatter: Title is "title: subtitle",
 # Author the names joined ", ", and empty for an export with `blind: double`.
 # CAS once titled every PDF by its subtitle and wrote U+2C20 after the names.
@@ -145,6 +158,7 @@ compare_one() {
   local info
   info=$(pdfinfo "$pdf" 2>/dev/null)
   check_metadata "$name" "$(sed -n 's/^Title: *//p' <<<"$info")" "$(sed -n 's/^Author: *//p' <<<"$info")"
+  check_fonts "$name" "$(pdffonts "$pdf" 2>/dev/null | awk 'NR > 2 { print $1 }')"
   # A double-blind export prints no title-note marks at all.
   is_double_blind "$name" || check_title_marks "$name" "$text"
   if diff -u --label "snapshot/$name" --label "built/$name" "$snap" "$built" > "$diff_out"; then
@@ -252,6 +266,12 @@ do_self_test() {
   expect_caught 'a title-note mark stolen by the graphical-abstract page' '^FAIL  probe: a title-note mark printed' "$out"
   out=$( fail=0; check_title_marks probe "$placed" )
   expect_passes 'a mark on the title page alone' '^ok    probe: the title-note mark is on the title page only' "$out"
+  # Fonts, at function level: one seed for stix loaded under XeLaTeX, one for an
+  # empty font list.
+  out=$( fail=0; check_fonts probe $'CQVJVE+LMRoman10-Regular-Identity-H\nMTQNLZ+STIXMath-Italic' )
+  expect_caught 'a STIX font in a CAS PDF' '^FAIL  probe: embeds STIX fonts' "$out"
+  out=$( fail=0; check_fonts probe '' )
+  expect_caught 'an empty font list' '^FAIL  probe: pdffonts lists no fonts' "$out"
   # Metadata, at function level: CAS's U+2C20 after the names, the subtitle as
   # Title, and authors named in the double-blind export.
   local ftitle names
