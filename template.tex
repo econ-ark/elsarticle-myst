@@ -10,8 +10,9 @@
 %% $\alpha$-mixing). Those three corrupt output silently; a stray _ or $ raises
 %% a TeX error the CI log grep already catches, so it need not be escaped here.
 [# macro esctext(s) #][- s | default("") | replace("&", "\\&") | replace("%", "\\%") | replace("#", "\\#") -][# endmacro #]
+[# set is_els = options.document_class == 'elsarticle' #]
 
-[# if options.document_class == 'elsarticle' #]
+[# if is_els #]
 %% Citation style rides on the class options (\@biboptions): elsarticle loads
 %% natbib itself. Named options exist only where the classes disagree on a
 %% NAME; everything else rides on class_options verbatim, future ones included.
@@ -38,7 +39,7 @@
   \usepackage{fontspec}
 \fi
 
-[# if options.document_class == 'elsarticle' #]
+[# if is_els #]
 %% natbib is already loaded by elsarticle.cls; loading it again would clash.
 %% cas-sc.cls loads the table stack below, elsarticle does not, and MyST emits
 %% markup needing it either way. Order: array first, xcolor before colortbl.
@@ -74,7 +75,7 @@
 %% is submitted or published, rather than a custom option. Backslash goes to a
 %% SENTINEL and is expanded LAST, or the brace rules would re-escape its braces.
 [# set jrnl = doc.venue.title if doc.venue and doc.venue.title else '' #]
-[# if options.document_class == 'elsarticle' and jrnl #]
+[# if is_els and jrnl #]
 \journal{[- esc(jrnl) -]}
 [# endif #]
 
@@ -97,39 +98,37 @@
   {\newcommand\llbracket{\mathopen{[\mkern-3mu[}}\newcommand\rrbracket{\mathclose{]\mkern-3mu]}}}}{}
 \makeatother
 
-%% A two-column measure is narrow. Let TeX widen interword space before it lets
-%% a line run into the gutter, and wrap a code line wider than the column at a
-%% space, with a continuation mark, where verbatim would overprint the next column.
+%% Narrow measures, two-column ones most of all: let TeX widen interword space
+%% before a line runs into the margin, and wrap a code line wider than the column
+%% at a space, with a continuation mark, where verbatim would overprint.
 \setlength{\emergencystretch}{3em}
 \usepackage{fvextra}
 %% A plain arrow as the continuation mark: fvextra's default hook is drawn from a
 %% math font glyph with no Unicode mapping, which costs that whole font its text
 %% layer, title-note stars included.
 \RecustomVerbatimEnvironment{verbatim}{Verbatim}{breaklines,breaksymbolleft={\tiny\ensuremath{\rightarrow}}}
-%% MyST sets every table as equal p-columns, a few picas wide in two columns. Set
-%% cells ragged right, and put glue before a cell's first word so TeX may hyphenate
-%% it (array.sty's \@startpbox, with only \raggedright and \hskip\z@skip added).
+%% MyST's tables are equal p-columns. Append to array's \@startpbox: ragged right,
+%% glue before a cell's first word so it can hyphenate. Narrower gaps tested per
+%% table, on a two-column page (cas-dc only turns two-column inside \maketitle).
+\usepackage{etoolbox}
 \makeatletter
 \AtBeginDocument{%
-  \def\@startpbox#1{\bgroup\color@begingroup\setlength\hsize{#1}\@arrayparboxrestore
-    \raggedright\arraybackslash
-    \everypar{\vrule\@height\ht\@arstrutbox\@width\z@\hskip\z@skip\everypar{}}}%
-  \let\@startpbox@action\@startpbox}
+  \apptocmd\@startpbox{\raggedright\arraybackslash\everypar\expandafter{\the\everypar\hskip\z@skip}}
+    {\let\@startpbox@action\@startpbox}
+    {\PackageError{elsarticle-myst}{cannot patch array's \string\@startpbox}{}}}
+\AtBeginEnvironment{tabular}{\if@twocolumn\setlength{\tabcolsep}{4pt}\fi}
 \makeatother
-[# if options.columns == 'double' #]
-\setlength{\tabcolsep}{4pt}
-[# endif #]
 
 [- IMPORTS -]
 
 \begin{document}
-[# if options.document_class != 'elsarticle' #]
+[# if not is_els #]
 \let\WriteBookmarks\relax
 \def\floatpagefraction{1}
 \def\textfraction{.001}
 [# endif #]
 
-[# if options.document_class == 'elsarticle' #]
+[# if is_els #]
 %% elsarticle needs every frontmatter declaration inside this environment; the
 %% CAS classes take them at top level. Everything down to \maketitle is shared.
 \begin{frontmatter}
@@ -144,9 +143,9 @@
 %% elsarticle resolves title-note, corresponding and footnote labels in ONE
 %% namespace shared with affiliations, so bare integers collide: \tnoteref{1}
 %% would render the affiliation mark. Prefixes are empty for CAS, which is safe.
-[# set tnp = 'tn' if options.document_class == 'elsarticle' else '' #]
-[# set corp = 'cor' if options.document_class == 'elsarticle' else '' #]
-[# set fnp = 'fn' if options.document_class == 'elsarticle' else '' #]
+[# set tnp = 'tn' if is_els else '' #]
+[# set corp = 'cor' if is_els else '' #]
+[# set fnp = 'fn' if is_els else '' #]
 %% Title notes, from MyST built-ins: the funding statement first, then the
 %% dedication, both footnotes to the title as Elsevier journals print them.
 %% An empty list is truthy in nunjucks, so test the count, never the list.
@@ -159,7 +158,7 @@
 %% filter the list FIRST, or a separator is emitted for an entry that prints nothing.
 [# set named_authors = doc.authors | selectattr("name") | list if doc.authors else [] #]
 
-[# if options.document_class != 'elsarticle' #]
+[# if not is_els #]
 %% \shorttitle and \shortauthors are CAS-only; elsarticle has neither.
 [# if doc.short_title #]
 \shorttitle{[- esctext(doc.short_title) -]}
@@ -173,10 +172,12 @@
 [# endif #]
 [# endif #]
 
-[# if options.document_class == 'elsarticle' #]
+%% Title and subtitle joined, for elsarticle's \title and the PDF metadata.
+[# set full_title = esctext(doc.title) ~ ((': ' ~ esctext(doc.subtitle)) if doc.subtitle else '') #]
+[# if is_els #]
 %% elsarticle's \title takes no mode key and has no subtitle slot, so a
 %% subtitle is appended after a colon rather than silently dropped.
-\title{[- esctext(doc.title) -][# if doc.subtitle #]: [- esctext(doc.subtitle) -][# endif #][# if tmarks #]\tnoteref{[-tmarks-]}[# endif #]}
+\title{[-full_title-][# if tmarks #]\tnoteref{[-tmarks-]}[# endif #]}
 [# else #]
 \title[mode=title]{[- esctext(doc.title) -]}
 [# if doc.subtitle #]
@@ -185,7 +186,7 @@
 [# endif #]
 
 %% CAS marks the title separately; elsarticle carries \tnoteref inside \title.
-[# if tmarks and options.document_class != 'elsarticle' #]
+[# if tmarks and not is_els #]
 \tnotemark[[-tmarks-]]
 [# endif #]
 [# if has_funds #]
@@ -205,7 +206,7 @@
 %% Two CAS-only shapes here. The trailing [orcid=...] group: elsarticle's \author
 %% takes only the affiliation label, so a second group prints as literal text.
 %% The marks: elsarticle wants \corref/\fnref INSIDE the name group, not after.
-[# if options.document_class == 'elsarticle' #]
+[# if is_els #]
 \author[[- author.affiliations | join(",", "index") -]]{[- esc(author.name) -][# if author.corresponding #]\corref{[-corp-][-loop.index-]}[# endif #][# if author.note #]\fnref{[-fnp-][-loop.index-]}[# endif #][# if author.equal_contributor and has_equal #]\fnref{[-fnp-][-eq_fnmark-]}[# endif #]}
 [# else #]
 \author[[- author.affiliations | join(",", "index") -]]{[- esc(author.name) -]}[# if author_opts #][[- author_opts -]][# endif #]
@@ -225,7 +226,7 @@
 [# if author.url #]
 \ead[url]{[-author.url-]}
 [# endif #]
-[# if author.roles and options.document_class != 'elsarticle' #]
+[# if author.roles and not is_els #]
 \credit{[# for role in author.roles #][- esc(role) -][# if not loop.last #], [# endif #][# endfor #]}
 [# endif #]
 [# endfor #]
@@ -269,12 +270,12 @@
 \end{abstract}
 [# endif #]
 
-[# set prelim_pages = parts.graphical_abstract or options.graphical_abstract or parts.keypoints #]
-[# set mute_tmark = options.document_class == 'elsarticle' and tmarks and prelim_pages #]
+[# set mute_tmark = is_els and tmarks #]
 [# if mute_tmark #]
-%% elsarticle's \title gobbles \tnoteref after the title's FIRST printing, and the
-%% graphical-abstract and highlights pages print it first, stealing the title
-%% page's mark. Mute the mark for those pages; it is restored below.
+%% elsarticle's \title gobbles \tnoteref after the title's FIRST printing, which a
+%% graphical-abstract or highlights page would take from the title page. Mute the
+%% mark across those pages; the class's own \tnoteref is restored below.
+\makeatletter\global\let\elsmyst@tnoteref\tnoteref\makeatother
 \gdef\tnoteref#1{}
 [# endif #]
 [# if parts.graphical_abstract #]
@@ -300,37 +301,33 @@
 \end{highlights}
 [# endif #]
 [# if mute_tmark #]
-\gdef\tnoteref#1{\tnotemark[{#1}]}
+\makeatletter\global\let\tnoteref\elsmyst@tnoteref\makeatother
 [# endif #]
 
 %% `keyword' (singular) in elsarticle, `keywords' (plural) in CAS; JEL codes
 %% come from the BUILT-IN `tags` and must sit INSIDE the environment.
 %% elsarticle's \JEL is an argument-less SWITCH; cas-common's takes a group.
 [# if doc.keywords or doc.tags #]
-[# if options.document_class == 'elsarticle' #]
-\begin{keyword}
-[# if doc.keywords #][# for kw in doc.keywords #][- esctext(kw) -][# if not loop.last #] \sep [# endif #][# endfor #]
-[# endif #][# if doc.tags #]\JEL [# for code in doc.tags #][- esc(code) -][# if not loop.last #]; [# endif #][# endfor #]
-[# endif #]\end{keyword}
-[# else #]
-\begin{keywords}
-[# if doc.keywords #][# for kw in doc.keywords #][- esctext(kw) -][# if not loop.last #] \sep [# endif #][# endfor #]
-[# endif #][# if doc.tags #]\JEL{[# for code in doc.tags #][- esc(code) -][# if not loop.last #]; [# endif #][# endfor #]}
-[# endif #]\end{keywords}
-[# endif #]
+[# set kw_line #][# for kw in doc.keywords or [] #][- esctext(kw) -][# if not loop.last #] \sep [# endif #][# endfor #][# endset #]
+[# set jel_codes #][# for code in doc.tags or [] #][- esc(code) -][# if not loop.last #]; [# endif #][# endfor #][# endset #]
+[# set kw_env = 'keyword' if is_els else 'keywords' #]
+\begin{[-kw_env-]}
+[# if doc.keywords #][-kw_line-]
+[# endif #][# if doc.tags #][# if is_els #]\JEL [-jel_codes-][# else #]\JEL{[-jel_codes-]}[# endif #]
+[# endif #]\end{[-kw_env-]}
 [# endif #]
 
 %% PDF metadata from MyST's title and authors, none named when double-blind. CAS
 %% titles it by its subtitle and corrupts \infoauthors (what its \maketitle uses);
 %% elsarticle's author list ends "; " and refills an empty pdfauthor via \Hy@author.
-\hypersetup{pdftitle={[- esctext(doc.title) -][# if doc.subtitle #]: [- esctext(doc.subtitle) -][# endif #]},pdfauthor={[# if options.blind != 'double' #][# for author in named_authors #][- esc(author.name) -][# if not loop.last #], [# endif #][# endfor #][# endif #]}}
-[# if options.document_class == 'elsarticle' #]
+\hypersetup{pdftitle={[-full_title-]},pdfauthor={[# if options.blind != 'double' #][# for author in named_authors #][- esc(author.name) -][# if not loop.last #], [# endif #][# endfor #][# endif #]}}
+[# if is_els #]
 \makeatletter\gdef\Hy@author{}\makeatother
 [# else #]
 \makeatletter\global\let\infoauthors\@pdfauthor\makeatother
 [# endif #]
 
-[# if options.document_class == 'elsarticle' #]
+[# if is_els #]
 %% \end{frontmatter} typesets the frontmatter; elsarticle has no \maketitle.
 \end{frontmatter}
 [# else #]
@@ -368,7 +365,7 @@
 
 [-CONTENT-]
 
-[# if options.document_class != 'elsarticle' #]
+[# if not is_els #]
 \printcredits
 [# endif #]
 
@@ -382,7 +379,7 @@
 [-parts.data_availability-]
 [# endif #]
 
-[# if options.document_class == 'elsarticle' #]
+[# if is_els #]
 %% elsarticle provides three styles; the numeric one has an author-name variant.
 \bibliographystyle{[# if options.citation_style == 'numbers' #]elsarticle-num[# else #]elsarticle-harv[# endif #]}
 [# else #]

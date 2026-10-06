@@ -311,8 +311,8 @@ do_check() {
   local work
   work=$(mktemp -d)
   write_fixture "$work"
-  if ! ( cd "$work" && myst build --tex fixture.md >/dev/null 2>&1 ); then
-    bad 'myst build failed on the escaping fixture'
+  if ! render_tex "$work" fixture.md; then
+    bad 'the template render aborted on the escaping fixture'
     rm -rf "$work"; return 1
   fi
   for f in cas els; do
@@ -325,7 +325,7 @@ do_check() {
     'see above. Check the esc() macro and its call sites in template.tex.'
 }
 
-# Rejection test, with FOUR seeded defects. Raw input exercises the positive
+# Rejection tests, each a seeded defect. Raw input exercises the positive
 # assertions; the double-escape assertion is a negative check that raw input
 # passes correctly, so it needs a doubly-escaped fixture of its own.
 do_self_test() {
@@ -420,8 +420,4 @@ RAW
     'the escaping checker missed unescaped input; its PASS is worthless.'
 }
 
-case "${1:-}" in
-  --self-test) do_self_test ;;
-  ""|--check)  do_check ;;
-  *) echo "usage: $0 [--check|--self-test]" >&2; exit 2 ;;
-esac
+run_cli "$@"

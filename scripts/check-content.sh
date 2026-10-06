@@ -88,15 +88,14 @@ check_title_marks() {
 # Author the names joined ", ", and empty for an export with `blind: double`.
 # CAS once titled every PDF by its subtitle and wrote U+2C20 after the names.
 fm() { yq --front-matter=extract -r "$1" "$ROOT/example/sample-article.md"; }
+want_title() { local sub; sub=$(fm '.subtitle // ""'); printf '%s\n' "$(fm '.title')${sub:+: $sub}"; }
+want_names() { fm '[.authors[].name] | join(", ")'; }
+is_double_blind() { [ "$(fm ".exports[] | select(.output == \"exports/$1.pdf\") | .blind // \"\"")" = double ]; }
 check_metadata() {
-  local name=$1 title=$2 author=$3 want_title want_author sub
-  sub=$(fm '.subtitle // ""')
-  want_title="$(fm '.title')${sub:+: $sub}"
-  want_author=$(fm '[.authors[].name] | join(", ")')
+  local name=$1 title=$2 author=$3 want_title want_author
+  want_title=$(want_title); want_author=$(want_names)
   [ -n "$want_author" ] || { bad "$name: the sample names no authors; the metadata check is vacuous"; return; }
-  if [ "$(fm ".exports[] | select(.output == \"exports/$name.pdf\") | .blind // \"\"")" = double ]; then
-    want_author=''
-  fi
+  if is_double_blind "$name"; then want_author=''; fi
   if [ "$title" != "$want_title" ]; then
     bad "$name: PDF Title is '$title', expected '$want_title'"
   elif [ "$author" != "$want_author" ]; then
@@ -137,16 +136,17 @@ compare_one() {
   local built diff_out
   built=$(mktemp); diff_out=$(mktemp)
   extract "$pdf" > "$built"
-  text=$(cat "$built")
+  text=$(<"$built")
   # BOTH sides. A truncated or anchor-less SNAPSHOT is its own defect: it would
   # let an equally degraded build compare equal and pass.
   check_substance "$name built" "$text"
   check_substance "$name snapshot" "$(cat "$snap")"
   check_no_unresolved_refs "$name" "$text"
-  check_metadata "$name" "$(pdfinfo "$pdf" 2>/dev/null | sed -n 's/^Title: *//p')" \
-    "$(pdfinfo "$pdf" 2>/dev/null | sed -n 's/^Author: *//p')"
-  # The double-blind export prints no title-note marks at all.
-  [ "$name" = sample-elsarticle-5p ] || check_title_marks "$name" "$text"
+  local info
+  info=$(pdfinfo "$pdf" 2>/dev/null)
+  check_metadata "$name" "$(sed -n 's/^Title: *//p' <<<"$info")" "$(sed -n 's/^Author: *//p' <<<"$info")"
+  # A double-blind export prints no title-note marks at all.
+  is_double_blind "$name" || check_title_marks "$name" "$text"
   if diff -u --label "snapshot/$name" --label "built/$name" "$snap" "$built" > "$diff_out"; then
     ok "$name: text matches the committed snapshot"
   else
@@ -195,6 +195,7 @@ do_update() {
 
 do_check() {
   local n
+  require_pdftotext || return 1
   for n in "${PDFS[@]}"; do compare_one "$n"; done
   check_closure
   verdict "$fail" 'every export matches its committed snapshot.' \
@@ -239,20 +240,10 @@ do_self_test() {
   # The ?? check is exercised at FUNCTION level: seeding it through a real PDF
   # would need a PDF writer in CI, and rebuilding a sample with a broken ref is
   # far slower than feeding the extracted text directly.
-  out=$( fail=0; check_no_unresolved_refs probe "Cross-ref: Sec ?? and Algorithm ??."; echo "__fail=$fail" )
-  if grep -q '^FAIL  probe: unresolved cross-reference' <<<"$out"; then
-    printf 'ok    rejection test: an unresolved cross-reference is caught\n'
-  else
-    printf 'FAIL  rejection test: an unresolved cross-reference was NOT caught\n'
-    rc=1
-  fi
-  out=$( fail=0; check_no_unresolved_refs probe "Ordinary prose with no markers."; echo "__fail=$fail" )
-  if grep -q '^ok    probe: no unresolved' <<<"$out"; then
-    printf 'ok    control: clean text does not trip the ?? check\n'
-  else
-    printf 'FAIL  control: the ?? check fires on clean text\n'
-    rc=1
-  fi
+  out=$( fail=0; check_no_unresolved_refs probe "Cross-ref: Sec ?? and Algorithm ??." )
+  expect_caught 'an unresolved cross-reference' '^FAIL  probe: unresolved cross-reference' "$out"
+  out=$( fail=0; check_no_unresolved_refs probe "Ordinary prose with no markers." )
+  expect_passes 'clean text through the ?? check' '^ok    probe: no unresolved' "$out"
   # Title-note marks, at function level for the same reason as the ?? check.
   # The first text is the defect: mark stolen by the graphical-abstract page.
   local stolen=$'Graphical Abstract\nTitle⋆,⋆⋆\n\fHighlights\nTitle\n\fTitle\nA. Author\n⋆ Funded.'
@@ -260,20 +251,14 @@ do_self_test() {
   out=$( fail=0; check_title_marks probe "$stolen" )
   expect_caught 'a title-note mark stolen by the graphical-abstract page' '^FAIL  probe: a title-note mark printed' "$out"
   out=$( fail=0; check_title_marks probe "$placed" )
-  if grep -q '^ok    probe: the title-note mark is on the title page only' <<<"$out"; then
-    printf 'ok    control: a mark on the title page alone passes\n'
-  else
-    printf 'FAIL  control: the title-mark check fires on a correct layout\n'
-    rc=1
-  fi
+  expect_passes 'a mark on the title page alone' '^ok    probe: the title-note mark is on the title page only' "$out"
   # Metadata, at function level: CAS's U+2C20 after the names, the subtitle as
   # Title, and authors named in the double-blind export.
-  local sub ftitle names
-  sub=$(fm '.subtitle // ""'); ftitle="$(fm '.title')${sub:+: $sub}"
-  names=$(fm '[.authors[].name] | join(", ")')
+  local ftitle names
+  ftitle=$(want_title); names=$(want_names)
   out=$( fail=0; check_metadata sample-sc "$ftitle" "$names"$'Ⱐ' )
   expect_caught 'U+2C20 after the PDF author names' '^FAIL  sample-sc: PDF Author' "$out"
-  out=$( fail=0; check_metadata sample-sc "$sub" "$names" )
+  out=$( fail=0; check_metadata sample-sc "$(fm '.subtitle')" "$names" )
   expect_caught 'the subtitle as PDF Title' '^FAIL  sample-sc: PDF Title' "$out"
   out=$( fail=0; check_metadata sample-elsarticle-5p "$ftitle" "$names" )
   expect_caught 'authors named in the double-blind PDF metadata' '^FAIL  sample-elsarticle-5p: PDF Author' "$out"
@@ -283,21 +268,11 @@ do_self_test() {
   # Positive half: an untouched tree must PASS. Without this the suite above is
   # satisfied by a checker that fails on everything.
   out=$(bash "$ROOT/scripts/check-content.sh" 2>&1)
-  if grep -q '^PASS' <<<"$out"; then
-    printf 'ok    control: the untouched tree passes\n'
-  else
-    printf 'FAIL  control: the untouched tree does NOT pass; the suite above is meaningless\n'
-    printf '%s\n' "$out" | grep '^FAIL' | head -5
-    rc=1
-  fi
+  expect_passes 'the untouched tree' '^PASS' "$out"
+  grep '^FAIL' <<<"$out" | head -5
 
   verdict "$rc" 'the content checker rejects every seeded defect and accepts a clean tree.' \
     'the content checker missed a seeded defect; its PASS verdict is worthless.'
 }
 
-case "${1:-}" in
-  --self-test) do_self_test ;;
-  --update)    do_update ;;
-  ""|--check)  do_check ;;
-  *) echo "usage: $0 [--check|--update|--self-test]" >&2; exit 2 ;;
-esac
+run_cli "$@"

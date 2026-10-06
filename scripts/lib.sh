@@ -11,27 +11,44 @@ bad() { printf 'FAIL  %s\n' "$*"; fail=1; }
 # comments mention the macros and strings the checks look for.
 strip_comments() { grep -v '^[[:space:]]*%' "$1"; }
 
-# Build page $2 in directory $1 to TeX. mystmd prints "Exported TeX" and exits 0
-# even when the template render aborts, so the log is the only signal.
-render_tex() {
-  local out
-  out=$( cd "$1" && myst build --tex "$2" --force 2>&1 )
-  if grep -qE 'Template render error|TypeError' <<<"$out"; then
-    grep -E 'Template render error|TypeError' <<<"$out" | head -2
+# Build page $2 in directory $1 to format $3 (tex or pdf), log in $1/build.log.
+# mystmd prints "Exported TeX" and exits 0 even when the template render aborts,
+# so the log is the only signal.
+render_page() {
+  ( cd "$1" && myst build "--$3" "$2" --force > build.log 2>&1 )
+  if grep -qE 'Template render error|TypeError' "$1/build.log"; then
+    grep -E 'Template render error|TypeError' "$1/build.log" | head -2
     return 1
   fi
 }
+render_tex() { render_page "$1" "$2" tex; }
+render_pdf() { render_page "$1" "$2" pdf; }
 
-# Self-test verdict. $3 is a checker's output after a seeded defect and must hold
-# a line matching the regex $2. A miss sets rc in the calling self-test.
-expect_caught() {
-  if grep -q -- "$2" <<<"$3"; then
-    printf 'ok    rejection test: %s\n' "$1"
-  else
-    printf 'FAIL  rejection test: %s was NOT caught\n' "$1"
-    rc=1
-  fi
+# Replace every fixed string $1 with $2 in file $3, for seeding defects. perl,
+# since the CI runner has no sd; passed through the environment, so perl reads
+# no \l or \u in TeX source as an escape.
+replace_fixed() { FROM=$1 TO=$2 perl -0pi -e 's/\Q$ENV{FROM}\E/$ENV{TO}/g' "$3"; }
+
+# Command line shared by the checkers: --self-test, --update where the script
+# defines do_update, or no argument / --check.
+run_cli() {
+  case "${1:-}" in
+    --self-test) do_self_test ;;
+    ''|--check) do_check ;;
+    --update) if declare -F do_update >/dev/null; then do_update; else run_cli --usage; fi ;;
+    *) echo "usage: $0 [--check|--self-test$(declare -F do_update >/dev/null && echo '|--update')]" >&2
+       exit 2 ;;
+  esac
 }
+
+# Self-test verdicts. $3 is a checker's output and must hold a line matching the
+# regex $2: after a seeded defect (expect_caught) or on correct input
+# (expect_passes). A miss sets rc in the calling self-test.
+expect_line() {
+  if grep -q -- "$2" <<<"$3"; then printf 'ok    %s\n' "$4"; else printf 'FAIL  %s\n' "$5"; rc=1; fi
+}
+expect_caught() { expect_line "$1" "$2" "$3" "rejection test: $1" "rejection test: $1 was NOT caught"; }
+expect_passes() { expect_line "$1" "$2" "$3" "control: $1" "control: $1 does NOT pass"; }
 
 # PDF-reading checkers: a missing pdftotext must fail, never read as empty text.
 require_pdftotext() { command -v pdftotext >/dev/null || { bad 'pdftotext is not installed'; return 1; }; }

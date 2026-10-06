@@ -44,7 +44,8 @@ exports:
 
 Body text.
 MD
-  ( cd "$dir" && myst build --pdf p.md > build.log 2>&1 )
+  # Render errors go to stderr: stdout carries the gap.
+  render_pdf "$dir" p.md >&2
   if [ ! -s "$dir/out/c.pdf" ]; then echo NOPDF; return; fi
   pdftotext -f 1 -l 1 -bbox "$dir/out/c.pdf" "$dir/bbox.html"
   # Block lines are every word written before the heading's "1.", wherever it
@@ -59,35 +60,36 @@ MD
              printf "%.1f\n", h - low }' "$dir/bbox.html"
 }
 
-check_layout() {
-  local root=$1 cols=$2 work long short
-  work=$(mktemp -d)
-  # Build the long and short fixtures side by side.
-  gap_of "$root" "$cols" "$work/long" "$LONG" > "$work/long.gap" &
-  gap_of "$root" "$cols" "$work/short" "$SHORT" > "$work/short.gap" &
-  wait
-  long=$(cat "$work/long.gap"); short=$(cat "$work/short.gap")
-  rm -rf "$work"
+# Judge layout $1 from its long and short gaps, $2 and $3.
+judge_layout() {
+  local cols=$1 long=$2 short=$3 before=$fail
   if ! [[ $long =~ ^-?[0-9.]+$ && $short =~ ^-?[0-9.]+$ ]]; then
     bad "$cols column: a fixture did not build or has no heading (long: $long, short: $short)"
     return
   fi
   # Both verdicts, independently: a defect can trip either or both.
-  local clean=1
   if awk -v a="$long" -v b="$short" -v m=$MIN_GAP 'BEGIN { exit !(a < m || b < m) }'; then
     bad "$cols column: the title block crowds the rule below it (long ${long}pt, short ${short}pt, at least ${MIN_GAP}pt expected)"
-    clean=0
   fi
   if awk -v a="$long" -v b="$short" -v t=$TOL 'BEGIN { d = a - b; exit !(d > t || d < -t) }'; then
     bad "$cols column: the gap under the title block depends on the abstract's length (long ${long}pt, short ${short}pt)"
-    clean=0
   fi
-  [ "$clean" -eq 1 ] && ok "$cols column: the same gap under a long and a short abstract (${long}pt, ${short}pt)"
+  [ "$fail" -eq "$before" ] && ok "$cols column: the same gap under a long and a short abstract (${long}pt, ${short}pt)"
 }
 
 run_checks() {
-  check_layout "$1" single
-  check_layout "$1" double
+  local work cols
+  work=$(mktemp -d)
+  # Build every fixture side by side: none depends on another.
+  for cols in single double; do
+    gap_of "$1" "$cols" "$work/$cols-long" "$LONG" > "$work/$cols-long.gap" &
+    gap_of "$1" "$cols" "$work/$cols-short" "$SHORT" > "$work/$cols-short.gap" &
+  done
+  wait
+  for cols in single double; do
+    judge_layout "$cols" "$(<"$work/$cols-long.gap")" "$(<"$work/$cols-short.gap")"
+  done
+  rm -rf "$work"
 }
 
 do_check() {
@@ -100,19 +102,14 @@ do_check() {
 do_self_test() {
   local rc=0
   expect_control_passes
-  # Fixed strings, since perl reads \l as an escape even inside \Q...\E.
   # 1.4.1's fixed guess: skip the keyword height less five lines, always.
   seed_defect 'a fixed skip under the abstract' 'depends on the abstract' run_checks cas-common.sty \
-    sd -F -- '- \l_tmpb_dim } }' '- 5\baselineskip } }'
+    replace_fixed '- \l_tmpb_dim } }' '- 5\baselineskip } }'
   # Upstream does not skip at all. A short abstract then lets the keywords overrun.
   seed_defect 'no skip past a longer keyword column' 'crowds the rule' run_checks cas-common.sty \
-    sd -F -- '{ \skip_vertical:n { \g_stm_keybox_ht_dim - \l_tmpb_dim } }' '{ }'
+    replace_fixed '{ \skip_vertical:n { \g_stm_keybox_ht_dim - \l_tmpb_dim } }' '{ }'
   verdict "$rc" 'the title-gap checker rejects every seeded defect and accepts the untouched template.' \
     'the title-gap checker missed a seeded defect; its PASS verdict is worthless.'
 }
 
-case "${1:-}" in
-  --self-test) do_self_test ;;
-  '') do_check ;;
-  *) echo "usage: $0 [--self-test]" >&2; exit 2 ;;
-esac
+run_cli "$@"

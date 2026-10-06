@@ -66,13 +66,13 @@ check_render() {
   local root=$1 work cls log
   work=$(mktemp -d)
   write_fixture "$root" "$work" pdf
-  ( cd "$work" && myst build --pdf p.md > build.log 2>&1 )
+  render_pdf "$work" p.md || bad 'the template render aborted on the fixture'
   for cls in cas els; do
     log="$work/out/${cls}_pdf_logs/$cls.log"
     if [ ! -s "$work/out/$cls.pdf" ] || [ ! -s "$log" ]; then
       bad "$cls: the fixture produced no PDF or no compile log"; continue
     fi
-    judge "$cls" "$(cat "$log")" "$(pdftotext "$work/out/$cls.pdf" - 2>/dev/null)"
+    judge "$cls" "$(<"$log")" "$(pdftotext "$work/out/$cls.pdf" - 2>/dev/null)"
   done
   rm -rf "$work"
 }
@@ -125,7 +125,7 @@ do_self_test() {
   local rc=0 out probe
   expect_control_passes
   seed_defect 'mathtools not loaded' 'undefined' check_render template.tex \
-    sd -F -- '\usepackage{mathtools}' ''
+    replace_fixed '\usepackage{mathtools}' ''
   # The whole bracket block, stmaryrd and fallback alike.
   seed_defect 'no definition of the double brackets' 'undefined' check_render template.tex \
     perl -0pi -e 's/\\\@ifundefined\{llbracket\}.*?\n(?=\\makeatother)//s'
@@ -139,11 +139,7 @@ do_self_test() {
   out=$( fail=0; judge probe 'clean' 'Symtext a := b and x and y' )
   expect_caught 'a PDF missing the double brackets' '^FAIL  probe: glyph missing: .llbracket' "$out"
   out=$( fail=0; judge probe 'clean' "$good" )
-  if grep -q '^ok    probe' <<<"$out"; then
-    printf 'ok    control: a clean log and full glyphs pass\n'
-  else
-    printf 'FAIL  control: the verdict fires on a clean page\n'; rc=1
-  fi
+  expect_passes 'a clean log and full glyphs' '^ok    probe' "$out"
   # The sentinel, at function level: MyST loading a package makes the line dead.
   probe=$(mktemp)
   printf '\\usepackage{amsmath}\n\\usepackage[only,llbracket]{stmaryrd}\n' > "$probe"
@@ -154,8 +150,4 @@ do_self_test() {
     'the math-macro checker missed a seeded defect; its PASS verdict is worthless.'
 }
 
-case "${1:-}" in
-  --self-test) do_self_test ;;
-  '') do_check ;;
-  *) echo "usage: $0 [--self-test]" >&2; exit 2 ;;
-esac
+run_cli "$@"

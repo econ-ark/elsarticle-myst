@@ -127,13 +127,10 @@ all_parts_checks() {
   if [ "$cls" = cas ]; then front_end=$'\\maketitle'; after_body+=($'\\printcredits'); fi
   check_order "$f" "abstract in its block ($cls)" '\begin{abstract}' ABSTRACTMARK '\end{abstract}'
   check_order "$f" "acknowledgments as a first-page note ($cls)" '\nonumnote{ACKMARK' "$front_end"
-  if [ "$cls" = cas ]; then
-    check_order "$f" "funding statement, then dedication, as title footnotes ($cls)" \
-      '\tnotemark[1,2]' '\tnotetext[1]{FUNDMARK' '\tnotetext[2]{DEDICATIONMARK' "$front_end"
-  else
-    check_order "$f" "funding statement, then dedication, as title footnotes ($cls)" \
-      '\tnoteref{tn1,tn2}' '\tnotetext[tn1]{FUNDMARK' '\tnotetext[tn2]{DEDICATIONMARK' "$front_end"
-  fi
+  local tn='' mark='\tnotemark[1,2]'
+  [ "$cls" = els ] && { tn=tn; mark='\tnoteref{tn1,tn2}'; }
+  check_order "$f" "funding statement, then dedication, as title footnotes ($cls)" \
+    "$mark" "\\tnotetext[${tn}1]{FUNDMARK" "\\tnotetext[${tn}2]{DEDICATIONMARK" "$front_end"
   check_order "$f" "summary and epigraph open the body as a plain section and a quote; the body epigraph stays ($cls)" \
     "$front_end" '\section*{Summary}' SUMMARYMARK \
     '\begin{quote}' EPIGRAPHMARK '\end{quote}' '\section{Body' DIRECTIVEQUOTE
@@ -177,11 +174,9 @@ check_none() { run_fixture "$1" 'no parts' '' $'# Body\n\nText.' none_checks; }
 
 # A dedication with no title note takes the first title-note slot alone.
 dedication_only_checks() {
-  if [ "$2" = cas ]; then
-    check_order "$1" "a lone dedication is title note 1 ($2)" '\tnotemark[1]' '\tnotetext[1]{LONEDEDICATION'
-  else
-    check_order "$1" "a lone dedication is title note 1 ($2)" '\tnoteref{tn1}' '\tnotetext[tn1]{LONEDEDICATION'
-  fi
+  local tn='' mark='\tnotemark[1]'
+  [ "$2" = els ] && { tn=tn; mark='\tnoteref{tn1}'; }
+  check_order "$1" "a lone dedication is title note 1 ($2)" "$mark" "\\tnotetext[${tn}1]{LONEDEDICATION"
 }
 
 check_dedication_only() {
@@ -284,8 +279,4 @@ do_self_test() {
     'the parts checker missed a seeded defect; its PASS verdict is worthless.'
 }
 
-case "${1:-}" in
-  --self-test) do_self_test ;;
-  ""|--check)  do_check ;;
-  *) echo "usage: $0 [--check|--self-test]" >&2; exit 2 ;;
-esac
+run_cli "$@"
