@@ -88,6 +88,9 @@ project:
     - "*.cls"
     - "*.bst"
     - thumbnail.png
+    # Each export leaves a main.bib under exports/*_pdf_tex/. Unexcluded, the
+    # next build reads them as bibliography sources, so stale entries win.
+    - example/exports/**
   toc:
     - file: example/sample-article.md
     - file: README.md

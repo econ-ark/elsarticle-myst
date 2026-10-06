@@ -731,8 +731,7 @@ e112. doi:10.7717/peerj-cs.112.
 Lamport, L., 1994. LaTeX: A Document Preparation System.
 2nd ed., Addison-Wesley, Reading, MA.
 Mittelbach, F., Goossens, M., 2004. The LaTeX Companion. 2nd
-ed., Addison-Wesley, Boston, MA. Print monograph with no
-DOI; identified by ISBN, as with latex1994.
+ed., Addison-Wesley, Boston, MA.
 Alan E. Lujan develops open-source computational tools for
 economics at Johns Hopkins University and Econ-ARK.
 Christopher D. Carroll is a professor of economics at Johns

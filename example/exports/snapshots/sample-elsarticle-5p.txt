@@ -652,31 +652,24 @@ Declaration of generative AI and AI-assisted tech[6] F. Mittelbach, M. Goossens,
 
 nologies in the manuscript preparation process
 
-2nd Edition, Addison-Wesley, Boston, MA, 2004, print
+2nd Edition, Addison-Wesley, Boston, MA, 2004.
 During the preparation of this work the authors used no
-
-monograph with no DOI; identified by ISBN, as with
-
-generative AI or AI-assisted technologies. This statement
-
-latex1994.
-
-exercises the ai_declaration part, which the template ren-
 
 Alan E. Lujan develops open-source computational tools for
 
-ders as an unnumbered section between the CRediT state-
+generative AI or AI-assisted technologies. This statement
 
 economics at Johns Hopkins University and Econ-ARK.
 
-ment and the references.
+exercises the ai_declaration part, which the template renders as an unnumbered section between the CRediT state-
+
 Christopher D. Carroll is a professor of economics at Johns
-Hopkins University and leads the Econ-ARK initiative for re-
+
+ment and the references.
+
+Hopkins University and leads the Econ-ARK initiative for reproducible heterogeneous-agent macroeconomics.
 
 References
-
-producible heterogeneous-agent macroeconomics.
-
 [1] R. Cockett, S. Purves, F. Koch, M. Morrison, Continuous Tools for Scientific Publishing: Using MyST Markdown and Curvenote to Encourage Continuous Science
 Practices, in: Proceedings of the 23rd Python in Science Conference, 2024, pp. 121–136. doi:10.25080/
 nkvc9349.

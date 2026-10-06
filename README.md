@@ -27,7 +27,7 @@ A MyST Markdown template for Elsevier journal articles, covering both the CAS (C
 
 ## Requirements
 
-- **MyST Markdown**: `mystmd >= 1.6` (install via `pip install 'mystmd>=1.6'` or `npm install -g mystmd@^1.6`). Tested against `1.10.1`. Changing this version means re-running the probes in "Known upstream limitations".
+- **MyST Markdown**: `mystmd >= 1.6` (install via `pip install 'mystmd>=1.6'` or `npm install -g mystmd@^1.6`). Tested against `1.11.0`, the version CI pins. Changing this version means re-running the probes in "Known upstream limitations".
 - **LaTeX Distribution**: TeX Live 2022 or later, or MiKTeX 22.1 or later, with a current `l3kernel`. Required for PDF export.
 - **XeLaTeX or LuaLaTeX**: Required for Unicode support and the `stix` / `charis` fonts the CAS classes load. `pdflatex` will emit a warning and silently lose Unicode characters.
 - **Python**: 3.9 or later (if installing via `pip`).
@@ -251,14 +251,14 @@ parts:
 ```markdown
 +++ {"part": "biography"}
 
-```{raw} latex
+:::{raw:latex}
 \bio{}
 Author One develops open-source computational tools.
 \endbio
 \bio{}
 Author Two is a professor of economics.
 \endbio
-```
+:::
 
 +++
 ```
@@ -286,13 +286,13 @@ The template has no `parts.appendix` key, and adding one back would reintroduce 
 
 ### Known upstream limitations
 
-Three mystmd bugs are reachable from this template. All are silent: `myst build` exits 0 and produces a PDF. Measured on mystmd 1.10.1.
+Three mystmd bugs are reachable from this template. All are silent: `myst build` exits 0 and produces a PDF. Measured on mystmd 1.10.1 and again on 1.11.0.
 
-> **These entries expire on someone else's merge.** Two have open PRs. When the PR lands, the entry becomes *obsolete* rather than wrong, and nothing in CI will say so — a gate can catch a claim that has become false, but not one that has become unnecessary. **Re-run the probes in each entry whenever the pinned mystmd version changes**, and delete any entry whose bug no longer reproduces.
+> **These entries expire on someone else's merge.** All three have open PRs. Once one is merged, the entry becomes *obsolete* rather than wrong, and nothing in CI will say so: a gate can catch a claim that has become false, but not one that has become unnecessary. **Re-run the probes in each entry whenever the pinned mystmd version changes**, and delete any entry whose bug no longer reproduces.
 
-**Four `prf:` kinds vanish from the PDF** ([#3030](https://github.com/jupyter-book/mystmd/issues/3030), PR [#3031](https://github.com/jupyter-book/mystmd/pull/3031)). `algorithm`, `assumption`, `criterion` and `property` match no case in `myst-to-tex`'s `kindToEnvironment`, so the block **and its `\label`** are omitted, while any `\ref` to it is still emitted and resolves to `??`. The other eleven kinds are fine. This template ships `algorithm` and `algpseudocode`, so writing `:::{prf:algorithm}` is a natural thing to try, and the body simply disappears. Until the PR lands, write algorithms as a `{raw} latex` block (see below) or use a supported kind.
+**Four `prf:` kinds vanish from the PDF** ([#3030](https://github.com/jupyter-book/mystmd/issues/3030), PR [#3031](https://github.com/jupyter-book/mystmd/pull/3031)). `algorithm`, `assumption`, `criterion` and `property` match no case in `myst-to-tex`'s `kindToEnvironment`, so the block **and its `\label`** are omitted, while any `\ref` to it is still emitted and resolves to `??`. The other eleven kinds are fine. This template loads `algorithm` and `algpseudocode`, so writing `:::{prf:algorithm}` is a natural thing to try, and the body simply disappears. Until the PR is merged, write algorithms as a `{raw} latex` block (see below) or use a supported kind.
 
-**Citations inside a frontmatter part never reach the `.bib`** ([#3032](https://github.com/jupyter-book/mystmd/issues/3032), PR [#3033](https://github.com/jupyter-book/mystmd/pull/3033)). MyST excludes `parts:` from the rendered document and harvests the bibliography from that document. A work cited only in `parts.abstract` reaches the `.tex` and never the `.bib`: an undefined citation rendering as `?`. This is why `parts.appendix` was removed (see "Appendices"), but `parts.abstract` is still exposed — cite in the body, not in the abstract.
+**Citations inside a frontmatter part never reach the `.bib`** ([#3032](https://github.com/jupyter-book/mystmd/issues/3032), PR [#3033](https://github.com/jupyter-book/mystmd/pull/3033)). MyST excludes `parts:` from the rendered document and harvests the bibliography from that document. A work cited only in `parts.abstract` reaches the `.tex` and never the `.bib`: an undefined citation rendering as `?`. This is why `parts.appendix` was removed (see "Appendices"), but `parts.abstract` is still exposed, so cite in the body, not in the abstract.
 
 **`[Sec %s](#label)` bakes a literal `??` into the `.tex`** ([#3035](https://github.com/jupyter-book/mystmd/pull/3035)). Single-article exports set the article level to 0, and the numbering lookup then computes a key no configuration can enable. The `??` is plain text, not a failed `\ref`, so **no LaTeX warning fires** and the compile-log gate cannot see it. `scripts/check-content.sh` greps the PDF text for `??` for exactly this reason.
 
@@ -305,7 +305,7 @@ Two forms, and they are not interchangeable.
 | ```` ```{raw} latex ```` (argument) | Stored in both `value` and `tex`. mystmd parses it, so the HTML site renders it *and* the LaTeX export writes it verbatim. Use for content the site should show: tables, figures, paragraphs. |
 | `:::{raw:latex}` (colon) | Stored as `tex` only. Correct in the PDF, **invisible on the site**. Use for anything that only steers LaTeX: `\appendix`, counter redefinitions, `\bio`/`\endbio`. |
 
-Put a macro mystmd's LaTeX parser does not know in the argument form and it emits `Unhandled TEX conversion for node of "macro_x"`. Measured on mystmd 1.10.1: the **macro node** is dropped, but the surrounding content is not — a `\bio{}`-wrapped paragraph and a `\legend`-annotated table both still reach the site in full, and the PDF is correct either way. So the message ranges from cosmetic to a lost element depending on what the macro carried, and it is worth reading rather than silencing.
+Put a macro mystmd's LaTeX parser does not know in the argument form and it emits `Unhandled TEX conversion for node of "macro_x"`. Measured on mystmd 1.10.1: the **macro node** is dropped, but the surrounding content is not: a `\bio{}`-wrapped paragraph and a `\legend`-annotated table both still reach the site in full, and the PDF is correct either way. So the message ranges from cosmetic to a lost element depending on what the macro carried, and it is worth reading rather than silencing.
 
 This template's biography part carried `\bio`/`\endbio` in the argument form and produced 24 such errors per build. Moving it to the colon form removed all 24 with byte-identical PDF text, at no cost because a frontmatter part never reaches the site anyway. CI now fails on that message.
 
@@ -324,7 +324,7 @@ The template escapes LaTeX specials in the frontmatter strings it interpolates i
 | `authors[].name`, `.note`, `.roles`, all `affiliations[].*`, `tags` (JEL), `venue.title` | `esc()`: every special. These never carry mathematics. |
 | `authors[].email`, `.url`, `.orcid`, social links | Verbatim. Escaping `_` or `%` breaks the link the class builds. A literal `%` or `#` here breaks the build; percent-encode it. |
 
-`&` is the character that matters most in economics (R&D, Q&A, "Risk & Return", institutional names) and it fails **silently**: unescaped, `Risk & Return` typesets as `Risk Return` and a `K&W` keyword as `KW`. An unescaped `%` is worse, because it comments out the rest of the line including the closing brace, and the field vanishes from a PDF that still ships.
+`&` is the character that matters most in economics (R&D, Q&A, "Risk & Return", institutional names) and it fails **silently**: unescaped, `Risk & Return` typesets as `Risk Return` and a `K&W` keyword as `KW`. An unescaped `%` is worse, because it comments out the rest of the line including the closing brace, and the field vanishes from a PDF that still builds.
 
 `scripts/check-escaping.sh` asserts all three columns on every CI run, and `--self-test` seeds both a raw and a doubly-escaped fixture to prove the checker can fail.
 
@@ -337,10 +337,10 @@ The template escapes LaTeX specials in the frontmatter strings it interpolates i
 | `check-escaping.sh` + `--self-test` | The escaping was documented and never asserted for six releases, during which `title` was raw. |
 | Compile-log grep | latexmk's exit code is not enough: mystmd prints "Exported PDF" and copies the file after xelatex exits non-zero. `^!` is TeX's fatal-error convention; undefined references and citations are only warnings but render as `?`. natbib prefixes its warnings `Package natbib Warning:`, not `LaTeX Warning:`, so the pattern matches the bare `Warning: Citation` form. |
 | bibtex gate on `build.stdout.log` | mystmd deletes the `.blg` with the other aux files. A positive control requires `This is BibTeX` in the log, so the gate cannot pass by bibtex never running. |
-| `Template render error` / `TypeError` / `Unhandled TEX conversion` on `build.stdout.log` | A jtex failure happens before LaTeX runs, so no compile log exists to grep. mystmd prints "Exported TeX", *then* the error, then exits 0 — leaving the previous PDF on disk with a stale mtime, which every later gate then "verifies". `Unhandled TEX conversion` was originally excluded because it fired 24 times on a healthy build; that turned out to be a real defect rather than noise. See "Raw LaTeX: which fence" below. |
+| `Template render error` / `TypeError` / `Unhandled TEX conversion` on `build.stdout.log` | A jtex failure happens before LaTeX runs, so no compile log exists to grep. mystmd prints "Exported TeX", *then* the error, then exits 0, leaving the previous PDF on disk with a stale mtime, which every later gate then "verifies". `Unhandled TEX conversion` was originally excluded because it fired 24 times on a healthy build; that turned out to be a real defect rather than noise. See "Raw LaTeX: which fence" below. |
 | `check-escaping.sh` absent-field fixtures | A fixture that supplies every field cannot catch a field being *absent*. MyST only warns on an author with no `name`, so it reaches the template, where a property access on undefined aborts the render and an unfiltered loop emits its separator anyway (`\shortauthors{, Solo}`). Six cases, both classes, including a page that declares nothing and inherits project scope. |
 | `check-content.sh` `??` check | An unresolved cross-reference. Two of the ways it arises raise no LaTeX warning at all (see "Known upstream limitations"), so the compile-log gate is structurally unable to catch them. |
-| `check-content.sh` + `--self-test` | Every other gate asks whether the build *succeeded*; this one asks what it *produced*. It diffs `pdftotext` output against committed snapshots in `example/exports/snapshots/`. Nothing else would have caught the appendix headings shipping as `.1. Supplementary Methods` and the appendix table as `Table .5`. A snapshot diff is *expected* to fail when the sample or template changes on purpose — read the diff, then re-record with `--update` in the same commit. |
+| `check-content.sh` + `--self-test` | Every other gate asks whether the build *succeeded*; this one asks what it *produced*. It diffs `pdftotext` output against committed snapshots in `example/exports/snapshots/`. Nothing else would have caught the appendix headings printing as `.1. Supplementary Methods` and the appendix table as `Table .5`. A snapshot diff is *expected* to fail when the sample or template changes on purpose; read the diff, then re-record with `--update` in the same commit. |
 | double-blind positive control | The blinding gate is an *absence* assertion keyed on a hard-coded surname. Renaming the example's authors would leave it green and vacuous forever, so it now first asserts the surname *does* appear in the unblinded export. |
 | `check-ink.sh` | A blank graphical abstract passes every other gate: exit 0, no LaTeX error, and `pdfimages` lists the image as present. |
 | `endfloat` / `doubleblind` effect checks | `class_options` reach the class unvalidated, and elsarticle's `endfloat` sits behind an `\IfFileExists` with an empty else-branch: without `endfloat.sty` the option silently does nothing. Assert the effect, not the flag. |
@@ -430,8 +430,10 @@ Build the example:
 
 ```bash
 cd example
-myst build sample-article.md --pdf
+SOURCE_DATE_EPOCH=1756400000 FORCE_SOURCE_DATE=1 myst build sample-article.md --pdf
 ```
+
+The PDFs in `example/exports/` are tracked. XeTeX stamps each one with its build time, which changes every byte on every rebuild; the fixed epoch, the same constant CI uses, makes a rebuild with unchanged sources reproduce the committed file exactly.
 
 ## Credits
 

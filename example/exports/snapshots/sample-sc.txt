@@ -625,8 +625,7 @@ Agendas, IOS Press. pp. 87–90. doi:10.3233/978-1-61499-649-1-87.
 Krewinkel, A., Winkler, R., 2017. Formatting Open Science: Agilely Creating Multiple Document Formats for Academic
 Manuscripts with Pandoc Scholar. PeerJ Computer Science 3, e112. doi:10.7717/peerj-cs.112.
 Lamport, L., 1994. LaTeX: A Document Preparation System. 2nd ed., Addison-Wesley, Reading, MA.
-Mittelbach, F., Goossens, M., 2004. The LaTeX Companion. 2nd ed., Addison-Wesley, Boston, MA. Print monograph with no
-DOI; identified by ISBN, as with latex1994.
+Mittelbach, F., Goossens, M., 2004. The LaTeX Companion. 2nd ed., Addison-Wesley, Boston, MA.
 Alan E. Lujan develops open-source computational tools for economics at Johns Hopkins University and Econ-ARK.
 Christopher D. Carroll is a professor of economics at Johns Hopkins University and leads the Econ-ARK initiative for
 reproducible heterogeneous-agent macroeconomics.
