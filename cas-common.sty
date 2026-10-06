@@ -1523,7 +1523,7 @@
     \dim_gset_eq:NN \g_stm_keybox_ht_dim \l_tmpa_dim
     \leftskip .35\textwidth
     \hspace*{-.35 \textwidth }
-    \noindent\hbox_to_wd:nn {  \z@ } { \box \g_stm_key_box }
+    \noindent\hbox_to_wd:nn {  \z@ } { \box \g_stm_key_box \hss } % patched: \hss added
     \skip_vertical:n { - \l_tmpa_dim }
   }
   \noindent \abstractname \par

@@ -451,18 +451,20 @@ Table 2
 Dataset characteristics
 Dataset
 MNIST
-CIFAR10
+CIFAR-10
 ImageNet
 
 Training
 Samples
 60,000
 50,000
+1,281,167
 
 Test
 Samples
 10,000
 10,000
+50,000
 
 Features
 
@@ -470,17 +472,14 @@ Classes
 
 784
 3,072
-
-10
-10
-
-1,281,167
-
-50,000
-
 150,528
 
+10
+10
 1,000
+
+Accuracy
+0.82
 
 Precision
 0.81
@@ -491,17 +490,23 @@ Recall
 F1-Score
 0.82
 
+0.89
+
 0.88
 
 0.90
 
 0.89
 
+0.94
+
 0.93
 
 0.95
 
 0.94
+
+0.97
 
 0.96
 
@@ -512,17 +517,13 @@ F1-Score
 Table 3
 Experimental results
 Model
-Accuracy
-0.82
 Logistic
 Regression
 Random
-0.89
 Forest
 Neural
-0.94
 Network
-Transformer 0.97
+Transformer
 
 Results are summarized in Table 1.
 
@@ -554,24 +555,16 @@ Table 4
 Table features: multi-column headers, aligned decimals, and
 stacked cells
 Category
+Type
 
 Measurements
 
-Type
-
 Description
+Status Value Count
 (details)
 
-Status
-
-Value
-
-Count
-
-Group A
-
 Item 1
-Item 2
+Group A Item 2
 Item 3
 
 Yes
@@ -586,8 +579,6 @@ Yes
 250
 50
 
-Group B
-
 Item 4
 Item 5
 
@@ -599,6 +590,8 @@ Yes
 
 175
 320
+
+Group B
 
 Features: booktabs rules, multirow row spanning, makecell
 line breaks, dcolumn decimal alignment, array column

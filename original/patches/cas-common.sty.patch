@@ -47,7 +47,7 @@
      \hspace*{-.35 \textwidth }
 -    \noindent\hbox_to_wd:nn {  \z@ } { \box \g_stm_key_box } 
 -    \skip_vertical:n { - \l_tmpa_dim } 
-+    \noindent\hbox_to_wd:nn {  \z@ } { \box \g_stm_key_box }
++    \noindent\hbox_to_wd:nn {  \z@ } { \box \g_stm_key_box \hss } % patched: \hss added
 +    \skip_vertical:n { - \l_tmpa_dim }
    }
    \noindent \abstractname \par

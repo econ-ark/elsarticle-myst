@@ -1,5 +1,5 @@
 Graphical Abstract
-MyST Markdown with the Elsevier CAS and elsarticle Classes: Feature Reference and Template Examples⋆,⋆⋆
+MyST Markdown with the Elsevier CAS and elsarticle Classes: Feature Reference and Template Examples
 Alan E. Lujan, Christopher D. Carroll, Matthew N. White
 
 Highlights
@@ -10,7 +10,7 @@ Alan E. Lujan, Christopher D. Carroll, Matthew N. White
 • Rich mathematical and scientific notation support
 
 MyST Markdown with the Elsevier CAS and elsarticle
-Classes: Feature Reference and Template Examples
+Classes: Feature Reference and Template Examples⋆,⋆⋆
 Alan E. Lujana,b,∗, Christopher D. Carrollc,b , Matthew N. Whiteb
 a Johns Hopkins University, Krieger School of Arts and Sciences Washington, DC, USA
 b Econ-ARK
@@ -377,15 +377,15 @@ Samples
 50,000
 1,281,167
 
-Test Samples
+Test
+Samples
+10,000
+10,000
+50,000
 
 Features
 
 Classes
-
-10,000
-10,000
-50,000
 
 784
 3,072
@@ -398,9 +398,12 @@ Classes
 Table 3: Experimental results
 
 Model
-Logistic Regression
-Random Forest
-Neural Network
+Logistic
+Regression
+Random
+Forest
+Neural
+Network
 Transformer
 
 Accuracy

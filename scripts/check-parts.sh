@@ -217,7 +217,7 @@ Text.'
 
 epigraph_block_checks() {
   check_order "$1" "a blockquote epigraph is set in place with its citation flush right ($2)" \
-    '\begin{quote}\small' '\itshape BLOCKQUOTEMARK' '{\raggedleft\upshape --- BLOCKBYLINE\par}' \
+    '\begin{quote}\small\raggedright' '\itshape BLOCKQUOTEMARK' '{\raggedleft\upshape --- BLOCKBYLINE\par}' \
     '\end{quote}' '\section{Body'
   check_absent "$1" "a blockquote epigraph leaves no float behind ($2)" '\begin{figure}' '\caption*{BLOCKBYLINE}'
 }
@@ -279,6 +279,8 @@ do_self_test() {
     perl -0pi -e 's/\Q[# if parts.data_availability #]\E\n(\Q\section*{Data Availability}\E\n)/$1\[# if parts.data_availability #]\n/'
   seed_defect 'a blockquote epigraph left as a float' 'leaves no float behind' check_epigraph_block template.tex \
     perl -0pi -e 's/\Q[# if '"'"'\\begin{quote}'"'"' in parts.epigraph #]\E/[# if false #]/'
+  seed_defect 'a justified epigraph quotation' 'set in place with its citation flush right' check_epigraph_block template.tex \
+    perl -0pi -e 's/\Q\begin{quote}\small\raggedright\E/\\begin{quote}\\small/'
   seed_defect 'a plain epigraph citation left inside the quotation' 'paragraph is its citation' check_epigraph_plain template.tex \
     perl -0pi -e 's/\Q(epi_paras | last).startsWith("--")\E/false/'
   seed_defect 'a lone dedication numbered as if a funding note preceded it' 'a lone dedication is title note 1' check_dedication_only template.tex \

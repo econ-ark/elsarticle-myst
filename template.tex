@@ -96,6 +96,19 @@
 %% math font glyph with no Unicode mapping, which costs that whole font its text
 %% layer, title-note stars included.
 \RecustomVerbatimEnvironment{verbatim}{Verbatim}{breaklines,breaksymbolleft={\tiny\ensuremath{\rightarrow}}}
+%% MyST sets every table as equal p-columns, a few picas wide in two columns. Set
+%% cells ragged right, and put glue before a cell's first word so TeX may hyphenate
+%% it (array.sty's \@startpbox, with only \raggedright and \hskip\z@skip added).
+\makeatletter
+\AtBeginDocument{%
+  \def\@startpbox#1{\bgroup\color@begingroup\setlength\hsize{#1}\@arrayparboxrestore
+    \raggedright\arraybackslash
+    \everypar{\vrule\@height\ht\@arstrutbox\@width\z@\hskip\z@skip\everypar{}}}%
+  \let\@startpbox@action\@startpbox}
+\makeatother
+[# if options.columns == 'double' #]
+\setlength{\tabcolsep}{4pt}
+[# endif #]
 
 [- IMPORTS -]
 
@@ -245,6 +258,14 @@
 \end{abstract}
 [# endif #]
 
+[# set prelim_pages = parts.graphical_abstract or options.graphical_abstract or parts.keypoints #]
+[# set mute_tmark = options.document_class == 'elsarticle' and tmarks and prelim_pages #]
+[# if mute_tmark #]
+%% elsarticle's \title gobbles \tnoteref after the title's FIRST printing, and the
+%% graphical-abstract and highlights pages print it first, stealing the title
+%% page's mark. Mute the mark for those pages; it is restored below.
+\gdef\tnoteref#1{}
+[# endif #]
 [# if parts.graphical_abstract #]
 \begin{graphicalabstract}
 [-parts.graphical_abstract-]
@@ -266,6 +287,9 @@
 \item [-point-]
 [# endfor #]
 \end{highlights}
+[# endif #]
+[# if mute_tmark #]
+\gdef\tnoteref#1{\tnotemark[{#1}]}
 [# endif #]
 
 %% `keyword' (singular) in elsarticle, `keywords' (plural) in CAS; JEL codes
@@ -299,9 +323,9 @@
 \section*{Summary}
 [-parts.summary-]
 [# endif #]
-%% Small italic quotation, upright citation flush right. MyST sets a blockquote's
-%% "-- Name" line as a floating figure's \caption*, so text and name are lifted out
-%% to keep the epigraph in place. In plain paragraphs, a last "--"/"---" one cites.
+%% Small italic quotation set ragged right, upright citation flush right. MyST sets a
+%% blockquote's "-- Name" line as a floating figure's \caption*, so text and name are
+%% lifted out to keep the epigraph in place. In plain paragraphs, a last "--"/"---" one cites.
 [# if parts.epigraph #]
 [# if '\\begin{quote}' in parts.epigraph #]
 [# set epi_body = parts.epigraph | replace(r/^[\s\S]*?\\begin\{quote\}\s*/, "") | replace(r/\s*\\end\{quote\}[\s\S]*$/, "") #]
@@ -313,7 +337,7 @@
 [# set epi_body = (epi_paras.slice(0, -1) | join("\n\n")) if has_cite else (parts.epigraph | trim) #]
 [# set epi_cite = (epi_paras | last) if has_cite else '' #]
 [# endif #]
-\begin{quote}\small
+\begin{quote}\small\raggedright
 \itshape [-epi_body-]\par
 [# if epi_cite #]
 {\raggedleft\upshape [-epi_cite-]\par}

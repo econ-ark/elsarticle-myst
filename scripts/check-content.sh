@@ -63,6 +63,27 @@ check_substance() {
   ok "$name: substantive ($lines lines, every anchor present)"
 }
 
+# elsarticle's \title drops its title-note mark after its FIRST printing. Passes when
+# no graphical-abstract or highlights page shows a mark and a title-page line has one
+# mid-line (a footnote line STARTS with it). Pages split on form feeds.
+check_title_marks() {
+  local name=$1 text=$2 counts prelim inline
+  counts=$(awk 'BEGIN { RS = "\f" }
+    { n = split($0, L, "\n"); f = ""
+      for (i = 1; i <= n; i++) if (L[i] != "") { f = L[i]; break }
+      if (f == "Graphical Abstract" || f == "Highlights") { pm += gsub(/⋆/, "&") }
+      else if (!done) { for (i = 1; i <= n; i++) if (L[i] ~ /⋆/ && L[i] !~ /^⋆/) ti++; done = 1 } }
+    END { print pm + 0, ti + 0 }' <<<"$text")
+  read -r prelim inline <<<"$counts"
+  if [ "$prelim" -gt 0 ]; then
+    bad "$name: a title-note mark printed on a graphical-abstract or highlights page"
+  elif [ "$inline" -lt 1 ]; then
+    bad "$name: the title page's title lost its title-note mark"
+  else
+    ok "$name: the title-note mark is on the title page only"
+  fi
+}
+
 # A literal '??' is an unresolved cross-reference, and two ways it arises raise
 # NO LaTeX warning, so the compile-log gate cannot see them. See README.md
 # "Known upstream limitations".
@@ -98,6 +119,8 @@ compare_one() {
   check_substance "$name built" "$text"
   check_substance "$name snapshot" "$(cat "$snap")"
   check_no_unresolved_refs "$name" "$text"
+  # The double-blind export prints no title-note marks at all.
+  [ "$name" = sample-elsarticle-5p ] || check_title_marks "$name" "$text"
   if diff -u --label "snapshot/$name" --label "built/$name" "$snap" "$built" > "$diff_out"; then
     ok "$name: text matches the committed snapshot"
   else
@@ -206,6 +229,19 @@ do_self_test() {
     printf 'ok    control: clean text does not trip the ?? check\n'
   else
     printf 'FAIL  control: the ?? check fires on clean text\n'
+    rc=1
+  fi
+  # Title-note marks, at function level for the same reason as the ?? check.
+  # The first text is the defect: mark stolen by the graphical-abstract page.
+  local stolen=$'Graphical Abstract\nTitle⋆,⋆⋆\n\fHighlights\nTitle\n\fTitle\nA. Author\n⋆ Funded.'
+  local placed=$'Graphical Abstract\nTitle\n\fHighlights\nTitle\n\fTitle⋆,⋆⋆\nA. Author\n⋆ Funded.'
+  out=$( fail=0; check_title_marks probe "$stolen" )
+  expect_caught 'a title-note mark stolen by the graphical-abstract page' '^FAIL  probe: a title-note mark printed' "$out"
+  out=$( fail=0; check_title_marks probe "$placed" )
+  if grep -q '^ok    probe: the title-note mark is on the title page only' <<<"$out"; then
+    printf 'ok    control: a mark on the title page alone passes\n'
+  else
+    printf 'FAIL  control: the title-mark check fires on a correct layout\n'
     rc=1
   fi
   expect_fail "unclaimed export" "closure: orphan.pdf is compared by NOTHING" \

@@ -844,24 +844,16 @@ F1-Score
 Table B.4: Table features: multi-column headers, aligned decimals, and stacked cells
 
 Category
+Type
 
 Measurements
 
-Type
-
 Description
+Status Value Count
 (details)
 
-Status
-
-Value
-
-Count
-
-Group A
-
 Item 1
-Item 2
+Group A Item 2
 Item 3
 
 Yes
@@ -876,8 +868,6 @@ Yes
 250
 50
 
-Group B
-
 Item 4
 Item 5
 
@@ -889,6 +879,8 @@ Yes
 
 175
 320
+
+Group B
 
 Features: booktabs rules, multirow row spanning, makecell line breaks, dcolumn decimal alignment, array column formatting.
 

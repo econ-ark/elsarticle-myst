@@ -111,6 +111,13 @@ jobs:
             else
               echo "clean"
             fi
+            # Every sample compiles with no overfull box, so any new one is text
+            # running into the margin or the other column: wide code, a long word
+            # in a narrow table cell, an unbreakable inline span.
+            if grep -A2 'Overfull \\hbox' "$log"; then
+              echo "::error file=$log::text overflows its line; see README.md 'What CI asserts'"
+              fail=1
+            fi
             echo "::endgroup::"
           done
           # nullglob means zero logs iterates zero times and passes. A build
