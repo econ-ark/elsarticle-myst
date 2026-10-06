@@ -197,20 +197,22 @@ keywords:
   - keyword2
 abstract: |
   Abstract text. Markdown formatting and inline LaTeX math both work.
-keypoints:                               # Research highlights (3-5 items, rendered as \item list)
+keypoints:                               # Research highlights (3-5 items), one \item each
   - First key finding
   - Second key finding
+data_availability: No data were used.    # unnumbered "Data Availability" section
 parts:
-  title_note: Funding acknowledgment.    # plain text; auto-escaped
-  note: General disclaimer.              # plain text; auto-escaped
-  acknowledgments: Thanks to reviewers.  # plain text; first-page \nonumnote
+  title_note: Funding acknowledgment.    # footnote on the title
+  note: General disclaimer.              # first-page \nonumnote
+  acknowledgments: Thanks to reviewers.  # first-page \nonumnote
+  declaration: No competing interests.   # unnumbered "Declarations" section
   # biography goes in a +++ block in the body, and appendices go in the body
   # as raw \appendix. Neither belongs here. See "Document Parts" below.
 bibliography:
   - references.bib
 ```
 
-**Automatic LaTeX escaping**: the template escapes `& % # _ ^ ~ { } $ \` in the following plain-text fields so a stray ampersand does not break compilation: `short_title`, author `roles` and `note`, `affiliation.{name,department,address,city,postal_code,state,country}`, and the `journal` option. Fields that flow through MyST's markdown AST (`title`, `subtitle`, `abstract`, `parts.*`, body content) are NOT double-escaped; the AST already handles specials. Verified for `parts.title_note`: `& % _ # ~ ^` all arrive correctly escaped without the template touching them.
+The template escapes LaTeX specials in the raw frontmatter strings it interpolates itself, and leaves alone the fields MyST has already rendered to LaTeX. Which field falls on which side is not guessable; "Escaping" below lists them.
 
 A backslash is routed through a sentinel and expanded last. Escaping it first emits `\textbackslash{}`, whose braces the subsequent brace rules would then escape into `\textbackslash\{\}`, typesetting as `\{}` instead of `\`.
 
@@ -235,18 +237,53 @@ Supported roles (per [CRediT taxonomy](https://credit.niso.org/)):
 
 ### Document Parts
 
-Use MyST `parts` for special content. Plain-text parts go in frontmatter; parts containing raw LaTeX go in `+++` blocks inside the markdown body.
+The template declares the seven parts MyST knows (`abstract`, `summary`, `keypoints`, `dedication`, `epigraph`, `acknowledgments`, `data_availability`), `declaration`, and five Elsevier parts (`highlights`, `graphical_abstract`, `title_note`, `note`, `biography`). The [econ-ark-myst](https://github.com/econ-ark/econ-ark-myst) template declares the same first eight, so one paper exports to both with nothing lost. MyST hands a template only the parts it declares. It drops an undeclared part written in the frontmatter without a warning, and leaves an undeclared `+++` part block in the body as plain paragraphs.
 
-**Plain-text parts (frontmatter)**:
+Declaring a part has a side effect in the body. When a paper does not supply a part explicitly, MyST moves any body section whose heading matches that part's name, ignoring case, into the part. A closing section titled "Summary" leaves the body and prints inside the abstract block, while its subsections stay behind under the preceding section. Sections titled "Abstract", "Dedication", "Epigraph", "Declaration", "Keypoints" or "Acknowledgments" (also spelled "Acknowledgements") move too. "Data Availability" and the plural "Declarations" stay in the body (measured on mystmd 1.11.0). To keep such a section in place, retitle it ("Summary and Conclusions") or supply the part in the frontmatter.
+
+| Part | Where it prints |
+|---|---|
+| `abstract` | The abstract block |
+| `summary` | Inside the abstract block, after the abstract, as a run-in paragraph headed "Summary." |
+| `keypoints` | The highlights, one `\item` per point; ignored when `highlights` is set |
+| `highlights` | The highlights, as raw LaTeX `\item` entries |
+| `graphical_abstract` | The graphical abstract, as raw LaTeX; the `graphical_abstract` option takes an image path instead |
+| `title_note` | A footnote on the title |
+| `note`, `acknowledgments` | Unnumbered first-page footnotes |
+| `dedication` | Centred in italics after the front matter, before the first heading |
+| `epigraph` | In italics, set in from the right, after the dedication; write the attribution into the text |
+| `declaration` | An unnumbered section "Declarations" after the CRediT statement, before the references |
+| `data_availability` | An unnumbered section "Data Availability" after the declarations |
+| `biography` | After the references, as raw LaTeX `\bio{}` ... `\endbio` |
+
+> Version 1.4.0 renamed `ai_declaration` to `declaration`, which now holds every statement a paper has to make: competing interests, generative-AI use and anything else. A paper that still writes `ai_declaration` builds cleanly while the statement goes astray. MyST drops it from the frontmatter, and leaves a `+++` block of that name in the body, where it stands, as an unheaded paragraph. Rename the key.
+
+Plain-text parts go in the frontmatter, the seven known ones also as top-level keys:
 
 ```yaml
+summary: A plain-language summary of the findings.
+keypoints:
+  - First key finding
+  - Second key finding
+data_availability: No data were used for the research described in the article.
 parts:
-  title_note: Prepared with support from grant XYZ-12345.     # plain-text footnote on title
-  note: Authors declare no competing interests.               # plain-text frontmatter note
-  acknowledgments: We thank the editor and two reviewers.     # plain-text first-page note
+  title_note: Prepared with support from grant XYZ-12345.
+  declaration: The authors declare no competing interests.
+  acknowledgments: We thank the editor and two reviewers.
 ```
 
-**Parts requiring raw LaTeX (body, `+++` block)**:
+Keypoints can also be a bullet list in a `+++` block in the body. Either way each item is one point. Only a list splits: a block of paragraphs, or a multi-line `keypoints: |` scalar, becomes a single highlight.
+
+```markdown
++++ {"part": "keypoints"}
+
+- First key finding
+- Second key finding
+
++++
+```
+
+Parts containing raw LaTeX go in a `+++` block in the body:
 
 ```markdown
 +++ {"part": "biography"}
@@ -263,9 +300,9 @@ Author Two is a professor of economics.
 +++
 ```
 
-The same pattern works for `parts.highlights` when you need finer-grained LaTeX control than the YAML-list-based `keypoints` frontmatter offers, and for `parts.graphical_abstract` when you want raw LaTeX rather than a file path.
+The same pattern works for `parts.highlights` when you need finer LaTeX control than `keypoints` gives, and for `parts.graphical_abstract` when you want raw LaTeX in place of an image path.
 
-> **Why two locations?** MyST processes part values through its markdown pipeline before injecting them into the template. A YAML scalar with literal `\bio{}` becomes `\textbackslash bio\{\}` in the rendered LaTeX. The `+++ {"part": ...}` block with a nested `{raw} latex` directive bypasses that pipeline.
+> Raw LaTeX needs the body form because MyST renders every part from markdown to LaTeX before handing it to the template. A YAML scalar holding `\bio{}` arrives as `\textbackslash bio\{\}`. A `:::{raw:latex}` block inside a `+++` part passes through verbatim.
 
 ### Appendices
 
@@ -338,6 +375,7 @@ The template escapes LaTeX specials in the frontmatter strings it interpolates i
 | Compile-log grep | latexmk's exit code is not enough: mystmd prints "Exported PDF" and copies the file after xelatex exits non-zero. `^!` is TeX's fatal-error convention; undefined references and citations are only warnings but render as `?`. natbib prefixes its warnings `Package natbib Warning:`, not `LaTeX Warning:`, so the pattern matches the bare `Warning: Citation` form. |
 | bibtex gate on `build.stdout.log` | mystmd deletes the `.blg` with the other aux files. A positive control requires `This is BibTeX` in the log, so the gate cannot pass by bibtex never running. |
 | `Template render error` / `TypeError` / `Unhandled TEX conversion` on `build.stdout.log` | A jtex failure happens before LaTeX runs, so no compile log exists to grep. mystmd prints "Exported TeX", *then* the error, then exits 0, leaving the previous PDF on disk with a stale mtime, which every later gate then "verifies". `Unhandled TEX conversion` was originally excluded because it fired 24 times on a healthy build; that turned out to be a real defect rather than noise. See "Raw LaTeX: which fence" below. |
+| `check-parts.sh` + `--self-test` | MyST drops an undeclared frontmatter part without a word. A part declared but never printed vanishes the same way. Fixtures write every part shared with econ-ark-myst, keypoints both as a YAML list and as a bullet-list block, and assert where each one prints in both classes; a page with no parts must omit every heading and block. Before 1.4.0 a bullet-list keypoints block came out as `\item \begin{itemize}`. The self-test seeds eight defects into a copy of the template. |
 | `check-escaping.sh` absent-field fixtures | A fixture that supplies every field cannot catch a field being *absent*. MyST only warns on an author with no `name`, so it reaches the template, where a property access on undefined aborts the render and an unfiltered loop emits its separator anyway (`\shortauthors{, Solo}`). Six cases, both classes, including a page that declares nothing and inherits project scope. |
 | `check-content.sh` `??` check | An unresolved cross-reference. Two of the ways it arises raise no LaTeX warning at all (see "Known upstream limitations"), so the compile-log gate is structurally unable to catch them. |
 | `check-content.sh` + `--self-test` | Every other gate asks whether the build *succeeded*; this one asks what it *produced*. It diffs `pdftotext` output against committed snapshots in `example/exports/snapshots/`. Nothing else would have caught the appendix headings printing as `.1. Supplementary Methods` and the appendix table as `Table .5`. A snapshot diff is *expected* to fail when the sample or template changes on purpose; read the diff, then re-record with `--update` in the same commit. |

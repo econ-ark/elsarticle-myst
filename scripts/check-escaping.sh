@@ -21,11 +21,8 @@
 
 set -uo pipefail
 
-ROOT=${ROOT:-$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)}
-
-fail=0
-ok()  { printf 'ok    %s\n' "$*"; }
-bad() { printf 'FAIL  %s\n' "$*"; fail=1; }
+# shellcheck source=lib.sh
+source "$(dirname "${BASH_SOURCE[0]}")/lib.sh"
 
 # Every string below carries '&', '%' and '_'. '%' is the dangerous one: raw, it
 # comments out the rest of the line INCLUDING the closing brace, so the macro
@@ -79,11 +76,6 @@ exports:
 Body text with 50% & Cost_Basis. Cites @probe2020.
 MD
 }
-
-# Strip EVERY comment line, '%%' and single '%' alike. A comment must never
-# satisfy a presence assertion nor trip an absence one, and the template's own
-# comments legitimately contain '&', '%' and '$x_1$' while discussing them.
-strip_comments() { grep -v '^[[:space:]]*%' "$1"; }
 
 # Assert that $2 appears in the emitted body and $3 does not.
 expect() {
@@ -151,13 +143,11 @@ check_tex() {
 # undefined key aborts the render, and mystmd prints "Exported TeX" and exits 0
 # with no file written, leaving whatever PDF was already on disk.
 build_absent_case() {
-  local label=$1 body=$2 work out
+  local label=$1 body=$2 work
   work=$(mktemp -d)
   printf '%s\n' "$body" > "$work/case.md"
-  out=$( cd "$work" && myst build --tex case.md --force 2>&1 )
-  if grep -qE 'Template render error|TypeError' <<<"$out"; then
+  if ! render_tex "$work" case.md; then
     bad "$label: aborts the template render"
-    grep -E 'Template render error|TypeError' <<<"$out" | head -2
   elif [ ! -s "$work/out/c.tex" ]; then
     bad "$label: produced no .tex (mystmd reports success either way)"
   else
@@ -248,7 +238,7 @@ Text."
 
   # A page inheriting everything from project scope and declaring nothing:
   # doc.short_title is undefined here even though the project sets it.
-  local work out
+  local work
   work=$(mktemp -d)
   cat > "$work/myst.yml" <<'YML'
 version: 1
@@ -269,8 +259,7 @@ exports:
 
 Text.
 MD
-  out=$( cd "$work" && myst build --tex page.md --force 2>&1 )
-  if grep -qE 'Template render error|TypeError' <<<"$out"; then
+  if ! render_tex "$work" page.md; then
     bad 'page inheriting from project scope: aborts the template render'
   elif [ ! -s "$work/out/c.tex" ]; then
     bad 'page inheriting from project scope: produced no .tex'
@@ -399,39 +388,17 @@ RAW
     printf 'ok    rejection test 3: comments neither satisfy nor trip assertions\n'
   fi
 
-  # Defects 4 and 5 need a real template tree, because check_absent_fields
-  # builds through one. Each reverts ONE guard so the two assertions it makes
-  # (no render abort, no empty furniture) are exercised independently.
-  seed_template() {
-    local label=$1 pattern=$2 marker=$3 tmpl out
-    shift 3
-    tmpl=$(mktemp -d)/tpl
-    cp -r "$ROOT" "$tmpl"
-    rm -rf "$tmpl/example" "$tmpl/_build" "$tmpl/original"
-    "$@" "$tmpl/template.tex"
-    if ! grep -qF "$marker" "$tmpl/template.tex"; then
-      printf 'FAIL  %s: could not seed the defect; the guard was not where expected\n' "$label"
-      rc=1
-    else
-      out=$( ROOT="$tmpl" fail=0; ROOT="$tmpl" check_absent_fields 2>&1 )
-      if grep -qE "^FAIL  .*$pattern" <<<"$out"; then
-        printf 'ok    %s\n' "$label"
-      else
-        printf 'FAIL  %s: the seeded defect was NOT caught\n' "$label"
-        rc=1
-      fi
-    fi
-    rm -rf "$(dirname "$tmpl")"
-  }
-
-  seed_template 'rejection test 4: an unguarded undefined key is caught' \
-    'aborts the template render' 'esc(author.name.split(" ") | last)' \
-    perl -0pi -e 's/\Qset named_authors = doc.authors | selectattr("name") | list if doc.authors else []\E/set named_authors = doc.authors if doc.authors else []/; s/\Qesc(author.name.split(" ") | last)\E/esc(author.name.split(" ") | last)/'
+  # The next two need a real template tree, because check_absent_fields builds
+  # through one. Each reverts ONE guard so the two assertions it makes (no
+  # render abort, no empty furniture) are exercised independently.
+  seed_defect 'an unguarded undefined key' 'aborts the template render' \
+    check_absent_fields template.tex \
+    perl -0pi -e 's/\Qset named_authors = doc.authors | selectattr("name") | list if doc.authors else []\E/set named_authors = doc.authors if doc.authors else []/'
 
   # Loop the UNFILTERED list but keep the undefined-key guard, so the only
-  # defect present is the orphan separator and defect 4 cannot mask it.
-  seed_template 'rejection test 5: an orphan separator is caught' \
-    'empty macro or orphan separator' 'default("")' \
+  # defect present is the orphan separator and the one above cannot mask it.
+  seed_defect 'an orphan separator' 'empty macro or orphan separator' \
+    check_absent_fields template.tex \
     perl -0pi -e 's/\Qfor author in named_authors\E/for author in doc.authors/; s/\Qesc(author.name.split(" ") | last)\E/esc((author.name | default("")).split(" ") | last)/'
   if [ "$rc" -eq 0 ]; then
     echo 'PASS: the escaping checker rejects unescaped input.'

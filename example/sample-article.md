@@ -83,6 +83,12 @@ keypoints:
   - MyST Markdown enables reproducible scientific writing
   - Seamless export to multiple journal formats
   - Rich mathematical and scientific notation support
+summary: One Markdown source produces both Elsevier layouts and a website.
+dedication: To everyone who has fought a LaTeX class file at midnight.
+epigraph: |
+  Beware of bugs in the above code; I have only proved it correct, not tried it.
+
+  Donald E. Knuth
 math:
   '\R': '\mathbb{R}'
   '\N': '\mathbb{N}'
@@ -99,11 +105,12 @@ abbreviations:
 thumbnail: images/thumbnail.png
 parts:
   title_note: Prepared as a demonstration of the elsarticle-myst template.
-  ai_declaration: >-
-    During the preparation of this work the authors used no generative AI or
-    AI-assisted technologies. This statement exercises the ai_declaration part,
-    which the template renders as an unnumbered section between the CRediT
-    statement and the references.
+  declaration: >-
+    The authors declare no competing interests and did not use generative AI
+    or AI-assisted technologies to prepare this work. This
+    statement exercises the declaration part, which the template prints under
+    the heading Declarations between the CRediT statement and the references.
+  data_availability: No data were used for the research described in the article.
 bibliography:
   - references.bib
 downloads:

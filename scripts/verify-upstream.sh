@@ -26,7 +26,8 @@
 
 set -uo pipefail
 
-ROOT=${ROOT:-$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)}
+# shellcheck source=lib.sh
+source "$(dirname "${BASH_SOURCE[0]}")/lib.sh"
 ZIP="$ROOT/original/els-cas-templates.zip"
 
 # CTAN anchors both classes; see original/README.md, "Why CTAN and not Elsevier".
@@ -80,9 +81,6 @@ LOOSE=(cas-sc-template.tex cas-dc-template.tex)
 GENERATED=(elsarticle.cls)
 ELS_COPIED=(elsarticle-num.bst elsarticle-harv.bst elsarticle-num-names.bst)
 
-fail=0
-ok()   { printf 'ok    %s\n' "$*"; }
-bad()  { printf 'FAIL  %s\n' "$*"; fail=1; }
 # warn does NOT set fail: reserved for an unreachable network peer, never for a
 # check that ran and disagreed. It must not use the word "skip" (CI greps that).
 warn() { printf 'warn  %s\n' "$*"; }
@@ -309,24 +307,25 @@ do_verify() {
 # throwaway copy of the tree once per check and assert the check catches it.
 do_self_test() {
   local rc=0
-  expect_fail() {
-    local label=$1 pattern=$2 tmp out
+  # A throwaway copy of every file the verifier reads. Prints its path.
+  make_tree() {
+    local tmp
     tmp=$(mktemp -d)
     mkdir -p "$tmp/original/patches" "$tmp/thumbnails" "$tmp/scripts"
     cp -r "$ROOT/original/." "$tmp/original/"
     cp "$ROOT"/cas-*.cls "$ROOT"/cas-common.sty "$ROOT"/cas-model2-names.bst "$tmp/"
     cp "$ROOT"/elsarticle.cls "$ROOT"/elsarticle-*.bst "$tmp/"
     cp "$ROOT"/thumbnails/*.jpeg "$tmp/thumbnails/"
-    cp "$ROOT/scripts/verify-upstream.sh" "$tmp/scripts/"
+    cp "$ROOT/scripts/verify-upstream.sh" "$ROOT/scripts/lib.sh" "$tmp/scripts/"
+    printf '%s\n' "$tmp"
+  }
+  expect_fail() {
+    local label=$1 pattern=$2 tmp out
+    tmp=$(make_tree)
     shift 2
     ( cd "$tmp" && "$@" )
     out=$(ROOT="$tmp" bash "$tmp/scripts/verify-upstream.sh" 2>&1)
-    if grep -q "^FAIL  $pattern" <<<"$out"; then
-      printf 'ok    rejection test: %s\n' "$label"
-    else
-      printf 'FAIL  rejection test: %s was NOT caught\n' "$label"
-      rc=1
-    fi
+    expect_caught "$label" "^FAIL  $pattern" "$out"
     rm -rf "$tmp"
   }
 
@@ -348,21 +347,10 @@ do_self_test() {
   # CTAN, where a regression surfaces up to 30 days late.
   expect_fail_online() {
     local label=$1 pattern=$2 stub=$3 tmp out fake
-    tmp=$(mktemp -d); fake=$(mktemp -d)
-    mkdir -p "$tmp/original/patches" "$tmp/thumbnails" "$tmp/scripts"
-    cp -r "$ROOT/original/." "$tmp/original/"
-    cp "$ROOT"/cas-*.cls "$ROOT"/cas-common.sty "$ROOT"/cas-model2-names.bst "$tmp/"
-    cp "$ROOT"/elsarticle.cls "$ROOT"/elsarticle-*.bst "$tmp/"
-    cp "$ROOT"/thumbnails/*.jpeg "$tmp/thumbnails/"
-    cp "$ROOT/scripts/verify-upstream.sh" "$tmp/scripts/"
+    tmp=$(make_tree); fake=$(mktemp -d)
     printf '%s\n' '#!/bin/sh' "$stub" > "$fake/curl"; chmod +x "$fake/curl"
     out=$(ROOT="$tmp" PATH="$fake:$PATH" bash "$tmp/scripts/verify-upstream.sh" --online 2>&1)
-    if grep -q "^FAIL  $pattern" <<<"$out"; then
-      printf 'ok    rejection test: %s\n' "$label"
-    else
-      printf 'FAIL  rejection test: %s was NOT caught\n' "$label"
-      rc=1
-    fi
+    expect_caught "$label" "^FAIL  $pattern" "$out"
     rm -rf "$tmp" "$fake"
   }
 

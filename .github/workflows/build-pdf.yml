@@ -176,6 +176,14 @@ jobs:
           ./scripts/check-escaping.sh --self-test
           ./scripts/check-escaping.sh
 
+      # MyST drops an undeclared frontmatter part without a word, and a part
+      # that is declared but never printed vanishes the same way.
+      - name: Check that every declared part reaches the .tex
+        run: |
+          set -eo pipefail
+          ./scripts/check-parts.sh --self-test
+          ./scripts/check-parts.sh
+
       - name: Verify all six exports produced PDFs
         run: |
           set -e

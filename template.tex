@@ -221,13 +221,17 @@
 \nonumnote{[-parts.note-]}
 [# endif #]
 
+%% A frontmatter `abstract:` reaches the template as parts.abstract; doc.abstract
+%% is never set. The summary rides inside the abstract block, the one front
+%% slot both classes typeset in place.
+[# if parts.abstract or parts.summary #]
+\begin{abstract}
 [# if parts.abstract #]
-\begin{abstract}
 [-parts.abstract-]
-\end{abstract}
-[# elif doc.abstract #]
-\begin{abstract}
-[-doc.abstract-]
+[# endif #]
+[# if parts.summary #]
+[# if parts.abstract #]\par\medskip[# endif #]\noindent\textbf{Summary.} [-parts.summary-]
+[# endif #]
 \end{abstract}
 [# endif #]
 
@@ -249,8 +253,11 @@
 [-parts.highlights-]
 \end{highlights}
 [# elif parts.keypoints #]
+%% as_list hands over one entry per point, from a YAML list or a bullet list alike.
 \begin{highlights}
-\item [-parts.keypoints | trim | replace("\n\n", "\n") | replace("\n", "\n\\item ")-]
+[# for point in parts.keypoints #]
+\item [-point-]
+[# endfor #]
 \end{highlights}
 [# endif #]
 
@@ -278,15 +285,36 @@
 \maketitle
 [# endif #]
 
+%% Once declared, these two leave the body, so they must be printed here or
+%% vanish. Placement matches econ-ark-myst: after the front matter, before the
+%% first heading.
+[# if parts.dedication #]
+\begin{center}\itshape
+[-parts.dedication-]
+\end{center}
+[# endif #]
+[# if parts.epigraph #]
+\begin{flushright}
+\begin{minipage}{0.72\linewidth}\raggedright\small\itshape
+[-parts.epigraph-]
+\end{minipage}
+\end{flushright}
+[# endif #]
+
 [-CONTENT-]
 
 [# if options.document_class != 'elsarticle' #]
 \printcredits
 [# endif #]
 
-[# if parts.ai_declaration #]
-\section*{Declaration of generative AI and AI-assisted technologies in the manuscript preparation process}
-[-parts.ai_declaration-]
+%% Headings match econ-ark-myst's back matter, so one paper reads alike in both.
+[# if parts.declaration #]
+\section*{Declarations}
+[-parts.declaration-]
+[# endif #]
+[# if parts.data_availability #]
+\section*{Data Availability}
+[-parts.data_availability-]
 [# endif #]
 
 [# if options.document_class == 'elsarticle' #]

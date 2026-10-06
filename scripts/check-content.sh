@@ -19,7 +19,8 @@
 
 set -uo pipefail
 
-ROOT=${ROOT:-$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)}
+# shellcheck source=lib.sh
+source "$(dirname "${BASH_SOURCE[0]}")/lib.sh"
 EXPORTS="$ROOT/example/exports"
 SNAPS="$EXPORTS/snapshots"
 
@@ -41,10 +42,6 @@ ANCHORS=(
   'William Shakespeare'
 )
 MIN_LINES=400
-
-fail=0
-ok()  { printf 'ok    %s\n' "$*"; }
-bad() { printf 'FAIL  %s\n' "$*"; fail=1; }
 
 extract() { pdftotext "$1" - 2>/dev/null; }
 
@@ -113,21 +110,23 @@ compare_one() {
 
 # Closure, same idea as check G in verify-upstream.sh: a snapshot nobody
 # compares, or a PDF nobody snapshots, is unverified while printing nothing.
+in_pdfs() {
+  local p
+  for p in "${PDFS[@]}"; do [ "$p" = "$1" ] && return 0; done
+  return 1
+}
+
 check_closure() {
-  local f base claimed p
+  local f base
   for f in "$EXPORTS"/*.pdf; do
     [ -e "$f" ] || continue
     base=$(basename "$f" .pdf)
-    claimed=0
-    for p in "${PDFS[@]}"; do [ "$p" = "$base" ] && claimed=1; done
-    [ "$claimed" -eq 1 ] || bad "closure: $base.pdf is compared by NOTHING; add it to PDFS"
+    in_pdfs "$base" || bad "closure: $base.pdf is compared by NOTHING; add it to PDFS"
   done
   for f in "$SNAPS"/*.txt; do
     [ -e "$f" ] || continue
     base=$(basename "$f" .txt)
-    claimed=0
-    for p in "${PDFS[@]}"; do [ "$p" = "$base" ] && claimed=1; done
-    [ "$claimed" -eq 1 ] || bad "closure: snapshot $base.txt has no matching entry in PDFS"
+    in_pdfs "$base" || bad "closure: snapshot $base.txt has no matching entry in PDFS"
   done
   [ "$fail" -eq 0 ] && ok "closure: every export and every snapshot is claimed"
 }
@@ -162,21 +161,16 @@ do_check() {
 do_self_test() {
   local rc=0 tmp out
   expect_fail() {
-    local label=$1 pattern=$2 shift2
+    local label=$1 pattern=$2
     shift 2
     tmp=$(mktemp -d)
     mkdir -p "$tmp/example/exports/snapshots" "$tmp/scripts"
     cp "$EXPORTS"/*.pdf "$tmp/example/exports/" 2>/dev/null
     cp "$SNAPS"/*.txt "$tmp/example/exports/snapshots/" 2>/dev/null
-    cp "$ROOT/scripts/check-content.sh" "$tmp/scripts/"
+    cp "$ROOT/scripts/check-content.sh" "$ROOT/scripts/lib.sh" "$tmp/scripts/"
     ( cd "$tmp" && "$@" )
     out=$(ROOT="$tmp" bash "$tmp/scripts/check-content.sh" 2>&1)
-    if grep -q "^FAIL  $pattern" <<<"$out"; then
-      printf 'ok    rejection test: %s\n' "$label"
-    else
-      printf 'FAIL  rejection test: %s was NOT caught\n' "$label"
-      rc=1
-    fi
+    expect_caught "$label" "^FAIL  $pattern" "$out"
     rm -rf "$tmp"
   }
 

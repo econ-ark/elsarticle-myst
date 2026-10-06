@@ -32,6 +32,11 @@ JEL: D14; C61; G11
 This article demonstrates MyST Markdown integration with Elsevier’s CAS and
 elsarticle classes, covering typography, math, cross-references, admonitions, proofs,
 tables, figures, and code blocks.
+Summary. One Markdown source produces both Elsevier layouts and a website.
+
+To everyone who has fought a LaTeX class file at midnight.
+Beware of bugs in the above code; I have only proved it correct, not tried it.
+Donald E. Knuth
 
 1. Introduction
 This document demonstrates the full integration of MyST Markdown [1] with Elsevier’s CAS templates.
@@ -52,9 +57,6 @@ Note
 About this document: This article is both a feature reference and a test file for the Elsevier MyST
 template. Every feature shown here should render correctly in the web preview and in all six PDF
 exports, under CAS and elsarticle alike.
-
-2. Typography Features
-This section demonstrates MyST Markdown typography features and how they render in the PDF output.
 ⋆
 
 Prepared as a demonstration of the elsarticle-myst template.
@@ -75,6 +77,9 @@ Figure 0: William Shakespeare, Hamlet
 The important thing is not to stop questioning. Curiosity has its own reason for existing.
 In the middle of diﬀiculty lies opportunity.
 Figure 0: Albert Einstein
+
+2. Typography Features
+This section demonstrates MyST Markdown typography features and how they render in the PDF output.
 
 2.1. Inline Formatting
 Standard inline formatting includes bold text, italic text, and inline code. You can also use
@@ -108,9 +113,6 @@ Task lists can track progress (rendered as bullet points in LaTeX):
 ■ Create template structure
 ■ Add typography examples
 ■ Add math demonstrations
-■ Add proof environments
-□ Submit to journal
-□ Celebrate publication!
 1 This is a footnote demonstrating the feature. Footnotes can contain formatted text and even code.
 2 Another footnote with additional information. Footnotes are essential for academic writing.
 
@@ -119,6 +121,10 @@ Lujan, Carroll, White: Preprint submitted to Elsevier
 Page 2 of 10
 
 MyST and Elsevier Guide
+
+■ Add proof environments
+□ Submit to journal
+□ Celebrate publication!
 
 3. Mathematical Content
 The templates support full LaTeX math with custom macros defined in frontmatter.
@@ -194,11 +200,9 @@ We write limn→∞ an = L.
 Definition 4.2 (Continuous Function). A function f : R → R is continuous at a point c if for every ε > 0,
 there exists δ > 0 such that:
 |x − c| < δ =⇒ |f (x) − f (c)| < ε
-
 Lujan, Carroll, White: Preprint submitted to Elsevier
 
 (5)
-
 Page 3 of 10
 
 MyST and Elsevier Guide
@@ -604,11 +608,13 @@ CRediT authorship contribution statement
 Alan E. Lujan: Conceptualization, Methodology, Software, Writing – original draft. Christopher D.
 Carroll: Supervision, Writing – review & editing. Matthew N. White: Methodology, Software.
 
-Declaration of generative AI and AI-assisted technologies in the manuscript
-preparation process
-During the preparation of this work the authors used no generative AI or AI-assisted technologies. This
-statement exercises the ai_declaration part, which the template renders as an unnumbered section between
-the CRediT statement and the references.
+Declarations
+The authors declare no competing interests and did not use generative AI or AI-assisted technologies
+to prepare this work. This statement exercises the declaration part, which the template prints under the
+heading Declarations between the CRediT statement and the references.
+
+Data Availability
+No data were used for the research described in the article.
 
 References
 [1] Cockett, R., Purves, S., Koch, F., Morrison, M., 2024. Continuous Tools for Scientific Publishing: Using MyST Markdown

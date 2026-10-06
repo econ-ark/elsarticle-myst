@@ -7,7 +7,7 @@ description: >
   preprint and 1p/3p/5p production layouts. Both support author-year or
   numeric citations, ORCID identifiers, research highlights, graphical
   abstracts, and keywords.
-version: 1.3.0
+version: 1.4.0
 license: LPPL-1.3c
 source: https://www.elsevier.com/authors/policies-and-guidelines/latex-instructions
 thumbnail: ./thumbnail.png
@@ -26,24 +26,36 @@ tags:
   - two-column
   - cas
   - elsarticle
+# MyST's seven known parts plus `declaration`, the same set as econ-ark-myst.
+# An undeclared frontmatter part is dropped, and an undeclared +++ part block
+# stays in the body as plain text. See README.md "Document Parts".
 parts:
   - id: abstract
     description: >
       A concise summary of the article's main findings and conclusions (100-300
-      words). Takes precedence over doc.abstract if both are provided. Use this
-      for abstracts with formatting; use doc.abstract for plain text.
+      words). A frontmatter `abstract:` arrives here too.
+
+      Do NOT cite a work here that nothing in the body cites. MyST excludes
+      frontmatter parts from the rendered document and harvests the .bib from
+      that document, so the citation reaches the .tex and never the .bib, and
+      renders as `?` at exit 0. Upstream jupyter-book/mystmd#3032.
+  - id: summary
+    description: >
+      Non-technical summary, printed inside the abstract block after the
+      abstract as a run-in paragraph headed "Summary".
+  - id: keypoints
+    description: >
+      Research highlights (3-5 items), each printed as one \\item. Write them
+      as a YAML list under keypoints in the frontmatter or as a bullet list in
+      a +++ keypoints block; each item is one point. Ignored if
+      parts.highlights is also set.
+    as_list: true
   - id: highlights
     description: >
       Research highlights as raw LaTeX \\item entries (3-5 items). Use when you
       need raw LaTeX control. Define with +++ block syntax. If both parts.highlights
       and parts.keypoints are provided, parts.highlights wins (parts.keypoints
-      is ignored). For simpler YAML-based highlights, use keypoints in frontmatter
-      instead.
-  - id: keypoints
-    description: >
-      Research highlights as bullet points (3-5 items). Simpler alternative to
-      parts.highlights. Define as a YAML list in frontmatter. Each item becomes
-      a LaTeX \\item automatically. Ignored if parts.highlights is also set.
+      is ignored).
   - id: graphical_abstract
     description: >
       A graphical abstract as raw LaTeX content. Alternatively, use the
@@ -58,6 +70,14 @@ parts:
     description: >
       A general note without a number that appears in the frontmatter. Useful
       for disclaimers or additional context.
+  - id: dedication
+    description: >
+      Dedication, centred in italics after the front matter and before the
+      first heading.
+  - id: epigraph
+    description: >
+      Epigraph, set in italics from the right after the dedication and before
+      the first heading; write the attribution into the text.
   - id: biography
     description: >
       Author biographies as raw LaTeX. Use \\bio{} and \\endbio commands. For
@@ -66,12 +86,17 @@ parts:
     description: >
       Acknowledgments section, rendered as a first-page unnumbered footnote.
       Content appears at bottom of title page.
-  - id: ai_declaration
+  - id: declaration
     description: >
-      Body text of the declaration of generative AI and AI-assisted
-      technologies. Rendered as an unnumbered section between the CRediT
-      statement and the references, per Elsevier placement guidance. Supply
-      only the statement text; the section heading is emitted by the template.
+      Declarations: one block for competing interests, generative-AI use and
+      anything else the paper has to state. Rendered as an unnumbered section
+      headed "Declarations" between the CRediT statement and the references.
+      Supply only the statement text; the template emits the heading. Replaces
+      `ai_declaration` (removed in 1.4.0).
+  - id: data_availability
+    description: >
+      Data availability statement, rendered as an unnumbered section headed
+      "Data Availability" after the declarations and before the references.
 doc:
   - id: title
     required: true
@@ -118,16 +143,6 @@ doc:
       and project metadata, but are NOT rendered in the PDF: neither cas-common
       nor elsarticle defines an \affiliation key for a persistent identifier.
       Setting them is harmless; expecting them in the typeset output is not.
-  - id: abstract
-    description: >
-      Article abstract as a simple string (100-300 words). Either this or
-      parts.abstract is required. If parts.abstract is also provided, it takes
-      precedence.
-
-      Do NOT cite a work here that nothing in the body cites. MyST excludes
-      frontmatter parts from the rendered document and harvests the .bib from
-      that document, so the citation reaches the .tex and never the .bib, and
-      renders as `?` at exit 0. Upstream jupyter-book/mystmd#3032.
   - id: tags
     description: >
       JEL classification codes, printed after the keywords as "JEL: ...".
