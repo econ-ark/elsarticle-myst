@@ -22,163 +22,150 @@ Keywords: MyST Markdown, Elsevier, LaTeX, CAS Template, Scientific Publishing, R
 JEL: D14; C61; G11
 Summary
 
-curve and complexity of LaTeX can be a barrier for authors who write outside it day to day. MyST Markdown
-
-One Markdown source produces both Elsevier layouts
-
-bridges this gap by providing:
-
-and a website.
-1. A familiar Markdown syntax based on CommonMark
-[4]
-
-Dedication
-
 2. Rich scientific features (equations, citations, cross-
 
-To everyone who has fought a LaTeX class file at mid-
+One Markdown source produces both Elsevier layouts
+and a website.
+Beware of bugs in the above code; I have only proved
 
 references)
 3. Export to multiple formats including PDF via LaTeX
-
-night.
-Beware of bugs in the above code; I have only proved
-
 Reproducible research workflows have become increasingly important, with tools like Jupyter Notebooks [5] en-
 
 it correct, not tried it.
 — Donald E. Knuth
 
 abling literate programming approaches.
+
 Note
 
 1. Introduction
 
 About this document: This article is both a feature
-
 This document demonstrates the full integration of
+
+reference and a test file for the Elsevier MyST tem-
+
 MyST Markdown [1] with Elsevier’s CAS templates.
+
+plate. Every feature shown here should render cor-
+
 MyST provides a powerful authoring experience while
+
+rectly in the web preview and in all six PDF exports,
+
 maintaining compatibility with traditional LaTeX jour-
 
-reference and a test file for the Elsevier MyST template. Every feature shown here should render correctly in the web preview and in all six PDF exports,
 under CAS and elsarticle alike.
 
 nal requirements [2]. The template renders to PDF for
 camera-ready submission and to HTML for the project
 website; author identifiers (ORCID) and persistent links
 (DOI) propagate through both pipelines.
-1.1. Background
+
+Scientific publishing has traditionally relied on LaTeX
+However, the learning
+
+curve and complexity of LaTeX can be a barrier for authors who write outside it day to day. MyST Markdown
+bridges this gap by providing:
+1. A familiar Markdown syntax based on CommonMark
+[4]
 
 This section demonstrates MyST Markdown typography
 features and how they render in the PDF output.
-2.1. Inline Formatting
 
-Scientific publishing has traditionally relied on LaTeX
+1.1. Background
+
 for high-quality typesetting [3].
 
 2. Typography Features
 
-However, the learning
-
+2.1. Inline Formatting
 Standard inline formatting includes bold text, italic
 text, and inline code. You can also use strikethrough
-
-text and underlined text for special emphasis.
+text and underlined text for special emphasis.
 For chemical formulas, use subscripts:
-
-2.5. Footnotes
 
 H2 O, CO2 ,
 
-MyST supports footnotes1 which are automatically
-
 C6 H12 O6 . For ordinals and exponents, use superscripts:
+the 4th of July, 1st place, x2 + y2 = r2 .
 
-numbered and placed at the end of the document. You
+2.2. Line Breaks
 
-the 4
-
-th
-
-of July, 1
-
-st
-
-2
-
-2
-
-2
-
-place, x + y = r .
-
-can have multiple footnotes2 throughout your text.
 2.6. Task Lists
-
-2.2. Line Breaks
-
 Task lists can track progress (rendered as bullet points
+
 The world’s shortest poem demonstrates line breaks:
 
 in LaTeX):
 
 Fleas
+Adam
+
 ■ Create template structure
 
-Adam
 Had ’em.
 
 ■ Add typography examples
 
 —Strickland Gillilan
+
 ■ Add math demonstrations
+
 2.3. Quotations
 
 ■ Add proof environments
-□ Submit to journal
 
 Block quotes are useful for highlighting important passages:
 
-□ Celebrate publication!
+□ Submit to journal
 [Figure 1 about here.]
-3. Mathematical Content
+
+□ Celebrate publication!
+
 [Figure 2 about here.]
-
-The templates support full LaTeX math with custom
-macros defined in frontmatter.
-
+3. Mathematical Content
 [Figure 3 about here.]
-
-3.1. Inline Mathematics
+The templates support full LaTeX math with custom
 2.4. Definition Lists
 
-Inline math like E = mc2 or E[X] = µ sets in running
-text without extra markup. Using our custom macros:
+macros defined in frontmatter.
 
 MyST supports definition lists for glossaries or term ex-
 
-for x ∈ R, we have Var(X) = E[X 2 ] − (E[X])2 and
+3.1. Inline Mathematics
 
 planations:
 
-Cov(X, Y ) = E[XY ] − E[X] E[Y ].
-
+Inline math like E = mc2 or E[X] = µ sets in running
 MyST Markedly Structured Text, a markdown flavor for
 
-3.2. Display Equations
+text without extra markup. Using our custom macros:
 
 scientific writing
 
-The quadratic formula:
+for x ∈ R, we have Var(X) = E[X 2 ] − (E[X])2 and
+Cov(X, Y ) = E[XY ] − E[X] E[Y ].
+
 LaTeX A document preparation system for high-quality
 typesetting
 
+3.2. Display Equations
+
+jtex A Jinja-based templating system for LaTeX docu-
+
+The quadratic formula:
+
+ments
 x=
 
-−b ±
+CAS Complex Article Service, the Elsevier workflow the
+cas-sc and cas-dc classes target
 
 √
+
+−b ±
 
 b2 − 4ac
 2a
@@ -186,55 +173,46 @@ b2 − 4ac
 (1)
 
 Maxwell’s equations in differential form:
+∇·E=
 
-jtex A Jinja-based templating system for LaTeX documents
+2.5. Footnotes
+MyST supports footnotes1 which are automatically
+
+ρ
+ε0
+
+∇·B=0
+
+numbered and placed at the end of the document. You
+
+∇×E=−
+
+can have multiple footnotes2 throughout your text.
+
+∂B
+∂t
+
+(2)
+
+∂E
+∂t
+The Bellman equation for dynamic programming,
+∇ × B = µ 0 J + µ 0 ε0
 
 1 This is a footnote demonstrating the feature. Footnotes can con-
 
 tain formatted text and even code.
 2 Another footnote with additional information. Footnotes are es-
 
-CAS Complex Article Service, the Elsevier workflow the
-cas-sc and cas-dc classes target
+where the policy is the maximizing action a⋆ (s) =
+P
+argmaxa {R(s, a) + γ s′ P (s′ |s, a)V (s′ )}:
 
 sential for academic writing.
 
 2
 
-Theorem 4.2 (Fundamental Theorem of Calculus). Let
-
-ρ
-∇·E=
-ε0
-
-f be continuous on [a, b] and let F be defined by F (x) =
-Rx
-f (t) dt. Then:
-a
-
-∇·B=0
-∇×E=−
-
-(2)
-
-∂B
-∂t
-
-1. F is continuous on [a, b]
-
-∂E
-∇ × B = µ 0 J + µ 0 ε0
-∂t
-The Bellman equation for dynamic programming,
-
-2. F is differentiable on (a, b) and F ′ (x) = f (x)
-Rb
-3. a f (x) dx = F (b) − F (a)
-
-where the policy is the maximizing action a⋆ (s) =
-P
-argmaxa {R(s, a) + γ s′ P (s′ |s, a)V (s′ )}:
-(
+(
 V (s) = max R(s, a) + γ
 a
 
@@ -243,13 +221,10 @@ X
 4.3. Proofs
 
 )
-′
-
-′
-
-P (s |s, a)V (s )
+P (s′ |s, a)V (s′ )
 
 Proof. Proof of Theorem 4.1. Let ε > 0 be given. Since
+
 (3)
 
 an → L and cn → L, there exist N1 , N2 ∈ N such that:
@@ -266,76 +241,70 @@ quadratic formula and (2) for Maxwell’s equations.
 
 • |cn − L| < ε for all n > N2
 4. Proofs and Theorems
+
 Let N = max{N0 , N1 , N2 }. For n > N , we have:
 
-MyST supports formal mathematical environments using proof directives. These are essential for mathematical
+MyST supports formal mathematical environments us-
 
 L − ε < a n ≤ bn ≤ c n < L + ε
 
+ing proof directives. These are essential for mathematical
+
 (7)
 
-and theoretical papers.
 Thus |bn − L| < ε, completing the proof.
+
+and theoretical papers.
 4.1. Definitions
-Definition 4.1 (Convergent Sequence). A sequence (an )
-in R is said to be convergent if there exists a number L ∈ R
 
 4.4. Lemmas and Corollaries
 
-such that for every ε > 0, there exists N ∈ N such that for
+Definition 4.1 (Convergent Sequence). A sequence (an )
+in R is said to be convergent if there exists a number L ∈ R
 
 Lemma 4.3 (Triangle Inequality). For all x, y ∈ R, we
 
-all n > N :
-|an − L| < ε
+such that for every ε > 0, there exists N ∈ N such that for
 
 have |x + y| ≤ |x| + |y|.
 
-(4)
-
-We write limn→∞ an = L.
+all n > N :
 
 Corollary 4.3.1. If (bn ) is squeezed between two sequences
+|an − L| < ε
 
-Definition 4.2 (Continuous Function). A function f :
+(4)
 
 converging to zero, then bn → 0.
 
-R → R is continuous at a point c if for every ε > 0, there
+We write limn→∞ an = L.
+
 4.5. Remarks and Examples
 
-exists δ > 0 such that:
-|x − c| < δ =⇒ |f (x) − f (c)| < ε
+Definition 4.2 (Continuous Function). A function f :
 
 Remark 4.1. The proof directives (Definition 4.1, The-
 
-(5)
+R → R is continuous at a point c if for every ε > 0, there
 
-orem 4.1) are automatically numbered and can be cross4.2. Theorems
+orem 4.1) are automatically numbered and can be cross-
+
+exists δ > 0 such that:
 
 referenced throughout the document.
 
-Theorem 4.1 (Squeeze Theorem). Let (an ), (bn ), and
-(cn ) be sequences such that an ≤ bn ≤ cn for all n ≥ N0 .
+|x − c| < δ =⇒ |f (x) − f (c)| < ε
+
+(5)
 
 Example 4.1 (Convergent Sequence). The sequence an =
-
-If
-
 1
 1
 n converges to 0. For any ε > 0, choose N > ε . Then for
 
-lim an = lim cn = L
-
-n→∞
-
-n→∞
+4.2. Theorems
 
 n > N:
-
-(6)
-
 1
 1
 1
@@ -345,51 +314,65 @@ n
 n
 N
 
-then limn→∞ bn = L.
-3
+Theorem 4.1 (Squeeze Theorem). Let (an ), (bn ), and
+(cn ) be sequences such that an ≤ bn ≤ cn for all n ≥ N0 .
+If
 
 (8)
 
-5. Admonitions
-Danger
-Danger: Do not run this code in production without
+5. Admonitions
+lim an = lim cn = L
 
+n→∞
+
+n→∞
+
+(6)
 Admonitions (callouts) are useful for highlighting im-
 
-proper testing!
+then limn→∞ bn = L.
 
 portant information. MyST supports many types:
 
+Theorem 4.2 (Fundamental Theorem of Calculus). Let
 Note
 
-Error
+f be continuous on [a, b] and let F be defined by F (x) =
+Rx
+f (t) dt. Then:
+a
 
-This is a note admonition. Use it to highlight sup-
+This is a note admonition. Use it to highlight supplementary information that readers should be aware
 
-Error: This approach will fail if the input matrix is
-
-plementary information that readers should be aware
-
-singular.
+1. F is continuous on [a, b]
 
 of.
 
-See Also
-Warning
+2. F is differentiable on (a, b) and F ′ (x) = f (x)
+Rb
+3. a f (x) dx = F (b) − F (a)
+3
 
-For more information on MyST Markdown features,
+Warning
+
+See Also
 
 Use a warning to alert readers about pitfalls or caveats
 
-visit the MyST documentation.
+For more information on MyST Markdown features,
 
 in your methodology.
 
+visit the MyST documentation.
+
 6. Code Blocks
+
 Tip
+Tips can provide helpful suggestions for readers ap-
+
 Code blocks with syntax highlighting are supported:
 
-Tips can provide helpful suggestions for readers applying your methods.
+plying your methods.
 
 [Figure 4 about here.]
 As shown in Program B.1, code can be captioned, num-
@@ -403,58 +386,38 @@ Important information that readers must not miss
 Multiple languages are supported:
 
 should go in this type of admonition.
+
 [Figure 5 about here.]
 Hint
-
 7. Algorithms
 
 Hints can be hidden in dropdowns! Click to reveal.
-For algorithm pseudocode, use raw LaTeX blocks with
-
 This hint contains the secret formula: eiπ + 1 = 0
 
+For algorithm pseudocode, use raw LaTeX blocks with
 the algorithm and algorithmic environments:
-The algorithm environment provides a float with caption
-and label for cross-referencing.
+Algorithm 1 Binary Search
 
 Caution
 Caution: Proceed carefully when implementing this
-algorithm with large datasets.
-
-8. Tables
-8.1. Markdown Tables
-
-Attention
-
-MyST tables convert cleanly to LaTeX:
-
-Attention: New methodology introduced in this sec[Table 1 about here.]
-
-tion differs from previous work.
-
-Results are summarized in Table B.1.
-4
-
-Algorithm 1 Binary Search
-
-10. Cross-References Summary
 
 Require: Sorted array A[1..n], target value x
-This document demonstrates various cross-reference ca-
+
+algorithm with large datasets.
 
 Ensure: Index i such that A[i] = x, or −1 if not found
-
-pabilities:
-
 1: low ← 1
 2: high ← n
-
-• Equations: (1), (2), (3)
-
 3: while low ≤ high do
+
+Attention
+Attention: New methodology introduced in this sec-
+
 4:
 
 mid ← ⌊(low + high)/2⌋
+
+tion differs from previous work.
 
 5:
 
@@ -465,19 +428,42 @@ if A[mid] = x then
 return mid
 
 7:
+
+Danger
+
 8:
+
+Danger: Do not run this code in production without
+
 9:
+
+proper testing!
+
 10:
 11:
 
-• Figures: Figure B.3
-• Tables: Table B.1, Table B.2, Table B.3
-• Code: Program B.1, Program B.2
-
 else if A[mid] < x then
-• Algorithms:
-
 low ← mid + 1
+else
+high ← mid − 1
+end if
+
+12: end while
+
+Error
+
+13: return −1
+
+Error: This approach will fail if the input matrix is
+singular.
+
+The algorithm environment provides a float with caption
+and label for cross-referencing.
+4
+
+8. Tables
+
+• Algorithms:
 
 Algorithm
 
@@ -491,30 +477,31 @@ LaTeX
 
 \ref{alg:binary-search})
 
-else
-high ← mid − 1
+8.1. Markdown Tables
 
 • Theorems: Theorem 4.1, Theorem 4.2
 
-end if
+MyST tables convert cleanly to LaTeX:
+
 • Definitions: Definition 4.1, Definition 4.2
 
-12: end while
-13: return −1
+[Table 1 about here.]
 
 • Lemmas: Lemma 4.3
+Results are summarized in Table B.1.
 • Corollaries: Corollary 4.3.1
-
 8.2. List Tables
 
 • Examples: Example 4.1
 
-List tables provide an alternative syntax useful for complex content:
+List tables provide an alternative syntax useful for com• Sections: Introduction, Typography
 
-• Sections: Introduction, Typography
-[Table 2 about here.]
+plex content:
 
 11. Discussion
+
+[Table 2 about here.]
+
 This approach enables researchers to write in MyST
 
 8.3. CSV Tables
@@ -524,6 +511,7 @@ Markdown while producing publication-ready documents
 [Table 3 about here.]
 
 that meet Elsevier’s submission requirements.
+
 8.4. Raw LaTeX Tables
 
 11.1. Advantages
@@ -553,132 +541,146 @@ Code, and other tools
 9. Figures and Images
 
 4. Rich features: Full LaTeX math, cross-references,
+[Figure 6 about here.]
+
 and citations
 
-[Figure 6 about here.]
+As shown in Figure B.3, the template properly handles
 
 11.2. Limitations
 
-As shown in Figure B.3, the template properly handles
 figure placement and captions.
-5
-
-Appendix B. Additional Tables
 Warning
-[Table 5 about here.]
+10. Cross-References Summary
 
 Some MyST features render only in HTML output.
-For PDF, consider using LaTeX-compatible alternatives.
+For PDF, consider using LaTeX-compatible alterna-
+
+This document demonstrates various cross-reference ca-
+
+tives.
+
+pabilities:
+
 12. Conclusion
 
-Declarations
+• Equations: (1), (2), (3)
 
 The Elsevier CAS MyST template provides a modern
 
-The authors declare no competing interests and did not
+• Figures: Figure B.3
 
 workflow for scientific writing while maintaining compat-
 
-use generative AI or AI-assisted technologies to prepare
+• Tables: Table B.1, Table B.2, Table B.3
 
 ibility with traditional journal submission systems. This
 
-this work. This statement exercises the declaration part,
+• Code: Program B.1, Program B.2
 
 document has demonstrated:
+5
 
-which the template prints under the heading Declarations
+• Typography: formatting, footnotes, definition lists
 
-• Typography: formatting, footnotes, definition lists
-
-between the CRediT statement and the references.
+Declarations
+The authors declare no competing interests and did not
 
 • Mathematics: inline, display, custom macros
-Data Availability
+
+use generative AI or AI-assisted technologies to prepare
 • Formal environments: definitions, theorems, proofs,
-No data were used for the research described in the ar-
+
+this work. This statement exercises the declaration part,
 
 examples
 
-ticle.
+which the template prints under the heading Declarations
+between the CRediT statement and the references.
+
 • All admonition types
+
+Data Availability
+
 • Multiple table formats
 
-References
+No data were used for the research described in the ar-
 
 • Code blocks with syntax highlighting
 
-[1] R. Cockett, S. Purves, F. Koch, M. Morrison, Continuous Tools for Scientific Publishing: Using MyST Mark-
-
+ticle.
 • Figures with cross-referencing
-
-down and Curvenote to Encourage Continuous Science
-
+References
 • Citations and bibliography
+[1] R. Cockett, S. Purves, F. Koch, M. Morrison, ContinuFor questions or contributions, please visit the template
 
-Practices, in: Proceedings of the 23rd Python in Sci-
-
-For questions or contributions, please visit the template
-
-ence Conference, 2024, pp. 121–136. doi:10.25080/
-nkvc9349.
+ous Tools for Scientific Publishing: Using MyST Mark-
 
 repository.
 
-[2] L. Lamport, LaTeX: A Document Preparation System,
+down and Curvenote to Encourage Continuous Science
+Practices, in: Proceedings of the 23rd Python in Science Conference, 2024, pp. 121–136. doi:10.25080/
+
 Appendix A. Supplementary Methods
 
-2nd Edition, Addison-Wesley, Reading, MA, 1994.
-
+nkvc9349.
 This appendix provides additional methodological de-
 
-[3] A. Krewinkel, R. Winkler, Formatting Open Science:
+[2] L. Lamport, LaTeX: A Document Preparation System,
 
 tails that support the main text.
 
-Agilely Creating Multiple Document Formats for Academic Manuscripts with Pandoc Scholar, PeerJ Com-
+2nd Edition, Addison-Wesley, Reading, MA, 1994.
+[3] A. Krewinkel, R. Winkler, Formatting Open Science:
 
 Appendix A.1. Data Processing
 
+Agilely Creating Multiple Document Formats for AcaThe data was processed using standard procedures as
+
+demic Manuscripts with Pandoc Scholar, PeerJ Com-
+
+described in the literature.
+
 puter Science 3 (2017) e112. doi:10.7717/peerj-cs.
 
-The data was processed using standard procedures as
+This paragraph cites [6], a work no other section cites.
 
 112.
 
-described in the literature.
-This paragraph cites [6], a work no other section cites.
+It is here to keep the appendix on the bibliography-
 
 [4] J.
+
+harvesting path: while this file was pulled in through
 
 Gruber,
 
 Markdown,
 
-It is here to keep the appendix on the bibliography-
-
 https://daringfireball.net/projects/markdown/,
-
-harvesting path: while this file was pulled in through
-
-accessed: 2026-05-12 (2004).
 
 parts.appendix, a citation made here reached the .tex
 
-URL
+accessed: 2026-05-12 (2004).
 
 and never the .bib, and no build step reported anything.
 
-markdown/
-6
+URL
 
 https://daringfireball.net/projects/
 
-[5] T. Kluyver, B. Ragan-Kelley, F. Pérez, B. Granger,
+markdown/
+Appendix B. Additional Tables
+[5] T. Kluyver, B. Ragan-Kelley, F. Pérez, B. Granger,
 M. Bussonnier, J. Frederic, K. Kelley, J. Hamrick,
+
+[Table 5 about here.]
+
 J. Grout, S. Corlay, P. Ivanov, D. Avila, S. Abdalla, C. Willing, Jupyter Development Team, Jupyter
 Notebooks: A Publishing Format for Reproducible
-Computational Workflows, in: Positioning and Power
+6
+
+Computational Workflows, in: Positioning and Power
 in Academic Publishing: Players, Agents and Agendas, IOS Press, 2016, pp. 87–90.
 
 doi:10.3233/

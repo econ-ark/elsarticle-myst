@@ -72,8 +72,8 @@ parts:
       for disclaimers or additional context.
   - id: dedication
     description: >
-      Dedication, printed as an unnumbered section headed "Dedication" after the
-      summary and before the first heading.
+      Dedication, printed as a footnote to the title (a title note), the way
+      Elsevier journals print one. It follows parts.title_note when both are set.
   - id: epigraph
     description: >
       Epigraph, printed as a quote after the dedication and before the first

@@ -114,6 +114,10 @@
 [# set tnp = 'tn' if options.document_class == 'elsarticle' else '' #]
 [# set corp = 'cor' if options.document_class == 'elsarticle' else '' #]
 [# set fnp = 'fn' if options.document_class == 'elsarticle' else '' #]
+%% Title notes: title_note first, then the dedication, which Elsevier journals
+%% print as a footnote to the title. Both classes take a comma-separated list.
+[# set ded_n = 2 if parts.title_note else 1 #]
+[# set tmarks = ((tnp ~ '1') if parts.title_note else '') ~ (',' if parts.title_note and parts.dedication else '') ~ ((tnp ~ ded_n) if parts.dedication else '') #]
 
 [# if options.document_class != 'elsarticle' #]
 %% \shorttitle and \shortauthors are CAS-only; elsarticle has neither.
@@ -135,7 +139,7 @@
 [# if options.document_class == 'elsarticle' #]
 %% elsarticle's \title takes no mode key and has no subtitle slot, so a
 %% subtitle is appended after a colon rather than silently dropped.
-\title{[- esctext(doc.title) -][# if doc.subtitle #]: [- esctext(doc.subtitle) -][# endif #][# if parts.title_note #]\tnoteref{[-tnp-]1}[# endif #]}
+\title{[- esctext(doc.title) -][# if doc.subtitle #]: [- esctext(doc.subtitle) -][# endif #][# if tmarks #]\tnoteref{[-tmarks-]}[# endif #]}
 [# else #]
 \title[mode=title]{[- esctext(doc.title) -]}
 [# if doc.subtitle #]
@@ -144,11 +148,14 @@
 [# endif #]
 
 %% CAS marks the title separately; elsarticle carries \tnoteref inside \title.
-[# if parts.title_note #]
-[# if options.document_class != 'elsarticle' #]
-\tnotemark[1]
+[# if tmarks and options.document_class != 'elsarticle' #]
+\tnotemark[[-tmarks-]]
 [# endif #]
+[# if parts.title_note #]
 \tnotetext[[-tnp-]1]{[-parts.title_note-]}
+[# endif #]
+[# if parts.dedication #]
+\tnotetext[[-tnp-][-ded_n-]]{[-parts.dedication-]}
 [# endif #]
 
 [# for author in doc.authors #]
@@ -280,15 +287,11 @@
 [# endif #]
 
 %% Neither class has a slot for these, so they go in the body before the first
-%% heading, as econ-ark-myst places them: plain unnumbered sections, and the
-%% epigraph as an ordinary quote.
+%% heading, as econ-ark-myst places them: the non-technical summary as a plain
+%% unnumbered section, and the epigraph as an ordinary quote.
 [# if parts.summary #]
 \section*{Summary}
 [-parts.summary-]
-[# endif #]
-[# if parts.dedication #]
-\section*{Dedication}
-[-parts.dedication-]
 [# endif #]
 %% A quote, then its citation: italic quotation a size smaller, upright citation
 %% flush right. A last paragraph opening with -- or --- is the citation. Written as a

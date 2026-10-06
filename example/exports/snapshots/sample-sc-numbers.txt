@@ -9,7 +9,7 @@ Alan E. Lujan, Christopher D. Carroll, Matthew N. White
 • Seamless export to multiple journal formats
 • Rich mathematical and scientific notation support
 
-MyST Markdown with the Elsevier CAS and elsarticle Classes⋆
+MyST Markdown with the Elsevier CAS and elsarticle Classes⋆,⋆⋆
 Feature Reference and Template Examples
 Alan E. Lujana,b,∗ , Christopher D. Carrollc,b and Matthew N. Whiteb
 a Johns Hopkins University, Krieger School of Arts and Sciences Washington, DC, USA
@@ -35,9 +35,6 @@ tables, figures, and code blocks.
 
 Summary
 One Markdown source produces both Elsevier layouts and a website.
-
-Dedication
-To everyone who has fought a LaTeX class file at midnight.
 Beware of bugs in the above code; I have only proved it correct, not tried it.
 — Donald E. Knuth
 
@@ -59,12 +56,13 @@ Reproducible research workflows have become increasingly important, with tools l
 ⋆
 
 Prepared as a demonstration of the elsarticle-myst template.
-
+To everyone who has fought a LaTeX class file at midnight.
 ∗ Corresponding author
-
 alujan@jhu.edu (A.E. Lujan); ccarroll@jhu.edu (C.D. Carroll)
 https://econ-ark.org (A.E. Lujan); https://econ.jhu.edu/people/ccarroll (C.D. Carroll)
 orcid(s): 0000-0002-5289-7054 (A.E. Lujan); 0000-0003-3732-9312 (C.D. Carroll)
+
+⋆⋆
 
 Lujan, Carroll, White: Preprint submitted to Elsevier
 

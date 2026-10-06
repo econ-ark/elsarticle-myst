@@ -107,6 +107,7 @@ keypoints:
   - Yamlpointtwo holds the second point.
   - Yamlpointthree holds the third point.
 parts:
+  title_note: TITLENOTEMARK funds the work.
   declaration: DECLMARK declares no competing interests.'
 BODY_ALL='# Body
 
@@ -125,8 +126,15 @@ all_parts_checks() {
   if [ "$cls" = cas ]; then front_end=$'\\maketitle'; after_body+=($'\\printcredits'); fi
   check_order "$f" "abstract in its block ($cls)" '\begin{abstract}' ABSTRACTMARK '\end{abstract}'
   check_order "$f" "acknowledgments as a first-page note ($cls)" '\nonumnote{ACKMARK' "$front_end"
-  check_order "$f" "summary, dedication, epigraph open the body as plain sections and a quote; the body epigraph stays ($cls)" \
-    "$front_end" '\section*{Summary}' SUMMARYMARK '\section*{Dedication}' DEDICATIONMARK \
+  if [ "$cls" = cas ]; then
+    check_order "$f" "title note, then dedication, as title footnotes ($cls)" \
+      '\tnotemark[1,2]' '\tnotetext[1]{TITLENOTEMARK' '\tnotetext[2]{DEDICATIONMARK' "$front_end"
+  else
+    check_order "$f" "title note, then dedication, as title footnotes ($cls)" \
+      '\tnoteref{tn1,tn2}' '\tnotetext[tn1]{TITLENOTEMARK' '\tnotetext[tn2]{DEDICATIONMARK' "$front_end"
+  fi
+  check_order "$f" "summary and epigraph open the body as a plain section and a quote; the body epigraph stays ($cls)" \
+    "$front_end" '\section*{Summary}' SUMMARYMARK \
     '\begin{quote}' EPIGRAPHMARK '\end{quote}' '\section{Body' DIRECTIVEQUOTE
   check_order "$f" "the epigraph's citation is set apart, flush right ($cls)" \
     '\itshape EPIGRAPHMARK' '{\raggedleft\upshape --- CITEMARK\par}' '\end{quote}'
@@ -183,11 +191,24 @@ check_precedence() {
 # No part supplied: nothing may print, not even a heading or an empty block.
 none_checks() {
   check_absent "$1" "no parts, no furniture ($2)" '\begin{abstract}' '\begin{highlights}' \
-    '\section*{Summary}' '\section*{Dedication}' '\begin{quote}' \
+    '\section*{Summary}' '\tnote' '\begin{quote}' \
     '\section*{Declarations}' '\section*{Data Availability}'
 }
 
 check_none() { run_fixture "$1" 'no parts' '' $'# Body\n\nText.' none_checks; }
+
+# A dedication with no title note takes the first title-note slot alone.
+dedication_only_checks() {
+  if [ "$2" = cas ]; then
+    check_order "$1" "a lone dedication is title note 1 ($2)" '\tnotemark[1]' '\tnotetext[1]{LONEDEDICATION'
+  else
+    check_order "$1" "a lone dedication is title note 1 ($2)" '\tnoteref{tn1}' '\tnotetext[tn1]{LONEDEDICATION'
+  fi
+}
+
+check_dedication_only() {
+  run_fixture "$1" 'dedication alone' 'dedication: LONEDEDICATION to a reader.' $'# Body\n\nText.' dedication_only_checks
+}
 
 # Pins MyST behaviour that README "Document Parts" warns about: with no explicit
 # summary, a closing body section titled "Summary" moves to the front.
@@ -237,6 +258,7 @@ run_checks() {
   check_block "$1"
   check_precedence "$1"
   check_none "$1"
+  check_dedication_only "$1"
   check_implicit "$1"
 }
 
@@ -264,7 +286,7 @@ do_self_test() {
     perl -0pi -e 's/\Q[# for point in parts.keypoints #]\E\n\Q\item [-point-]\E\n\Q[# endfor #]\E/\\item [-parts.keypoints | join(" ")-]/'
   seed_defect 'keypoints without as_list' 'item line' check_block template.yml \
     perl -0pi -e 's/\n    as_list: true//'
-  seed_defect 'an undeclared part is dropped' 'open the body as plain sections' check_all template.yml \
+  seed_defect 'an undeclared part is dropped' 'summary and epigraph open the body' check_all template.yml \
     perl -0pi -e 's/^  - id: epigraph\n(?:    .*\n)+//m'
   seed_defect 'a declared part never printed' 'missing: \\section\*{Summary}' check_all template.tex \
     perl -0pi -e 's/\Q[# if parts.summary #]\E/[# if false #]/'
@@ -276,6 +298,8 @@ do_self_test() {
     perl -0pi -e 's/\Q[# if parts.epigraph and '"'"'\\begin{quote}'"'"' in parts.epigraph #]\E/[# if false #]/'
   seed_defect 'the epigraph citation left inside the quotation' 'citation is set apart' check_all template.tex \
     perl -0pi -e 's/\Qepi_cite.startsWith("--")\E/false/'
+  seed_defect 'a lone dedication numbered as if a title note preceded it' 'a lone dedication is title note 1' check_dedication_only template.tex \
+    perl -0pi -e 's/\Qset ded_n = 2 if parts.title_note else 1\E/set ded_n = 2/'
   seed_defect 'highlights no longer win' 'Losingpoint' check_precedence template.tex \
     perl -0pi -e 's/\Q[# if parts.highlights #]\E/[# if false #]/'
   # elsarticle has no \printcredits to order against, so the body itself must

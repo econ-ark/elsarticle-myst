@@ -9,7 +9,7 @@ Alan E. Lujan, Christopher D. Carroll, Matthew N. White
 • Seamless export to multiple journal formats
 • Rich mathematical and scientific notation support
 
-MyST Markdown with the Elsevier CAS and elsarticle Classes⋆
+MyST Markdown with the Elsevier CAS and elsarticle Classes⋆,⋆⋆
 Feature Reference and Template Examples
 Alan E. Lujana,b,∗ , Christopher D. Carrollc,b and Matthew N. Whiteb
 a Johns Hopkins University, Krieger School of Arts and Sciences Washington, DC, USA
@@ -35,10 +35,6 @@ tables, figures, and code blocks.
 
 Summary
 One Markdown source produces both Elsevier layouts and a website.
-
-Dedication
-To everyone who has fought a LaTeX class file at
-midnight.
 Beware of bugs in the above code; I have only
 proved it correct, not tried it.
 — Donald E. Knuth
@@ -56,24 +52,24 @@ pipelines.
 1.1. Background
 Scientific publishing has traditionally relied on LaTeX for high-quality typesetting (Krewinkel and Winkler, 2017). However, the learning curve and complexity
 of LaTeX can be a barrier for authors who write outside
+it day to day. MyST Markdown bridges this gap by
+providing:
+1. A familiar Markdown syntax based on CommonMark (Gruber, 2004)
 ⋆
 
 Prepared as a demonstration of the elsarticle-myst template.
-
+To everyone who has fought a LaTeX class file at midnight.
 ∗ Corresponding author
-
 alujan@jhu.edu (A.E. Lujan); ccarroll@jhu.edu (C.D.
 Carroll)
 https://econ-ark.org (A.E. Lujan);
 https://econ.jhu.edu/people/ccarroll (C.D. Carroll)
 orcid(s): 0000-0002-5289-7054 (A.E. Lujan);
 0000-0003-3732-9312 (C.D. Carroll)
+⋆⋆
 
 Lujan, Carroll, White: Preprint submitted to Elsevier
 
-it day to day. MyST Markdown bridges this gap by
-providing:
-1. A familiar Markdown syntax based on CommonMark (Gruber, 2004)
 2. Rich scientific features (equations, citations, crossreferences)
 3. Export to multiple formats including PDF via
 LaTeX
@@ -97,6 +93,12 @@ text and underlined text for special emphasis.
 For chemical formulas, use subscripts: H2 O, CO2 ,
 C6 H12 O6 . For ordinals and exponents, use superscripts:
 the 4th of July, 1st place, x2 + y2 = r2 .
+
+2.2. Line Breaks
+The world’s shortest poem demonstrates line breaks:
+Fleas
+Adam
+Had ’em.
 Page 1 of 6
 
 MyST and Elsevier Guide
@@ -120,11 +122,6 @@ and Cov(X, Y ) = E[XY ] − E[X] E[Y ].
 3.2. Display Equations
 The quadratic formula:
 
-2.2. Line Breaks
-The world’s shortest poem demonstrates line breaks:
-Fleas
-Adam
-Had ’em.
 —Strickland Gillilan
 
 2.3. Quotations
@@ -140,6 +137,8 @@ LaTeX A document preparation system for highquality typesetting
 jtex A Jinja-based templating system for LaTeX documents
 CAS Complex Article Service, the Elsevier workflow
 the cas-sc and cas-dc classes target
+
+2.5. Footnotes
 
 x=
 
@@ -188,58 +187,50 @@ P (s |s, a)V (s )
 
 s′
 
-Equations can be cross-referenced: see (1) for the
-quadratic formula and (2) for Maxwell’s equations.
-
-2.5. Footnotes
 MyST supports footnotes1 which are automatically
 numbered and placed at the end of the document. You
 can have multiple footnotes2 throughout your text.
 
-4. Proofs and Theorems
+Equations can be cross-referenced: see (1) for the
+quadratic formula and (2) for Maxwell’s equations.
 
 2.6. Task Lists
 
-MyST supports formal mathematical environments
-using proof directives. These are essential for mathematical and theoretical papers.
+4. Proofs and Theorems
 
 Task lists can track progress (rendered as bullet
 points in LaTeX):
 
-4.1. Definitions
+MyST supports formal mathematical environments
+using proof directives. These are essential for mathematical and theoretical papers.
 
 ■ Create template structure
 ■ Add typography examples
 ■ Add math demonstrations
 ■ Add proof environments
-
-Definition 4.1 (Convergent Sequence). A sequence
-(an ) in R is said to be convergent if there exists a
-number L ∈ R such that for every ε > 0, there exists
-N ∈ N such that for all n > N :
-|an − L| < ε
-
-(4)
-
 □ Submit to journal
-
-We write limn→∞ an = L.
-
 □ Celebrate publication!
-
-Definition 4.2 (Continuous Function). A function
-f : R → R is continuous at a point c if for every ε > 0,
-there exists δ > 0 such that:
-
 1 This is a footnote demonstrating the feature. Footnotes can
 
 contain formatted text and even code.
 2 Another footnote with additional information. Footnotes are
 essential for academic writing.
 
+4.1. Definitions
+Definition 4.1 (Convergent Sequence). A sequence
+(an ) in R is said to be convergent if there exists a
+number L ∈ R such that for every ε > 0, there exists
+N ∈ N such that for all n > N :
+|an − L| < ε
+We write limn→∞ an = L.
+Definition 4.2 (Continuous Function). A function
+f : R → R is continuous at a point c if for every ε > 0,
+there exists δ > 0 such that:
+|x − c| < δ =⇒ |f (x) − f (c)| < ε
+
 Lujan, Carroll, White: Preprint submitted to Elsevier
 
-|x − c| < δ =⇒ |f (x) − f (c)| < ε
+(4)
 
 (5)
 Page 2 of 6
