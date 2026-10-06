@@ -35,6 +35,7 @@ jobs:
             texlive-fonts-extra \
             texlive-fonts-recommended \
             texlive-latex-extra \
+            texlive-plain-generic \
             texlive-bibtex-extra \
             texlive-science \
             texlive-pictures \
