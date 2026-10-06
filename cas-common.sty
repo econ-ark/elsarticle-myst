@@ -1506,6 +1506,7 @@
 \tl_new:N \l_stm_abs_title_tl
 \box_new:N \g_stm_abs_box
 \dim_new:N \g_stm_keybox_ht_dim
+\box_new:N \l_stm_abs_body_box
 
 \NewDocumentEnvironment { Abstract } { o }
 {
@@ -1526,6 +1527,8 @@
     \noindent\hbox_to_wd:nn {  \z@ } { \box \g_stm_key_box \hss } % patched: \hss added
     \skip_vertical:n { - \l_tmpa_dim }
   }
+  % patched: the abstract is set in a box so its height can be measured below
+  \vbox_set:Nw \l_stm_abs_body_box
   \noindent \abstractname \par
   \skip_vertical:n { -4pt}
   \noindent \rule{.65\textwidth}{.2pt}\par \footnotesize
@@ -1533,12 +1536,13 @@
 }
 {
   \par
-  \dim_compare:nNnT { \g_stm_keybox_ht_dim } > { \z@ }
-  {
-    \dim_set:Nn \l_tmpa_dim { \g_stm_keybox_ht_dim - 5\baselineskip }
-    \dim_compare:nNnT { \l_tmpa_dim } > { \z@ }
-    { \skip_vertical:n { \l_tmpa_dim } }
-  }
+  \vbox_set_end:
+  \dim_set:Nn \l_tmpb_dim
+    { \box_ht:N \l_stm_abs_body_box + \box_dp:N \l_stm_abs_body_box }
+  \box_use_drop:N \l_stm_abs_body_box
+  % patched: when the keyword column outruns the abstract, skip the difference
+  \dim_compare:nNnT { \g_stm_keybox_ht_dim } > { \l_tmpb_dim }
+  { \skip_vertical:n { \g_stm_keybox_ht_dim - \l_tmpb_dim } }
   \group_end:
 }
 

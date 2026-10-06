@@ -19,11 +19,12 @@
  }
  
  %
-@@ -1502,31 +1505,42 @@
+@@ -1502,31 +1505,46 @@
  \tex_gdef:D \abstractname { A\,B\,S\,T\,R\,A\,C\,T }
  \tl_new:N \l_stm_abs_title_tl
  \box_new:N \g_stm_abs_box
 +\dim_new:N \g_stm_keybox_ht_dim
++\box_new:N \l_stm_abs_body_box
  
  \NewDocumentEnvironment { Abstract } { o }
  {
@@ -50,6 +51,8 @@
 +    \noindent\hbox_to_wd:nn {  \z@ } { \box \g_stm_key_box \hss } % patched: \hss added
 +    \skip_vertical:n { - \l_tmpa_dim }
    }
++  % patched: the abstract is set in a box so its height can be measured below
++  \vbox_set:Nw \l_stm_abs_body_box
    \noindent \abstractname \par
    \skip_vertical:n { -4pt}
    \noindent \rule{.65\textwidth}{.2pt}\par \footnotesize
@@ -58,18 +61,19 @@
 -{ \par \group_end: }
 +{
 +  \par
-+  \dim_compare:nNnT { \g_stm_keybox_ht_dim } > { \z@ }
-+  {
-+    \dim_set:Nn \l_tmpa_dim { \g_stm_keybox_ht_dim - 5\baselineskip }
-+    \dim_compare:nNnT { \l_tmpa_dim } > { \z@ }
-+    { \skip_vertical:n { \l_tmpa_dim } }
-+  }
++  \vbox_set_end:
++  \dim_set:Nn \l_tmpb_dim
++    { \box_ht:N \l_stm_abs_body_box + \box_dp:N \l_stm_abs_body_box }
++  \box_use_drop:N \l_stm_abs_body_box
++  % patched: when the keyword column outruns the abstract, skip the difference
++  \dim_compare:nNnT { \g_stm_keybox_ht_dim } > { \l_tmpb_dim }
++  { \skip_vertical:n { \g_stm_keybox_ht_dim - \l_tmpb_dim } }
 +  \group_end:
 +}
  
  \NewDocumentEnvironment { PrelimsAbstract } { O{} }
    {\parindent=0pt 
-@@ -1875,9 +1889,10 @@
+@@ -1875,9 +1893,10 @@
    % \iow_term:x { ...~[tmpa-noteht:~ \dim_use:N \g_tmpa_dim ] }
    % \dim_gsub:Nn \g_tmpa_dim { \box_dp:N \g_stm_notes_box }
    % \iow_term:x { ...~[tmpa-notedp:~ \dim_use:N \g_tmpa_dim ] }
@@ -82,7 +86,7 @@
    \printFirstPageNotes
    \dim_gzero:N \g_tmpa_dim
    \dim_gset:Nn \g_tmpa_dim { \box_ht:N \g_stm_front_box }
-@@ -1887,15 +1902,15 @@
+@@ -1887,15 +1906,15 @@
    \dim_compare:nNnTF { \dim_use:N \g_tmpa_dim } > { \the\textheight }
    {
      \vbox_set_split_to_ht:NNn \g_tmpb_box \g_stm_front_box { \textheight }
@@ -103,7 +107,7 @@
    } 
   \normalcolor \normalfont 
  }
-@@ -2108,12 +2123,12 @@
+@@ -2108,12 +2127,12 @@
    unknown   .code:n      = { 
                                \ifstrempty { #1 } 
                                   {
@@ -120,7 +124,7 @@
  }
  
  \cs_set:Npn \__reset_tbl:
-@@ -2204,7 +2219,7 @@
+@@ -2204,7 +2223,7 @@
    unknown   .code:n      = { 
                                \ifstrempty { #1 } 
                                   {

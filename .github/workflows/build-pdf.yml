@@ -194,6 +194,14 @@ jobs:
           ./scripts/check-parts.sh --self-test
           ./scripts/check-parts.sh
 
+      # The samples share one short abstract, so only fixtures of both lengths
+      # show whether the space under the CAS title block tracks the longer column.
+      - name: Check the space under the CAS title block
+        run: |
+          set -eo pipefail
+          ./scripts/check-title-gap.sh --self-test
+          ./scripts/check-title-gap.sh
+
       - name: Verify all six exports produced PDFs
         run: |
           set -e

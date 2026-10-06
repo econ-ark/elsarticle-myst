@@ -256,15 +256,8 @@ do_check() {
 }
 
 do_self_test() {
-  local rc=0 out
-  out=$( fail=0; run_checks "$ROOT" 2>&1 )
-  if grep -q '^FAIL' <<<"$out"; then
-    printf '%s\n' "$out"
-    printf 'FAIL  control: the untouched template does NOT pass; the seeds below prove nothing\n'
-    rc=1
-  else
-    printf 'ok    control: the untouched template passes\n'
-  fi
+  local rc=0
+  expect_control_passes
   seed_defect 'all points joined into one \item' 'item line' check_block template.tex \
     perl -0pi -e 's/\Q[# for point in parts.keypoints #]\E\n\Q\item [-point-]\E\n\Q[# endfor #]\E/\\item [-parts.keypoints | join(" ")-]/'
   seed_defect 'keypoints without as_list' 'item line' check_block template.yml \

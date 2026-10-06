@@ -33,6 +33,20 @@ expect_caught() {
   fi
 }
 
+# Self-test control: the caller's run_checks must pass on the untouched template
+# at ROOT, or no seeded defect proves anything. A failure sets rc.
+expect_control_passes() {
+  local out
+  out=$( fail=0; run_checks "$ROOT" 2>&1 )
+  if grep -q '^FAIL' <<<"$out"; then
+    printf '%s\n' "$out"
+    printf 'FAIL  control: the untouched template does NOT pass; the seeds below prove nothing\n'
+    rc=1
+  else
+    printf 'ok    control: the untouched template passes\n'
+  fi
+}
+
 # Seed ONE defect into a copy of the template at ROOT: run the command after $4
 # on the copy's file $4, then check $3 against the copy, which must FAIL matching
 # $2. An edit that leaves the file unchanged fails as unseeded.
